@@ -16,7 +16,12 @@ The application currently has two modes:
 
 ## Architecture
 
-Game is intended to use 
+Code is split between three main sections:
+- Editor: asset viewer
+- Game: the game logic
+- Engine: primitives for parsing original assets, perform world simulation and rendering
+
+Architecture tries to use modern patterns like events and node structure.  
 
 ## Thanks
 
