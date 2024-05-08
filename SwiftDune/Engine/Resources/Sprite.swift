@@ -697,24 +697,6 @@ final class Sprite: Equatable {
                     i += 1
                     continue
                 }
-
-                /*
-                // Colorize scales
-                if scale == 1 {
-                    buffer.rawPointer[destIndex] = 0xFF000000
-                } else if scale == 2 {
-                    buffer.rawPointer[destIndex] = 0xFFFF0000
-                } else if scale == 3 {
-                    buffer.rawPointer[destIndex] = 0xFF00FF00
-                } else if scale == 4 {
-                    buffer.rawPointer[destIndex] = 0xFFFF00FF
-                } else if scale == 5 {
-                    buffer.rawPointer[destIndex] = 0xFF00FFFF
-                } else if scale == 6 {
-                    buffer.rawPointer[destIndex] = 0xFFFFFFFF
-                } else {
-                    buffer.rawPointer[destIndex] = 0xFF999999
-                }*/
                 
                 buffer.rawPointer[destIndex] = engine.palette.rawPointer[paletteIndex] & opacityMask
 

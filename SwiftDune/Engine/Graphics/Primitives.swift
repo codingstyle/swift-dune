@@ -8,6 +8,9 @@
 import Foundation
 
 struct Primitives {
+    /**
+     Bresenham line plotting algorithm
+     */
     static func drawLine(_ pt1: DunePoint, _ pt2: DunePoint, _ paletteIndex: Int, _ buffer: PixelBuffer, isOffset: Bool = true) {
         let engine = DuneEngine.shared
         
@@ -48,6 +51,108 @@ struct Primitives {
     }
     
     
+    /**
+     Fast ellipse plotting algorithm using only integer arithmetic
+     @see https://dai.fmph.uniba.sk/upload/0/01/Ellipse.pdf
+     */
+    static func drawEllipse(_ center: DunePoint, _ xRadius: Int, _ yRadius: Int, _ buffer: PixelBuffer) {
+        let twoASquare = 2 * xRadius * xRadius
+        let twoBSquare = 2 * yRadius * yRadius
+        var x = xRadius
+        var y = 0
+        var xChange = (yRadius * yRadius) * (1 - (2 * xRadius))
+        var yChange = xRadius * xRadius
+        var ellipseError = 0
+        var stoppingX = twoBSquare * xRadius
+        var stoppingY = 0
+        
+        let cy = Int(center.y)
+        let cx = Int(center.x)
+
+        func plotPoint(_ x: Int, _ y: Int) {
+            if x < 0 || x > buffer.width || y < 0 || y > buffer.height {
+                return
+            }
+
+            var destIndex = y * buffer.width + x
+            let initialColor = buffer.rawPointer[destIndex]
+            
+            var i = 0
+            var j = 0
+            
+            while i < 4 {
+                j = 0
+                
+                while j < 4 {
+                    if y + j >= buffer.height || x + i >= buffer.width {
+                        break
+                    }
+                    
+                    destIndex = (y + j) * buffer.width + (x + i)
+                    buffer.rawPointer[destIndex] = initialColor
+                    j += 1
+                }
+                
+                i += 1
+            }
+        }
+        
+        
+        // Subroutine for plotting points on the four quadrants
+        func plotEllipsePoints() {
+            if (cx + x) % 4 != 0 {
+                return
+            }
+
+            plotPoint(cx + x, cy + y)
+            plotPoint(cx - x, cy + y)
+            plotPoint(cx + x, cy - y)
+            plotPoint(cx - x, cy - y)
+        }
+        
+        while stoppingX >= stoppingY {
+            plotEllipsePoints()
+            
+            y += 1
+            stoppingY += twoASquare
+            ellipseError += yChange
+            yChange += twoASquare
+            
+            if (2 * ellipseError) + xChange > 0 {
+                x -= 1
+                stoppingX -= twoBSquare
+                ellipseError += xChange
+                xChange += twoBSquare
+            }
+        }
+        
+        // 1st point set is done; start the 2nd set of points
+        x = 0
+        y = yRadius
+        xChange = yRadius * yRadius
+        yChange = xRadius * xRadius * (1 - (2 * yRadius))
+        ellipseError = 0
+        stoppingX = 0
+        stoppingY = twoASquare * yRadius
+        
+        while stoppingX <= stoppingY {
+            plotEllipsePoints()
+            
+            x += 1
+            stoppingX += twoBSquare
+            ellipseError += xChange
+            xChange += twoBSquare
+            
+            if (2 * ellipseError) + yChange > 0 {
+                y -= 1
+                stoppingY -= twoASquare
+                ellipseError += yChange
+                yChange += twoASquare
+            }
+        }
+    }
+    
+    
     static func fillPolygon(_ polygon: [DunePoint], _ paletteOffset: Int,_ buffer: PixelBuffer, isOffset: Bool = true) {
         let n = polygon.count
         var minY = Int16.max
@@ -80,10 +185,13 @@ struct Primitives {
             intersections.sort()
 
             // Draw horizontal line segments between pairs of intersection points
-            for i in stride(from: 0, to: intersections.count, by: 2) {
+            var i = 0
+            
+            while i < intersections.count {
                 let x0 = max(0, min(intersections[i], bufferWidth - 1))
                 let x1 = max(0, min(intersections[i + 1], bufferWidth - 1))
                 drawLine(DunePoint(x0, y), DunePoint(x1, y), paletteOffset, buffer, isOffset: isOffset)
+                i += 2
             }
         }
     }

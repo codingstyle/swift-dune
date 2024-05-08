@@ -38,7 +38,11 @@ final class Sietch: DuneNode {
     private var markers: Dictionary<Int, RoomCharacter> = [:]
     private var duration: Double = 0.0
     private var character: DuneCharacter = .none
-
+    
+    private var waterXRadius = 15
+    private var waterYRadius = 3
+    private let waterCenter = DunePoint(175, 95)
+    
     init() {
         super.init("Sietch")
     }
@@ -64,6 +68,8 @@ final class Sietch: DuneNode {
         currentRoom = .entrance
         currentTime = 0.0
         character = .none
+        waterXRadius = 15
+        waterYRadius = 3
     }
     
     
@@ -92,6 +98,11 @@ final class Sietch: DuneNode {
         if duration != 0.0 && currentTime > duration {
             engine.sendEvent(self, .nodeEnded)
         }
+        
+        if currentRoom == .water {
+            waterXRadius = 15 + Int(Double(currentTime / duration) * Double(320 - 15))
+            waterYRadius = 3 + Int(Double(currentTime / duration) * Double(26 - 3))
+        }
     }
     
     
@@ -103,7 +114,7 @@ final class Sietch: DuneNode {
         
         buffer.clearBuffer()
         
-        if currentRoom == .entrance{
+        if currentRoom == .entrance {
             if contextBuffer.tag != 0x0001 {
                 // Apply sky gradient with blue palette
                 skySprite.setAlternatePalette(1)
@@ -123,6 +134,13 @@ final class Sietch: DuneNode {
         
         sietchScenery.drawRoom(currentRoom.rawValue, buffer: buffer)
         
+        
+        // Water drop animation
+        if currentRoom == .water {
+            Primitives.drawEllipse(waterCenter, waterXRadius, waterYRadius, buffer)
+        }
+        
+        // Character rendering
         if let characterSprite = characterSprite {
             characterSprite.drawAnimation(0, buffer: buffer, time: currentTime)
         }
