@@ -61,14 +61,16 @@ final class Feyd: DuneNode {
     
     
     private func drawBackground() {
-        guard let backgroundSprite = backgroundSprite else {
+        guard let backgroundSprite = backgroundSprite,
+              let feydSprite = feydSprite else {
             return
         }
 
+        feydSprite.setPalette()
+        Primitives.fillRect(DuneRect(84, 0, 152, 152), 48, contextBuffer, isOffset: false)
+
         // Background
         backgroundSprite.setPalette()
-
-        Primitives.fillRect(DuneRect(84, 0, 152, 152), 94, contextBuffer)
 
         backgroundSprite.drawFrame(4, x: 0, y: 0, buffer: contextBuffer, effect: .transform(flipX: true))
         backgroundSprite.drawFrame(4, x: 236, y: 0, buffer: contextBuffer)
