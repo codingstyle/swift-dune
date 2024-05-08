@@ -24,6 +24,7 @@ final class Paul: DuneNode {
     private var skySprite: Sprite?
     private var fadeIn: Bool = false
     private var fadeOut: Bool = false
+    private var duration: Double = 8.0
 
     var background: PaulBackground
     
@@ -46,6 +47,9 @@ final class Paul: DuneNode {
         chaniSprite = nil
         backgroundSprite = nil
         skySprite = nil
+        fadeIn = false
+        fadeOut = false
+        duration = 8.0
         currentTime = 0.0
         contextBuffer.tag = 0x0
         contextBuffer.clearBuffer()
@@ -64,6 +68,10 @@ final class Paul: DuneNode {
 
         if let fadeOutParam = params["fadeOut"] {
             self.fadeOut = fadeOutParam as! Bool
+        }
+        
+        if let durationParam = params["duration"] {
+            self.duration = durationParam as! Double
         }
     }
     
@@ -106,7 +114,7 @@ final class Paul: DuneNode {
             contextBuffer.render(to: buffer, effect: fx)
         }
         
-        if currentTime >= 2.0 && currentTime <= 6.0 {
+        if currentTime >= 2.0 && currentTime <= duration - 2.0 {
             backgroundSprite.setPalette()
             drawBackground(buffer: buffer)
 
@@ -115,7 +123,7 @@ final class Paul: DuneNode {
         }
         
         
-        if currentTime > 6.0 {
+        if currentTime > duration - 2.0 {
             if contextBuffer.tag < 0x0002 {
                 contextBuffer.copyPixels(from: buffer)
                 contextBuffer.tag = 0x0002
@@ -123,7 +131,7 @@ final class Paul: DuneNode {
             
             var fx: SpriteEffect {
                 if fadeOut {
-                    return .fadeOut(end: 8.0, duration: 2.0, current: currentTime)
+                    return .fadeOut(end: duration, duration: 2.0, current: currentTime)
                 } else {
                     return .none
                 }

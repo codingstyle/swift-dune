@@ -54,6 +54,8 @@
 		06A7E8842AD6FBA80042D878 /* EditorViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06A7E8832AD6FBA80042D878 /* EditorViewModel.swift */; };
 		06A7E8872AD700910042D878 /* SpriteListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06A7E8862AD700910042D878 /* SpriteListView.swift */; };
 		06A7E8892AD700AD0042D878 /* SpriteDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06A7E8882AD700AD0042D878 /* SpriteDetailsView.swift */; };
+		06AB96D22BE814AF00482823 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 06AB96D12BE814AF00482823 /* README.md */; };
+		06AB96D52BEB7DC300482823 /* Attack.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06AB96D42BEB7DC300482823 /* Attack.swift */; };
 		06B812CB2BB0CF3D0048C8AC /* Prologue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06B812CA2BB0CF3D0048C8AC /* Prologue.swift */; };
 		06B812CD2BB559B90048C8AC /* PrologueSubtitle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06B812CC2BB559B90048C8AC /* PrologueSubtitle.swift */; };
 		06C16D872B1C8F0100CBEAA2 /* PixelBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06C16D862B1C8F0100CBEAA2 /* PixelBuffer.swift */; };
@@ -118,6 +120,9 @@
 		06A7E8832AD6FBA80042D878 /* EditorViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorViewModel.swift; sourceTree = "<group>"; };
 		06A7E8862AD700910042D878 /* SpriteListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpriteListView.swift; sourceTree = "<group>"; };
 		06A7E8882AD700AD0042D878 /* SpriteDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpriteDetailsView.swift; sourceTree = "<group>"; };
+		06AB96D12BE814AF00482823 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		06AB96D32BE814CA00482823 /* TODO.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = TODO.md; sourceTree = "<group>"; };
+		06AB96D42BEB7DC300482823 /* Attack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Attack.swift; sourceTree = "<group>"; };
 		06B812CA2BB0CF3D0048C8AC /* Prologue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Prologue.swift; sourceTree = "<group>"; };
 		06B812CC2BB559B90048C8AC /* PrologueSubtitle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrologueSubtitle.swift; sourceTree = "<group>"; };
 		06C16D862B1C8F0100CBEAA2 /* PixelBuffer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PixelBuffer.swift; sourceTree = "<group>"; };
@@ -183,6 +188,7 @@
 				061725EC2B7968DA00254635 /* Palace.swift */,
 				061725EE2B8542A400254635 /* Ornithopter.swift */,
 				061725F02B8B559900254635 /* Sietch.swift */,
+				06AB96D42BEB7DC300482823 /* Attack.swift */,
 				062779652B9AEB940046E068 /* Sky.swift */,
 				06E8FC262BC3C77300F78082 /* DesertBackground.swift */,
 			);
@@ -218,6 +224,8 @@
 		0699D2582A93C682006287E0 = {
 			isa = PBXGroup;
 			children = (
+				06AB96D32BE814CA00482823 /* TODO.md */,
+				06AB96D12BE814AF00482823 /* README.md */,
 				0699D2732A93C6D7006287E0 /* DuneFiles */,
 				0699D2632A93C682006287E0 /* SwiftDune */,
 				0699D2622A93C682006287E0 /* Products */,
@@ -348,6 +356,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				06AB96D22BE814AF00482823 /* README.md in Resources */,
 				0699D2692A93C685006287E0 /* Assets.xcassets in Resources */,
 				0699D2742A93C6D8006287E0 /* DuneFiles in Resources */,
 			);
@@ -399,6 +408,7 @@
 				06799CBB2B3600B000A196A3 /* Worm.swift in Sources */,
 				06C16E3C2B57B27C00E54A38 /* Baron.swift in Sources */,
 				06D359D02B4D778000D79173 /* Scenery.swift in Sources */,
+				06AB96D52BEB7DC300482823 /* Attack.swift in Sources */,
 				06A7E8822AD6FA400042D878 /* EditorView.swift in Sources */,
 				0699D27E2A93D245006287E0 /* DuneEngine.swift in Sources */,
 				066D9D3B2B4A9EC40003ADD3 /* LogoSwap.swift in Sources */,
