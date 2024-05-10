@@ -62,8 +62,17 @@ final class Main: DuneNode, DuneEventObserver {
             return
         }
         
-        setNodeActive(source, false)
+        moveToNextNode()
+    }
+    
+    
+    private func moveToNextNode() {
+        guard let activeNode = activeNodes.first else {
+            return
+        }
         
+        setNodeActive(activeNode.name, false)
+
         guard let nextItem = queue.dequeueFirst() else {
             setNodeActive("Main", false)
             engine.sendEvent(self, .nodeEnded)
@@ -72,6 +81,20 @@ final class Main: DuneNode, DuneEventObserver {
         
         if let _ = findNode(nextItem) {
             setNodeActive(nextItem, true)
+        }
+    }
+    
+    
+    override func onKey(_ key: DuneKeyEvent) {
+        guard let activeNode = activeNodes.first else {
+            return
+        }
+        
+        // Prologue iterates screen by screen
+        if activeNode.name == "Prologue" {
+            super.onKey(key)
+        } else {
+            moveToNextNode()
         }
     }
 }

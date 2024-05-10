@@ -7,11 +7,11 @@
 
 import Foundation
 import AppKit
+import SwiftUI
 
-
-// Reference : https://youtu.be/8cZrx8l634g?t=177
 
 final class Credits: DuneNode {
+    private var backgroundBuffer = PixelBuffer(width: 320, height: 152)
     private var contextBuffer = PixelBuffer(width: 320, height: 152)
     
     private var creditsSprite: Sprite?
@@ -19,8 +19,8 @@ final class Credits: DuneNode {
     private var duneSprite: Sprite?
 
     private var currentTime: Double = 0.0
-
     private var scrollY: Int16 = 152
+    private var scrollAnimation: DuneAnimation<Int16>?
     
     private let engine = DuneEngine.shared
     
@@ -82,6 +82,8 @@ final class Credits: DuneNode {
         creditsSprite = engine.loadSprite("CREDITS.HSQ")
         duneSprite = engine.loadSprite("INTDS.HSQ", updatePalette: false)
         skySprite = engine.loadSprite("SKY.HSQ", updatePalette: false)
+        
+        scrollAnimation = DuneAnimation<Int16>(from: 0, to: 1936, startTime: 0.0, endTime: 52.0)
     }
     
     
@@ -89,6 +91,7 @@ final class Credits: DuneNode {
         creditsSprite = nil
         duneSprite = nil
         skySprite = nil
+        scrollAnimation = nil
         scrollY = 152
         currentTime = 0
     }
@@ -97,9 +100,12 @@ final class Credits: DuneNode {
     override func update(_ elapsedTime: Double) {
         currentTime += elapsedTime
 
-        // TODO: animate according to time
-        // TODO: block at the end on the trademark
-        scrollY = scrollY - 1
+        guard let scrollAnimation = scrollAnimation else {
+            return
+        }
+        
+        let scrollOffset = scrollAnimation.interpolate(currentTime)
+        scrollY = 152 - scrollOffset
     }
     
     
@@ -110,31 +116,33 @@ final class Credits: DuneNode {
             return
         }
        
-        if contextBuffer.tag != 0x0001 {
+        if backgroundBuffer.tag != 0x0001 {
             creditsSprite.setPalette()
 
             // Apply color gradient from the palette
             for x: Int16 in stride(from: 0, to: 320, by: 40) {
-                skySprite.drawFrame(0, x: x, y: 0, buffer: contextBuffer)
-                skySprite.drawFrame(1, x: x, y: 20, buffer: contextBuffer)
-                skySprite.drawFrame(2, x: x, y: 40, buffer: contextBuffer)
-                skySprite.drawFrame(3, x: x, y: 60, buffer: contextBuffer)
+                skySprite.drawFrame(0, x: x, y: 0, buffer: backgroundBuffer)
+                skySprite.drawFrame(1, x: x, y: 20, buffer: backgroundBuffer)
+                skySprite.drawFrame(2, x: x, y: 40, buffer: backgroundBuffer)
+                skySprite.drawFrame(3, x: x, y: 60, buffer: backgroundBuffer)
             }
 
-            duneSprite.drawFrame(0, x: 0, y: 60, buffer: contextBuffer)
-            contextBuffer.tag = 0x0001
+            duneSprite.drawFrame(0, x: 0, y: 60, buffer: backgroundBuffer)
+            backgroundBuffer.tag = 0x0001
         }
 
-        contextBuffer.render(to: buffer, effect: .none)
+        backgroundBuffer.render(to: contextBuffer, effect: .none)
         
         // Blit credit sprites
         var i = 0
         
         while i < spritePositions.count {
             let el = spritePositions[i]
-            creditsSprite.drawFrame(UInt16(el[0]), x: Int16(el[1]), y: scrollY + Int16(el[2]), buffer: buffer)
+            creditsSprite.drawFrame(UInt16(el[0]), x: Int16(el[1]), y: scrollY + Int16(el[2]), buffer: contextBuffer)
             
             i += 1
         }
+        
+        contextBuffer.copyPixels(to: buffer, offset: 24 * buffer.width)
     }
 }

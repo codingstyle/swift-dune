@@ -135,7 +135,11 @@ final class Sunrise: DuneNode {
             if zoomOut && currentTime < 2.0 {
                 chaniSprite.drawAnimation(0, buffer: contextBuffer, time: 0.0)
             } else {
-                chaniSprite.drawAnimation(0, buffer: contextBuffer, time: currentTime)
+                if currentTime < 2.0 {
+                    chaniSprite.drawAnimation(1, buffer: contextBuffer, time: currentTime)
+                } else {
+                    chaniSprite.drawAnimation(2, buffer: contextBuffer, time: currentTime)
+                }
             }
         }
 
@@ -149,7 +153,12 @@ final class Sunrise: DuneNode {
             villageSprite.drawFrame(24, x: 140, y: 3, buffer: contextBuffer)
             
             lietSprite.setPalette()
-            lietSprite.drawAnimation(0, buffer: contextBuffer, time: currentTime)
+            
+            if currentTime < 2.0 {
+                lietSprite.drawAnimation(1, buffer: contextBuffer, time: currentTime)
+            } else {
+                lietSprite.drawAnimation(2, buffer: contextBuffer, time: currentTime)
+            }
         }
         
         

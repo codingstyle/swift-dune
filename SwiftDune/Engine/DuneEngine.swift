@@ -15,6 +15,7 @@ final class DuneEngine {
     
     var palette = Palette()
     // var audioPlayer = AudioPlayer()
+    var keyboard = Keyboard()
     
     var isRunning: Bool = false
     var onRender: ((_ buffer: PixelBuffer) -> Void)?
@@ -105,7 +106,12 @@ final class DuneEngine {
     
     
     func processInput() {
-        // TODO: Process input (keyboard, mouse)
+        // TODO: Process input (mouse)
+        
+        // Process keyboard input
+        while let key = keyboard.keysPressed.dequeueFirst() {
+            rootNode.onKey(key)
+        }
     }
     
     
@@ -203,7 +209,7 @@ final class DuneEngine {
         return sentence
     }
     
-    func saveBufferToFile(as fileName: String, scale: Int = 1) {
+    func saveBufferToPNG(as fileName: String, scale: Int = 1) {
         let currentOffscreenBuffer = screenBuffers[offscreenBufferIndex]
         
         let bytesPerPixel = 4 // ABGR has 4 bytes per pixel
@@ -216,7 +222,7 @@ final class DuneEngine {
             return
         }
         
-        // Create a CGImage from the data provider/Users/christophebuguet/Downloads/Input File as of 240419_3.xlsx
+        // Create a CGImage from the data
         let bitmapInfo: CGBitmapInfo = [ CGBitmapInfo(rawValue: CGImageAlphaInfo.noneSkipLast.rawValue), .byteOrder32Big ]
         
         guard let cgImage = CGImage(width: currentOffscreenBuffer.width, height: currentOffscreenBuffer.height, bitsPerComponent: bitsPerComponent, bitsPerPixel: bytesPerPixel * bitsPerComponent, bytesPerRow: bytesPerRow, space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: bitmapInfo, provider: dataProvider, decode: nil, shouldInterpolate: false, intent: .defaultIntent) else {

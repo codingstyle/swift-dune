@@ -101,4 +101,10 @@ class DuneNode {
     func onParamsChange() {
         
     }
+    
+    func onKey(_ key: DuneKeyEvent) {
+        activeNodes.forEach { node in
+            node.onKey(key)
+        }
+    }
 }

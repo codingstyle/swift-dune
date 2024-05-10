@@ -92,7 +92,7 @@ final class Paul: DuneNode {
         }
         
         if currentTime < 2.0  {
-            if contextBuffer.tag < 0x0001 {
+            if contextBuffer.tag != 0x0001 {
                 backgroundSprite.setPalette()
                 drawBackground(buffer: buffer)
                 
@@ -119,13 +119,19 @@ final class Paul: DuneNode {
             drawBackground(buffer: buffer)
 
             paulSprite.setPalette()
-            paulSprite.drawAnimation(0, buffer: buffer, time: currentTime - 2.0 + (0.016 * 40.0)) // Add 40 frames ? 16.0 * 40 ?
+            paulSprite.drawAnimation(0, buffer: buffer, time: currentTime - 2.0 + (0.016 * 40.0))
         }
         
         
         if currentTime > duration - 2.0 {
-            if contextBuffer.tag < 0x0002 {
-                contextBuffer.copyPixels(from: buffer)
+            if contextBuffer.tag != 0x0002 {
+                contextBuffer.clearBuffer()
+                
+                backgroundSprite.setPalette()
+                drawBackground(buffer: contextBuffer)
+
+                paulSprite.setPalette()
+                paulSprite.drawAnimation(0, buffer: contextBuffer, time: currentTime - 2.0 + (0.016 * 40.0))
                 contextBuffer.tag = 0x0002
             }
             

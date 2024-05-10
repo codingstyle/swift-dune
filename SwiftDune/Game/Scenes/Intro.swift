@@ -46,6 +46,7 @@ final class Intro: DuneNode, DuneEventObserver {
         queue.enqueue(DuneNodeParams("Sunrise", [ "mode": SunriseMode.daylight, "zoomOut": true, "character": DuneCharacter.chani, "duration": 2.5 ]))
         queue.enqueue(DuneNodeParams("Sunrise", [ "mode": SunriseMode.daylight, "character": DuneCharacter.chani ]))
         queue.enqueue(DuneNodeParams("Sunrise", [ "mode": SunriseMode.daylight, "character": DuneCharacter.liet ]))
+        queue.enqueue(DuneNodeParams("Sunrise", [ "mode": SunriseMode.daylight, "character": DuneCharacter.chani, "duration": 2.0 ]))
         queue.enqueue(DuneNodeParams("Paul", [ "background": PaulBackground.desert, "fadeOut": true, "duration": 4.0 ]))
         queue.enqueue(DuneNodeParams("Sietch", [ "room": SietchRoom.room8, "duration": 4.0, "markers": [
             6: RoomCharacter.harah,
@@ -103,8 +104,6 @@ final class Intro: DuneNode, DuneEventObserver {
         nodes.filter { $0.isActive }.forEach { node in
             node.render(buffer)
         }
-        
-        //super.render(buffer)
         
         buffer.copyPixels(to: screenBuffer, offset: 24 * screenBuffer.width)
     }

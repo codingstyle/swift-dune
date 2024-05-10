@@ -8,6 +8,7 @@
 import Foundation
 import AppKit
 import CoreGraphics
+import SwiftUI
 
 struct GameFPSData: Identifiable {
     var id = UUID()
@@ -53,8 +54,9 @@ final class GameViewModel: ObservableObject {
     func screenshot() {
         let date = NSDate()
         let fileName = "DuneCapture_\(date.timeIntervalSince1970).png"
-        engine.saveBufferToFile(as: fileName, scale: 3)
+        engine.saveBufferToPNG(as: fileName, scale: 3)
     }
+    
     
     private func onPostRender() {
         DispatchQueue.main.sync {

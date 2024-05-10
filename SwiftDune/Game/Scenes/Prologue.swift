@@ -46,34 +46,34 @@ final class Prologue: DuneNode, DuneEventObserver {
     
     
     override func onEnable() {
-        /*queue.enqueue(PrologueSteps(
+        queue.enqueue(PrologueSteps(
             mainNode: DuneNodeParams("Stars", [ "mode": StarsMode.planets ]),
             subtitle: DuneNodeParams("PrologueSubtitle", [ "sentenceNumber": 267 ])
-        ))*/
-        /*queue.enqueue(PrologueSteps(
+        ))
+        queue.enqueue(PrologueSteps(
             mainNode: DuneNodeParams("Stars", [ "mode": StarsMode.globe ]),
             subtitle: DuneNodeParams("PrologueSubtitle", [ "sentenceNumber": 268 ])
-        ))*/
-        /*queue.enqueue(PrologueSteps(
+        ))
+        queue.enqueue(PrologueSteps(
             mainNode: DuneNodeParams("DesertBackground", [:]),
             subtitle: DuneNodeParams("PrologueSubtitle", [ "sentenceNumber": 269 ])
-        ))*/
-        /*queue.enqueue(PrologueSteps(
+        ))
+        queue.enqueue(PrologueSteps(
             mainNode: DuneNodeParams("Paul", [ "background": PaulBackground.red ]),
             subtitle: DuneNodeParams("PrologueSubtitle", [ "sentenceNumber": 270 ])
-        ))*/
+        ))
         queue.enqueue(PrologueSteps(
             mainNode: DuneNodeParams("Baron", [ "animation": 5 ]),
             subtitle: DuneNodeParams("PrologueSubtitle", [ "sentenceNumber": 271 ])
         ))
-        /*queue.enqueue(PrologueSteps(
+        queue.enqueue(PrologueSteps(
             mainNode: DuneNodeParams("Stars", [ "mode": StarsMode.globe ]),
             subtitle: DuneNodeParams("PrologueSubtitle", [ "sentenceNumber": 272 ])
-        ))*/
-        /*queue.enqueue(PrologueSteps(
+        ))
+        queue.enqueue(PrologueSteps(
             mainNode: DuneNodeParams("Paul", [ "background": PaulBackground.red ]),
             subtitle: DuneNodeParams("PrologueSubtitle", [ "sentenceNumber": 273 ])
-        ))*/
+        ))
         /*queue.enqueue(PrologueSteps(
             mainNode: DuneNodeParams("Flight", [ "mode": .night ]),
             subtitle: DuneNodeParams("PrologueSubtitle", [ "sentenceNumber": 274 ])
@@ -81,11 +81,7 @@ final class Prologue: DuneNode, DuneEventObserver {
 
         engine.addEventObserver(self)
 
-        guard let item = queue.dequeueFirst() else {
-            return
-        }
-
-        processNextStep(item)
+        processNextStep()
     }
     
     
@@ -100,27 +96,33 @@ final class Prologue: DuneNode, DuneEventObserver {
             return
         }
         
-        setNodeActive(source, false)
-        
-        guard let nextItem = queue.dequeueFirst() else {
-            engine.sendEvent(self, .nodeEnded)
-            // engine.setNodeActive("Game", true)
-            return
-        }
-        
-        processNextStep(nextItem)
+        processNextStep()
     }
     
     
-    private func processNextStep(_ step: PrologueSteps) {
-        if let mainNode = findNode(step.mainNode.name) {
-            mainNode.params = step.mainNode.params
-            setNodeActive(step.mainNode.name, true)
+    override func onKey(_ key: DuneKeyEvent) {
+        processNextStep()
+    }
+    
+    
+    private func processNextStep() {
+        if let activeNode = activeNodes.first {
+            setNodeActive(activeNode.name, false)
+        }
+
+        guard let nextItem = queue.dequeueFirst() else {
+            engine.sendEvent(self, .nodeEnded)
+            return
         }
         
-        if let subtitleNode = findNode(step.subtitle.name) {
-            subtitleNode.params = step.subtitle.params
-            setNodeActive(step.subtitle.name, true)
+        if let mainNode = findNode(nextItem.mainNode.name) {
+            mainNode.params = nextItem.mainNode.params
+            setNodeActive(nextItem.mainNode.name, true)
+        }
+        
+        if let subtitleNode = findNode(nextItem.subtitle.name) {
+            subtitleNode.params = nextItem.subtitle.params
+            setNodeActive(nextItem.subtitle.name, true)
         }
     }
 }
