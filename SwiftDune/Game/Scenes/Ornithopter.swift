@@ -14,20 +14,6 @@ enum OrnithopterFlightMode: Int {
 }
 
 
-struct Animate {
-    static func value<T: FixedWidthInteger>(from: T, to: T, startTime: Double, duration: Double, currentTime: Double) -> T {
-        let ratio = (currentTime - startTime) / duration
-        
-        if ratio < 0 && from is any UnsignedInteger {
-            return from
-        }
-        
-        let value = T(ratio * (Double(to) - Double(from)))
-        return Math.clamp(value, from, to)
-    }
-}
-
-
 final class Ornithopter: DuneNode {
     private var contextBuffer = PixelBuffer(width: 320, height: 152)
 
@@ -44,7 +30,12 @@ final class Ornithopter: DuneNode {
     
     private var ornyX: Int16 = 68
     private var ornyY: Int16 = 56
-
+    
+    private var xAnimation = DuneAnimation<Int16>(from: 0, to: 100, startTime: 2.0, endTime: 3.0)
+    private var yAnimation = DuneAnimation<Int16>(from: 0, to: 152, startTime: 2.0, endTime: 3.0, timing: .easeIn)
+    private var feetAnimation = DuneAnimation<UInt16>(from: 2, to: 7, startTime: 2.0, endTime: 2.6)
+    private var wingAnimation = DuneAnimation<UInt16>(from: 8, to: 22, startTime: 0.2, endTime: 2.0)
+    
     init() {
         super.init("Ornithopter")
     }
@@ -73,10 +64,10 @@ final class Ornithopter: DuneNode {
     override func update(_ elapsedTime: Double) {
         currentTime += elapsedTime
 
-        wingFrameIndex = Animate.value(from: 8, to: 22, startTime: 0.0, duration: 1.2, currentTime: currentTime)
-        feetFrameIndex = Animate.value(from: 2, to: 7, startTime: 1.8, duration: 0.4, currentTime: currentTime)
-        ornyX = 68 - Animate.value(from: 0, to: 100, startTime: 2.0, duration: 0.6, currentTime: currentTime)
-        ornyY = 56 - Animate.value(from: 0, to: 152, startTime: 2.0, duration: 0.6, currentTime: currentTime)
+        wingFrameIndex = wingAnimation.interpolate(currentTime)
+        feetFrameIndex = feetAnimation.interpolate(currentTime)
+        ornyX = 68 - xAnimation.interpolate(currentTime)
+        ornyY = 56 - yAnimation.interpolate(currentTime)
     }
     
     

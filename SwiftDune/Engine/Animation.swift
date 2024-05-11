@@ -8,27 +8,40 @@
 import Foundation
 
 
+enum DuneAnimationTiming {
+    case linear
+    case easeIn
+}
+
 final class DuneAnimation<T: FixedWidthInteger> {
     var startValue: T
     var endValue: T
     var startTime: Double
     var endTime: Double
+    var timing: DuneAnimationTiming
     
     init(
         from startValue: T,
         to endValue: T,
         startTime: Double,
-        endTime: Double
+        endTime: Double,
+        timing: DuneAnimationTiming = .linear
     ) {
         self.startValue = startValue
         self.endValue = endValue
         self.startTime = startTime
         self.endTime = endTime
+        self.timing = timing
     }
     
     
     func interpolate(_ time: Double) -> T {
-        let progress = Math.clampf((time - startTime) / (endTime - startTime), 0.0, 1.0)
+        var progress = Math.clampf((time - startTime) / (endTime - startTime), 0.0, 1.0)
+        
+        if timing == .easeIn {
+            progress *= progress
+        }
+        
         return startValue + T(Double(endValue - startValue) * progress)
     }
 }
