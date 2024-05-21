@@ -39,8 +39,8 @@ final class Sietch: DuneNode {
     private var duration: Double = 0.0
     private var character: DuneCharacter = .none
     
-    private var waterXRadius = 15
-    private var waterYRadius = 3
+    private var waterRadius = DunePoint(15, 3)
+    private var waterRadiusAnimation: DuneAnimation<DunePoint>?
     private let waterCenter = DunePoint(175, 95)
     
     init() {
@@ -57,6 +57,15 @@ final class Sietch: DuneNode {
         if character != .none {
             characterSprite = Sprite(character.rawValue)
         }
+        
+        if currentRoom == .water {
+            waterRadiusAnimation = DuneAnimation<DunePoint>(
+                from: DunePoint.zero,
+                to: DunePoint(320, 26),
+                startTime: 0.0,
+                endTime: 4.0
+            )
+        }
     }
     
     
@@ -68,8 +77,8 @@ final class Sietch: DuneNode {
         currentRoom = .entrance
         currentTime = 0.0
         character = .none
-        waterXRadius = 15
-        waterYRadius = 3
+        waterRadiusAnimation = nil
+        waterRadius = DunePoint(15, 3)
     }
     
     
@@ -99,9 +108,8 @@ final class Sietch: DuneNode {
             engine.sendEvent(self, .nodeEnded)
         }
         
-        if currentRoom == .water {
-            waterXRadius = 15 + Int(Double(currentTime / duration) * Double(320 - 15))
-            waterYRadius = 3 + Int(Double(currentTime / duration) * Double(26 - 3))
+        if let waterRadiusAnimation = waterRadiusAnimation {
+            waterRadius = DunePoint(15, 3) + waterRadiusAnimation.interpolate(currentTime)
         }
     }
     
@@ -137,7 +145,7 @@ final class Sietch: DuneNode {
         
         // Water drop animation
         if currentRoom == .water {
-            Primitives.drawEllipse(waterCenter, waterXRadius, waterYRadius, buffer)
+            Primitives.drawEllipse(waterCenter, waterRadius, buffer)
         }
         
         // Character rendering

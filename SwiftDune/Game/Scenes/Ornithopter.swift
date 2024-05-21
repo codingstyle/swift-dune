@@ -28,11 +28,14 @@ final class Ornithopter: DuneNode {
     private var wingFrameIndex: UInt16 = 8
     private var animationStartTime: Double = 0.0
     
-    private var ornyX: Int16 = 68
-    private var ornyY: Int16 = 56
-    
-    private var xAnimation = DuneAnimation<Int16>(from: 0, to: 100, startTime: 2.0, endTime: 3.0)
-    private var yAnimation = DuneAnimation<Int16>(from: 0, to: 152, startTime: 2.0, endTime: 3.0, timing: .easeIn)
+    private var ornyPosition = DunePoint(68, 56)
+    private var takeOffAnimation = DuneAnimation<DunePoint>(
+        from: DunePoint(0, 0),
+        to: DunePoint(100, 152),
+        startTime: 2.0,
+        endTime: 3.0,
+        timing: .easeIn
+    )
     private var feetAnimation = DuneAnimation<UInt16>(from: 2, to: 7, startTime: 2.0, endTime: 2.6)
     private var wingAnimation = DuneAnimation<UInt16>(from: 8, to: 22, startTime: 0.2, endTime: 2.0)
     
@@ -54,10 +57,9 @@ final class Ornithopter: DuneNode {
         skySprite = nil
         
         currentTime = 0.0
-        ornyX = 68
-        ornyY = 56
-        feetFrameIndex = 2
-        wingFrameIndex = 8
+        ornyPosition = DunePoint(68, 56)
+        feetFrameIndex = feetAnimation.startValue
+        wingFrameIndex = wingAnimation.startValue
     }
     
     
@@ -66,14 +68,13 @@ final class Ornithopter: DuneNode {
 
         wingFrameIndex = wingAnimation.interpolate(currentTime)
         feetFrameIndex = feetAnimation.interpolate(currentTime)
-        ornyX = 68 - xAnimation.interpolate(currentTime)
-        ornyY = 56 - yAnimation.interpolate(currentTime)
+        ornyPosition = DunePoint(68, 56) - takeOffAnimation.interpolate(currentTime)
     }
     
     
     override func render(_ buffer: PixelBuffer) {
         drawBackground(buffer)
-        drawOrnithopter(ornyX, ornyY, buffer)
+        drawOrnithopter(buffer)
     }
 
     
@@ -106,15 +107,15 @@ final class Ornithopter: DuneNode {
     }
     
     
-    private func drawOrnithopter(_ x: Int16, _ y: Int16, _ buffer: PixelBuffer) {
+    private func drawOrnithopter(_ buffer: PixelBuffer) {
         guard let ornySprite = ornySprite else {
             return
         }
         
         ornySprite.setPalette()
-        ornySprite.drawFrame(1, x: x + 87, y: y + 33, buffer: buffer)
-        ornySprite.drawFrame(0, x: x + 81, y: y + 3, buffer: buffer)
-        ornySprite.drawFrame(feetFrameIndex, x: x + 85, y: y + 53, buffer: buffer)
-        ornySprite.drawFrame(wingFrameIndex, x: x, y: y, buffer: buffer)
+        ornySprite.drawFrame(1, x: ornyPosition.x + 87, y: ornyPosition.y + 33, buffer: buffer)
+        ornySprite.drawFrame(0, x: ornyPosition.x + 81, y: ornyPosition.y + 3, buffer: buffer)
+        ornySprite.drawFrame(feetFrameIndex, x: ornyPosition.x + 85, y: ornyPosition.y + 53, buffer: buffer)
+        ornySprite.drawFrame(wingFrameIndex, x: ornyPosition.x, y: ornyPosition.y, buffer: buffer)
     }
 }

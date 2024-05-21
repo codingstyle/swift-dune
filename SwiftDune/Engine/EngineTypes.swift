@@ -8,7 +8,22 @@
 import Foundation
 
 
-struct DunePoint {
+protocol DuneNumeric {
+    static func + (lhs: Self, rhs: Self) -> Self
+    static func += (lhs: inout Self, rhs: Self) -> Self
+    
+    static func - (lhs: Self, rhs: Self) -> Self
+    static func -= (lhs: inout Self, rhs: Self) -> Self
+
+    static func * (lhs: Self, rhs: Double) -> Self
+    static func *= (lhs: inout Self, rhs: Double) -> Self
+
+    static func / (lhs: Self, rhs: Double) -> Self
+    static func /= (lhs: inout Self, rhs: Double) -> Self
+}
+
+
+struct DunePoint: DuneNumeric {
     let x: Int16
     let y: Int16
     
@@ -17,6 +32,39 @@ struct DunePoint {
         self.y = y
     }
     
+    static func + (lhs: DunePoint, rhs: DunePoint) -> DunePoint {
+        return DunePoint(lhs.x + rhs.x, lhs.y + rhs.y)
+    }
+
+    static func += (lhs: inout DunePoint, rhs: DunePoint) -> DunePoint {
+        return DunePoint(lhs.x + rhs.x, lhs.y + rhs.y)
+    }
+    
+    static func - (lhs: DunePoint, rhs: DunePoint) -> DunePoint {
+        return DunePoint(lhs.x - rhs.x, lhs.y - rhs.y)
+    }
+
+    static func -= (lhs: inout DunePoint, rhs: DunePoint) -> DunePoint {
+        return DunePoint(lhs.x - rhs.x, lhs.y - rhs.y)
+    }
+
+    static func * (lhs: DunePoint, rhs: Double) -> DunePoint {
+        return DunePoint(Int16(Double(lhs.x) * rhs), Int16(Double(lhs.y) * rhs))
+    }
+
+    static func *= (lhs: inout DunePoint, rhs: Double) -> DunePoint {
+        return DunePoint(Int16(Double(lhs.x) * rhs), Int16(Double(lhs.y) * rhs))
+    }
+
+    static func / (lhs: DunePoint, rhs: Double) -> DunePoint {
+        return DunePoint(Int16(Double(lhs.x) / rhs), Int16(Double(lhs.y) / rhs))
+    }
+
+    static func /= (lhs: inout DunePoint, rhs: Double) -> DunePoint {
+        return DunePoint(Int16(Double(lhs.x) / rhs), Int16(Double(lhs.y) / rhs))
+    }
+
+
     static let zero = DunePoint(0, 0)
 }
 

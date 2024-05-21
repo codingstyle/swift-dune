@@ -23,3 +23,10 @@ enum DuneCharacter: String {
     case fremen3 = "FRM3.HSQ"
     case smuggler = "SMUG.HSQ"
 }
+
+enum DuneLightMode {
+    case sunrise
+    case day
+    case sunset
+    case night
+}

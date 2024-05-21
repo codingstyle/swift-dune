@@ -13,11 +13,54 @@ enum DuneAnimationTiming {
     case easeIn
 }
 
-final class DuneAnimation<T: FixedWidthInteger> {
+
+protocol DuneAnimatable {
+    static func interpolated(start: Self, end: Self, frameCount: Double, progress: Double) -> Self
+}
+
+
+extension DunePoint: DuneAnimatable {
+    static func interpolated(start: DunePoint, end: DunePoint, frameCount: Double, progress: Double) -> DunePoint {
+        let step = (end - start) / frameCount
+        return start + (step * round(progress * frameCount))
+    }
+}
+
+
+extension Int16: DuneAnimatable {
+    static func interpolated(start: Int16, end: Int16, frameCount: Double, progress: Double) -> Int16 {
+        let step = Double(end - start) / frameCount
+        return start + Int16(round(step * progress * frameCount))
+    }
+}
+
+
+extension UInt16: DuneAnimatable {
+    static func interpolated(start: UInt16, end: UInt16, frameCount: Double, progress: Double) -> UInt16 {
+        let step = Double(end - start) / frameCount
+        return start + UInt16(round(step * progress * frameCount))
+    }
+}
+
+
+extension Int: DuneAnimatable {
+    static func interpolated(start: Int, end: Int, frameCount: Double, progress: Double) -> Int {
+        let step = Double(end - start) / frameCount
+        return start + Int(floor(step * progress) * frameCount)
+    }
+}
+
+
+final class DuneAnimation<T: DuneAnimatable> {
+    private let engine = DuneEngine.shared
+    
+    private var frameCount: Double
+    
     var startValue: T
     var endValue: T
     var startTime: Double
     var endTime: Double
+    var frameRate: Double = 30.0
     var timing: DuneAnimationTiming
     
     init(
@@ -32,6 +75,8 @@ final class DuneAnimation<T: FixedWidthInteger> {
         self.startTime = startTime
         self.endTime = endTime
         self.timing = timing
+        
+        self.frameCount = Double(endTime - startTime) * frameRate
     }
     
     
@@ -42,12 +87,18 @@ final class DuneAnimation<T: FixedWidthInteger> {
             progress *= progress
         }
         
-        return startValue + T(Double(endValue - startValue) * progress)
+        return T.interpolated(
+            start: startValue,
+            end: endValue,
+            frameCount: frameCount,
+            progress: progress
+        )
     }
 }
 
 
-final class DuneCombinedAnimation<T: FixedWidthInteger> {
+/*
+final class DuneSequenceAnimation<T: DuneAnimatable> {
     var animations: [DuneAnimation<T>]
     
     init(_ animations: [DuneAnimation<T>]) {
@@ -72,3 +123,4 @@ final class DuneCombinedAnimation<T: FixedWidthInteger> {
         return animations.last!.endValue
     }
 }
+*/

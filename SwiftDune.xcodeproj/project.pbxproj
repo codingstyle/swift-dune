@@ -58,6 +58,7 @@
 		06AB96D52BEB7DC300482823 /* Attack.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06AB96D42BEB7DC300482823 /* Attack.swift */; };
 		06AB96D72BEE013300482823 /* Animation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06AB96D62BEE013300482823 /* Animation.swift */; };
 		06AB96DA2BEE160B00482823 /* Keyboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06AB96D92BEE160B00482823 /* Keyboard.swift */; };
+		06AB96DC2BEFC4FD00482823 /* Flight.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06AB96DB2BEFC4FD00482823 /* Flight.swift */; };
 		06B812CB2BB0CF3D0048C8AC /* Prologue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06B812CA2BB0CF3D0048C8AC /* Prologue.swift */; };
 		06B812CD2BB559B90048C8AC /* PrologueSubtitle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06B812CC2BB559B90048C8AC /* PrologueSubtitle.swift */; };
 		06C16D872B1C8F0100CBEAA2 /* PixelBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06C16D862B1C8F0100CBEAA2 /* PixelBuffer.swift */; };
@@ -127,6 +128,7 @@
 		06AB96D42BEB7DC300482823 /* Attack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Attack.swift; sourceTree = "<group>"; };
 		06AB96D62BEE013300482823 /* Animation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Animation.swift; sourceTree = "<group>"; };
 		06AB96D92BEE160B00482823 /* Keyboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Keyboard.swift; sourceTree = "<group>"; };
+		06AB96DB2BEFC4FD00482823 /* Flight.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Flight.swift; sourceTree = "<group>"; };
 		06B812CA2BB0CF3D0048C8AC /* Prologue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Prologue.swift; sourceTree = "<group>"; };
 		06B812CC2BB559B90048C8AC /* PrologueSubtitle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrologueSubtitle.swift; sourceTree = "<group>"; };
 		06C16D862B1C8F0100CBEAA2 /* PixelBuffer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PixelBuffer.swift; sourceTree = "<group>"; };
@@ -195,6 +197,7 @@
 				06AB96D42BEB7DC300482823 /* Attack.swift */,
 				062779652B9AEB940046E068 /* Sky.swift */,
 				06E8FC262BC3C77300F78082 /* DesertBackground.swift */,
+				06AB96DB2BEFC4FD00482823 /* Flight.swift */,
 			);
 			path = Scenes;
 			sourceTree = "<group>";
@@ -406,6 +409,7 @@
 				06566A6B2ADEFDD500AF5734 /* FontDetailsView.swift in Sources */,
 				06D372D72B529939006BDDF3 /* SceneryListView.swift in Sources */,
 				06AB96DA2BEE160B00482823 /* Keyboard.swift in Sources */,
+				06AB96DC2BEFC4FD00482823 /* Flight.swift in Sources */,
 				061725EF2B8542A400254635 /* Ornithopter.swift in Sources */,
 				0627796E2BA043280046E068 /* GlobeDetailsView.swift in Sources */,
 				06A7E86A2AD527040042D878 /* RenderView.swift in Sources */,

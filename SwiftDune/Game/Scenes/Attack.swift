@@ -45,6 +45,17 @@ final class Attack: DuneNode {
             return
         }
         
+        drawBackground(buffer)
+        
+        // TODO: render projectiles
+    }
+    
+    
+    private func drawBackground(_ buffer: PixelBuffer) {
+        guard let attackSprite = attackSprite else {
+            return
+        }
+        
         if contextBuffer.tag != 0x01 {
             contextBuffer.clearBuffer()
             

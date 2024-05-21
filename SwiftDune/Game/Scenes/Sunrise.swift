@@ -7,12 +7,6 @@
 
 import Foundation
 
-enum SunriseMode {
-    case sunrise
-    case sunset
-    case daylight
-}
-
 
 final class Sunrise: DuneNode {
     private var contextBuffer = PixelBuffer(width: 320, height: 152)
@@ -28,14 +22,15 @@ final class Sunrise: DuneNode {
     private var currentPaletteIndex = -1
     private var currentPaletteStart = 3
     private var currentPaletteEnd = 3
+    private var paletteAnimation: DuneAnimation<Int>?
     
     private var showFort = false
     private var fadeIn = false
     private var fadeOut = false
     private var zoomOut = false
-    private var mode: SunriseMode = .sunrise
+    private var mode: DuneLightMode = .sunrise
     private var character: DuneCharacter = .none
-    private var totalDuration: Double = 4.0
+    private var duration: Double = 4.0
 
     init() {
         super.init("Sunrise")
@@ -48,6 +43,13 @@ final class Sunrise: DuneNode {
         villageSprite = engine.loadSprite("VILG.HSQ")
         sunriseSprite = engine.loadSprite("SUNRS.HSQ")
         sunriseSprite!.setPalette()
+        
+        paletteAnimation = DuneAnimation<Int>(
+            from: mode == .sunrise ? 0 : 3,
+            to: mode == .sunrise ? 2 : 6,
+            startTime: fadeIn ? 2.0 : 0.0,
+            endTime: duration
+        )
     }
     
     
@@ -61,22 +63,23 @@ final class Sunrise: DuneNode {
         lietSprite = nil
         currentTime = 0.0
         character = .none
-        totalDuration = 4.0
+        duration = 4.0
         showFort = false
         zoomOut = false
         fadeIn = false
         fadeOut = false
-        mode = .daylight
+        mode = .day
+        paletteAnimation = nil
     }
     
     
     override func onParamsChange() {
         if let duration = params["duration"] {
-            self.totalDuration = duration as! Double
+            self.duration = duration as! Double
         }
         
         if let mode = params["mode"] {
-            self.mode = mode as! SunriseMode
+            self.mode = mode as! DuneLightMode
         }
 
         if let fort = params["fort"] {
@@ -102,22 +105,28 @@ final class Sunrise: DuneNode {
     
     
     override func update(_ elapsedTime: Double) {
-        if currentTime > totalDuration {
+        if currentTime > duration {
             DuneEngine.shared.sendEvent(self, .nodeEnded)
             return
         }
         
         currentTime += elapsedTime
         
-        if mode == .daylight {
+        if mode == .day {
             currentPaletteIndex = 3
         } else {
-            let delayTime = fadeIn ? 2.0 : 0.0
             currentPaletteStart = mode == .sunrise ? 0 : 3
-            currentPaletteEnd = mode == .sunrise ? 2 : 6
             
+            let delayTime = fadeIn ? 2.0 : 0.0
+            currentPaletteEnd = mode == .sunrise ? 2 : 6
+
             let index = currentPaletteStart + Int(floor(currentTime - delayTime))
             currentPaletteIndex = Math.clamp(index, currentPaletteStart, currentPaletteEnd) % 6
+            
+            /*if let paletteAnimation = paletteAnimation {
+                let index = paletteAnimation.interpolate(currentTime)
+                currentPaletteIndex = Math.clamp(index, currentPaletteStart, currentPaletteEnd) % 6
+            }*/
         }
     }
     
@@ -167,8 +176,8 @@ final class Sunrise: DuneNode {
                 return .fadeIn(start: 0.0, duration: 2.0, current: currentTime)
             }
 
-            if fadeOut && currentTime > totalDuration - 2.0 {
-                return .fadeOut(end: totalDuration, duration: 2.0, current: currentTime)
+            if fadeOut && currentTime > duration - 2.0 {
+                return .fadeOut(end: duration, duration: 2.0, current: currentTime)
             }
 
             if zoomOut {

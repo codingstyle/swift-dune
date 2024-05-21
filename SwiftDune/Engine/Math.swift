@@ -8,6 +8,8 @@
 import Foundation
 
 struct Math {
+    static let PI: Double = 3.141592
+    
     @inlinable static func clamp<T: FixedWidthInteger>(_ value: T, _ minValue: T, _ maxValue: T) -> T {
         return min(maxValue, max(minValue, value))
     }
@@ -31,5 +33,9 @@ struct Math {
 
     @inlinable static func lerpf<T: BinaryFloatingPoint>(_ a: T, _ b: T, _ value: CGFloat) -> T {
         return T(CGFloat(a) + CGFloat(b - a) * value)
+    }
+    
+    @inlinable static func random<T: FixedWidthInteger>(_ a: T, _ b: T) -> T {
+        return T.random(in: a...b)
     }
 }

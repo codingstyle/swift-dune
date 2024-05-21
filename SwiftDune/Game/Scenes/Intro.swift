@@ -8,6 +8,12 @@
 import Foundation
 
 
+struct IntroSteps {
+    var foregroundNode: [DuneNodeParams]
+    var backgroundNodes: [DuneNodeParams]
+}
+
+
 final class Intro: DuneNode, DuneEventObserver {
     private var buffer = PixelBuffer(width: 320, height: 152)
     private var engine = DuneEngine.shared
@@ -31,6 +37,7 @@ final class Intro: DuneNode, DuneEventObserver {
         attachNode(Kiss())
         attachNode(Attack())
         attachNode(Ornithopter())
+        attachNode(Flight())
     }
 
     override func onEnable() {
@@ -42,11 +49,11 @@ final class Intro: DuneNode, DuneEventObserver {
         queue.enqueue(DuneNodeParams("DuneTitle"))
         queue.enqueue(DuneNodeParams("Worm"))
         queue.enqueue(DuneNodeParams("Paul", [ "background": PaulBackground.red, "fadeIn": true, "fadeOut": true ]))
-        queue.enqueue(DuneNodeParams("Sunrise", [ "mode": SunriseMode.sunrise, "fadeIn": true, "duration" : 8.0 ]))
-        queue.enqueue(DuneNodeParams("Sunrise", [ "mode": SunriseMode.daylight, "zoomOut": true, "character": DuneCharacter.chani, "duration": 2.5 ]))
-        queue.enqueue(DuneNodeParams("Sunrise", [ "mode": SunriseMode.daylight, "character": DuneCharacter.chani ]))
-        queue.enqueue(DuneNodeParams("Sunrise", [ "mode": SunriseMode.daylight, "character": DuneCharacter.liet ]))
-        queue.enqueue(DuneNodeParams("Sunrise", [ "mode": SunriseMode.daylight, "character": DuneCharacter.chani, "duration": 2.0 ]))
+        queue.enqueue(DuneNodeParams("Sunrise", [ "mode": DuneLightMode.sunrise, "fadeIn": true, "duration" : 8.0 ]))
+        queue.enqueue(DuneNodeParams("Sunrise", [ "mode": DuneLightMode.day, "zoomOut": true, "character": DuneCharacter.chani, "duration": 2.5 ]))
+        queue.enqueue(DuneNodeParams("Sunrise", [ "mode": DuneLightMode.day, "character": DuneCharacter.chani ]))
+        queue.enqueue(DuneNodeParams("Sunrise", [ "mode": DuneLightMode.day, "character": DuneCharacter.liet ]))
+        queue.enqueue(DuneNodeParams("Sunrise", [ "mode": DuneLightMode.day, "character": DuneCharacter.chani, "duration": 2.0 ]))
         queue.enqueue(DuneNodeParams("Paul", [ "background": PaulBackground.desert, "fadeOut": true, "duration": 4.0 ]))
         queue.enqueue(DuneNodeParams("Sietch", [ "room": SietchRoom.room8, "duration": 4.0, "markers": [
             6: RoomCharacter.harah,
@@ -69,15 +76,15 @@ final class Intro: DuneNode, DuneEventObserver {
         queue.enqueue(DuneNodeParams("Palace", [ "room": PalaceRoom.balcony, "duration": 4.0, "character": DuneCharacter.leto, "zoom": DuneRect(75, 45, 84, 40) ]))
         queue.enqueue(DuneNodeParams("Palace", [ "room": PalaceRoom.balcony, "duration": 4.0, "character": DuneCharacter.jessica, "zoom": DuneRect(170, 63, 84, 40) ]))
         queue.enqueue(DuneNodeParams("Paul", [ "background": PaulBackground.red ]))
-        queue.enqueue(DuneNodeParams("Sunrise", [ "mode": SunriseMode.sunset, "fadeOut": true, "fort": true ]))
+        queue.enqueue(DuneNodeParams("Sunrise", [ "mode": DuneLightMode.sunset, "fadeOut": true, "fort": true ]))
         queue.enqueue(DuneNodeParams("Baron", [ "duration": 2.0 ]))
         queue.enqueue(DuneNodeParams("Feyd", [ "duration": 4.0 ]))
         queue.enqueue(DuneNodeParams("Baron", [ "duration": 3.0, "sardaukar": true ]))
         queue.enqueue(DuneNodeParams("Attack"))
         queue.enqueue(DuneNodeParams("Paul", [ "background": PaulBackground.red ]))
         queue.enqueue(DuneNodeParams("Kiss", [ "fadeOut": true ]))
-        queue.enqueue(DuneNodeParams("Ornithopter", [ "dayMode": "night", "scenery": SceneryType.sietch, "fadeOut": true ]))
-        // TODO: Flight scroll
+        queue.enqueue(DuneNodeParams("Ornithopter", [ "dayMode": DuneLightMode.night, "scenery": SceneryType.sietch, "fadeOut": true ]))
+        queue.enqueue(DuneNodeParams("Flight"))
         
         engine.addEventObserver(self)
 

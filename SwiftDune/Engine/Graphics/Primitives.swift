@@ -55,19 +55,21 @@ struct Primitives {
      Fast ellipse plotting algorithm using only integer arithmetic
      @see https://dai.fmph.uniba.sk/upload/0/01/Ellipse.pdf
      */
-    static func drawEllipse(_ center: DunePoint, _ xRadius: Int, _ yRadius: Int, _ buffer: PixelBuffer) {
-        let twoASquare = 2 * xRadius * xRadius
-        let twoBSquare = 2 * yRadius * yRadius
-        var x = xRadius
-        var y = 0
-        var xChange = (yRadius * yRadius) * (1 - (2 * xRadius))
-        var yChange = xRadius * xRadius
-        var ellipseError = 0
-        var stoppingX = twoBSquare * xRadius
-        var stoppingY = 0
-        
+    static func drawEllipse(_ center: DunePoint, _ radius: DunePoint, _ buffer: PixelBuffer) {
+        let rx = Int(radius.x)
+        let ry = Int(radius.y)
         let cy = Int(center.y)
         let cx = Int(center.x)
+
+        let twoASquare = Int(2 * rx * rx)
+        let twoBSquare = Int(2 * ry * ry)
+        var x = rx
+        var y = Int(0)
+        var xChange = (ry * ry) * (1 - (2 * rx))
+        var yChange = rx * rx
+        var ellipseError = 0
+        var stoppingX = twoBSquare * rx
+        var stoppingY = 0
 
         func plotPoint(_ x: Int, _ y: Int) {
             if x < 0 || x > buffer.width || y < 0 || y > buffer.height {
@@ -128,12 +130,12 @@ struct Primitives {
         
         // 1st point set is done; start the 2nd set of points
         x = 0
-        y = yRadius
-        xChange = yRadius * yRadius
-        yChange = xRadius * xRadius * (1 - (2 * yRadius))
+        y = ry
+        xChange = ry * ry
+        yChange = rx * rx * (1 - (2 * ry))
         ellipseError = 0
         stoppingX = 0
-        stoppingY = twoASquare * yRadius
+        stoppingY = twoASquare * ry
         
         while stoppingX <= stoppingY {
             plotEllipsePoints()
