@@ -209,55 +209,10 @@ final class DuneEngine {
         return sentence
     }
     
+    
     func saveBufferToPNG(as fileName: String, scale: Int = 1) {
         let currentOffscreenBuffer = screenBuffers[offscreenBufferIndex]
-        
-        let bytesPerPixel = 4 // ABGR has 4 bytes per pixel
-        let bitsPerComponent = 8
-        let bytesPerRow = currentOffscreenBuffer.width * bytesPerPixel
-        
-        // Create a data provider from the components array
-        guard let dataProvider = CGDataProvider(data: NSData(bytes: currentOffscreenBuffer.rawPointer, length: currentOffscreenBuffer.frameSizeInBytes)) else {
-            print("Error creating data provider")
-            return
-        }
-        
-        // Create a CGImage from the data
-        let bitmapInfo: CGBitmapInfo = [ CGBitmapInfo(rawValue: CGImageAlphaInfo.noneSkipLast.rawValue), .byteOrder32Big ]
-        
-        guard let cgImage = CGImage(width: currentOffscreenBuffer.width, height: currentOffscreenBuffer.height, bitsPerComponent: bitsPerComponent, bitsPerPixel: bytesPerPixel * bitsPerComponent, bytesPerRow: bytesPerRow, space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: bitmapInfo, provider: dataProvider, decode: nil, shouldInterpolate: false, intent: .defaultIntent) else {
-            print("Error creating CGImage")
-            return
-        }
-        
-        // Resize the image
-        let scaledSize = CGSize(width: currentOffscreenBuffer.width * scale, height: currentOffscreenBuffer.height * scale)
-        
-        guard let resizedImage = cgImage.resize(to: scaledSize) else {
-            print("Error resizing image")
-            return
-        }
-        
-        // Create a destination URL
-        let downloadsDirectory = FileManager.default.urls(for: .downloadsDirectory, in: .userDomainMask).first!
-        let fileURL = downloadsDirectory.appendingPathComponent(fileName)
-        
-        // Create a CGImageDestination
-        guard let destination = CGImageDestinationCreateWithURL(fileURL as NSURL, kUTTypePNG, 1, nil) else {
-            print("Error creating image destination")
-            return
-        }
-        
-        // Add the CGImage to the destination
-        CGImageDestinationAddImage(destination, resizedImage, nil)
-        
-        // Finalize the destination to write the image to disk
-        guard CGImageDestinationFinalize(destination) else {
-            print("Error finalizing image destination")
-            return
-        }
-        
-        print("Image saved successfully")
+        currentOffscreenBuffer.saveToPNG(as: fileName, scale: scale)
     }
 }
 
