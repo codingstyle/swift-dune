@@ -94,11 +94,13 @@ final class Sound {
     func saveAsVOC() {
         let fileName = resource.fileName.replacingOccurrences(of: ".HSQ", with: ".VOC")
         let data = Data(resource.stream!.data)
-        let filePath = "/Users/christophebuguet/Downloads/\(fileName)"
+        
+        let downloadsDirectory = FileManager.default.urls(for: .downloadsDirectory, in: .userDomainMask).first!
+        let fileURL = downloadsDirectory.appendingPathComponent(fileName)
         
         do {
-            try data.write(to: URL(fileURLWithPath: filePath))
-            print("Array saved to file: \(filePath)")
+            try data.write(to: fileURL)
+            print("Array saved to file: \(fileURL.absoluteString)")
         } catch {
             print("Error saving \(fileName): \(error)")
         }

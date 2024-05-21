@@ -112,7 +112,7 @@ struct SoundPCMBlock {
     var samplingRate: CGFloat
     var bytes: [UInt8]
     
-    func saveAsWAV() {
+    func saveAsWAV(_ fileName: String) {
         var waveBytes: [UInt8] = []
 
         let rate = UInt32(samplingRate)
@@ -141,14 +141,15 @@ struct SoundPCMBlock {
         waveBytes.append(contentsOf: [UInt8(dataSize & 0xFF), UInt8((dataSize >> 8) & 0xFF), UInt8((dataSize >> 16) & 0xFF), UInt8(dataSize >> 24)])
         waveBytes.append(contentsOf: bytes)
         
-        let filePath = "/Users/christophebuguet/Downloads/TEST.WAV"
+        let downloadsDirectory = FileManager.default.urls(for: .downloadsDirectory, in: .userDomainMask).first!
+        let fileURL = downloadsDirectory.appendingPathComponent(fileName)
         let data = Data(waveBytes)
         
         do {
-            try data.write(to: URL(fileURLWithPath: filePath))
-            print("Array saved to file: \(filePath)")
+            try data.write(to: fileURL)
+            print("WAV data saved to file: \(fileURL.absoluteString)")
         } catch {
-            print("Error saving TEST.WAV: \(error)")
+            print("Error saving \(fileName): \(error)")
         }
     }
     
@@ -183,10 +184,11 @@ struct SoundPCMBlock {
     
     func convert8to16BitPCM(_ eightBitData: [UInt8]) -> [Int16] {
         var sixteenBitData = [Int16]()
+        var i = 0
         
-        for byte in eightBitData {
-            // Convert 8-bit sample to 16-bit sample
-            let sixteenBitSample = Int16(byte) << 8
+        // Convert unsinged 8-bit sample to signed 16-bit PCM sample
+        while i < eightBitData.count {
+            let sixteenBitSample = Int16((Int(eightBitData[i]) << 8) - 32768)
             sixteenBitData.append(sixteenBitSample)
         }
         
