@@ -13,7 +13,7 @@ final class Fresk: DuneNode {
     private var freskSprite: Sprite?
     private var globe: Globe?
     
-    private var currentTime: Double = 0.0
+    private var currentTime: TimeInterval = 0.0
     private let engine = DuneEngine.shared
     
     init() {
@@ -33,7 +33,7 @@ final class Fresk: DuneNode {
     }
     
     
-    override func update(_ elapsedTime: Double) {
+    override func update(_ elapsedTime: TimeInterval) {
         guard let globe = globe else {
             return
         }

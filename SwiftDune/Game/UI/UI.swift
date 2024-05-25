@@ -83,7 +83,7 @@ final class UI: DuneNode, DuneEventObserver {
         uiSprite.drawFrame(27, x: 92, y: 191, buffer: buffer)
 
         // Head
-        var headState = 16 /* 16-25 */
+        let headState = 16 /* 16-25 */
         uiSprite.drawFrame(25, x: 150, y: 137, buffer: buffer)
         uiSprite.drawFrame(12, x: 2, y: 154, buffer: buffer)
         uiSprite.drawFrame(12, x: 253, y: 154, buffer: buffer)

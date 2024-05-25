@@ -13,7 +13,7 @@ class Metrics {
     private let queue = DispatchQueue(label: "com.dunemetrics.queue", attributes: .concurrent)
     
     
-    func addMetric(_ value: Double, at time: Double) {
+    func addMetric(_ value: Double, at time: TimeInterval) {
         queue.async(flags: .barrier) { [weak self] in
             guard let self = self else { return }
             metrics.append((time, value))

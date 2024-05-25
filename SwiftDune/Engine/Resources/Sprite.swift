@@ -402,7 +402,7 @@ final class Sprite: Equatable {
         // Find starting position for anims
         resource.stream!.seek(animationOffset)
         
-        let animationSize = resource.stream!.size - animationOffset
+        // let animationSize = resource.stream!.size - animationOffset
 
         // Read header (should be 0x0000)
         let animationHeaderSize: UInt32 = 14
@@ -534,10 +534,10 @@ final class Sprite: Equatable {
         // Find starting position for anims
         resource.stream!.seek(animationOffset)
         
-        let animationSize = resource.stream!.size - animationOffset
+        // let animationSize = resource.stream!.size - animationOffset
 
         // Read header (should be 0x0000)
-        let animationHeaderSize: UInt32 = 14
+        // let animationHeaderSize: UInt32 = 14
         let header = resource.stream!.readUInt16()
         
         if (header != 0x0000) {

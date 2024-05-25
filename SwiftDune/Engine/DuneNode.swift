@@ -75,7 +75,7 @@ class DuneNode {
     }
     
     
-    func update(_ elapsedTime: Double) {
+    func update(_ elapsedTime: TimeInterval) {
         activeNodes = nodes.filter { $0.isActive }
         
         activeNodes.forEach { node in

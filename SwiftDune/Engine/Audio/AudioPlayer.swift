@@ -190,6 +190,7 @@ struct SoundPCMBlock {
         while i < eightBitData.count {
             let sixteenBitSample = Int16((Int(eightBitData[i]) << 8) - 32768)
             sixteenBitData.append(sixteenBitSample)
+            i += 1
         }
         
         return sixteenBitData

@@ -361,7 +361,7 @@ final class Globe {
     }
     
     
-    func update(_ time: Double) {
+    func update(_ time: TimeInterval) {
         let rotation = initialRotation + UInt16(Int(ceil(time) * 200.0) % 65000)
         self.rotation = rotation
 

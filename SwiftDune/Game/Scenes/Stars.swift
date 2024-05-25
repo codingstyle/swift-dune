@@ -24,11 +24,11 @@ final class Stars: DuneNode {
     private var starsSprite: Sprite?
     private var globe: Globe?
 
-    private var currentTime: Double = 0.0
-    private var duration: Double = 0.0
+    private var currentTime: TimeInterval = 0.0
+    private var duration: TimeInterval = 0.0
     private var mode: StarsMode = .stars
     private var fadeIn: Bool = false
-    private var fadeInDuration: Double = 0.0
+    private var fadeInDuration: TimeInterval = 0.0
 
     init() {
         super.init("Stars")
@@ -67,16 +67,16 @@ final class Stars: DuneNode {
         }
 
         if let fadeInDurationParam = params["fadeInDuration"] {
-            self.fadeInDuration = fadeInDurationParam as! Double
+            self.fadeInDuration = fadeInDurationParam as! TimeInterval
         }
 
         if let durationParam = params["duration"] {
-            self.duration = durationParam as! Double
+            self.duration = durationParam as! TimeInterval
         }
     }
     
     
-    override func update(_ elapsedTime: Double) {
+    override func update(_ elapsedTime: TimeInterval) {
         currentTime += elapsedTime
         
         if let globe = globe {

@@ -12,8 +12,8 @@ final class Attack: DuneNode {
     
     private var contextBuffer = PixelBuffer(width: 320, height: 152)
     private var attackSprite: Sprite?
-    private var duration: Double = 10.0
-    private var currentTime: Double = 0.0
+    private var duration: TimeInterval = 10.0
+    private var currentTime: TimeInterval = 0.0
     
     init() {
         super.init("Attack")
@@ -31,7 +31,7 @@ final class Attack: DuneNode {
     }
     
     
-    override func update(_ elapsedTime: Double) {
+    override func update(_ elapsedTime: TimeInterval) {
         currentTime += elapsedTime
         
         if currentTime > duration {

@@ -12,10 +12,10 @@ final class Baron: DuneNode {
     
     private var baronSprite: Sprite?
     private var backgroundSprite: Sprite?
-    private var duration: Double = 3.0
+    private var duration: TimeInterval = 3.0
     private var showSardaukar: Bool = false
     
-    private var currentTime: Double = 0.0
+    private var currentTime: TimeInterval = 0.0
     private let engine = DuneEngine.shared
 
     init() {
@@ -41,7 +41,7 @@ final class Baron: DuneNode {
     override func onParamsChange() {
         
         if let durationParam = params["duration"] {
-            self.duration = durationParam as! Double
+            self.duration = durationParam as! TimeInterval
         }
         
         if let sardaukarParam = params["sardaukar"] {
@@ -50,7 +50,7 @@ final class Baron: DuneNode {
     }
     
     
-    override func update(_ elapsedTime: Double) {
+    override func update(_ elapsedTime: TimeInterval) {
         currentTime += elapsedTime
         
         if currentTime > duration {

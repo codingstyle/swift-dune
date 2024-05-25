@@ -13,7 +13,7 @@ final class Feyd: DuneNode {
     private var feydSprite: Sprite?
     private var backgroundSprite: Sprite?
     
-    private var currentTime: Double = 0.0
+    private var currentTime: TimeInterval = 0.0
     private let engine = DuneEngine.shared
     
     init() {
@@ -34,7 +34,7 @@ final class Feyd: DuneNode {
     }
     
     
-    override func update(_ elapsedTime: Double) {
+    override func update(_ elapsedTime: TimeInterval) {
         currentTime += elapsedTime
         
         if currentTime > 8.0 {

@@ -27,10 +27,6 @@ final class Sky: DuneNode {
     }
     
     
-    override func update(_ elapsedTime: Double) {
-    }
-    
-    
     override func render(_ buffer: PixelBuffer) {
         guard let skySprite = skySprite else {
             return

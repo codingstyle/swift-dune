@@ -13,7 +13,7 @@ final class DuneTitle: DuneNode {
     private var skySprite: Sprite?
     private var titleSprite: Sprite?
     
-    private var currentTime: Double = 0.0
+    private var currentTime: TimeInterval = 0.0
     private var scrollY: Int = 0
     private let engine = DuneEngine.shared
     
@@ -36,7 +36,7 @@ final class DuneTitle: DuneNode {
     }
     
     
-    override func update(_ elapsedTime: Double) {
+    override func update(_ elapsedTime: TimeInterval) {
         currentTime += elapsedTime
         
         if currentTime > 16.5 {

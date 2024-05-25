@@ -10,7 +10,7 @@ import AppKit
 
 final class LogoSwap: DuneNode {
     private var contextBuffer = PixelBuffer(width: 320, height: 152)
-    private var currentTime: Double = 5.32
+    private var currentTime: TimeInterval = 5.32
     private var cryoSprite: Sprite?
 
     private let engine = DuneEngine.shared
@@ -36,7 +36,7 @@ final class LogoSwap: DuneNode {
     }
     
     
-    override func update(_ elapsedTime: Double) {
+    override func update(_ elapsedTime: TimeInterval) {
         currentTime += elapsedTime
         
         if currentTime > virginLogo.end {

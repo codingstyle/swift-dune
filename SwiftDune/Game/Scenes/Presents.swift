@@ -17,7 +17,7 @@ final class Presents: DuneNode {
     private let engine = DuneEngine.shared
 
     private var contextBuffer = PixelBuffer(width: 320, height: 152)
-    private var currentTime: Double = 0.0
+    private var currentTime: TimeInterval = 0.0
 
     private var introSprite: Sprite?
 
@@ -41,7 +41,7 @@ final class Presents: DuneNode {
     }
     
     
-    override func update(_ elapsedTime: Double) {
+    override func update(_ elapsedTime: TimeInterval) {
         currentTime += elapsedTime
         
         if currentTime > cryoPresents.end {

@@ -20,7 +20,7 @@ final class DuneEngine {
     var isRunning: Bool = false
     var onRender: ((_ buffer: PixelBuffer) -> Void)?
     var onPostRender: (() -> Void)?
-    var gameTime: Double = 0.0
+    var gameTime: TimeInterval = 0.0
     var fpsMetrics = Metrics()
 
     let frameRate = 60.0
@@ -115,7 +115,7 @@ final class DuneEngine {
     }
     
     
-    func update(_ elapsedTime: Double) {
+    func update(_ elapsedTime: TimeInterval) {
         rootNode.update(elapsedTime)
     }
     

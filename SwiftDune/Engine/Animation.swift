@@ -58,16 +58,16 @@ final class DuneAnimation<T: DuneAnimatable> {
     
     var startValue: T
     var endValue: T
-    var startTime: Double
-    var endTime: Double
+    var startTime: TimeInterval
+    var endTime: TimeInterval
     var frameRate: Double = 30.0
     var timing: DuneAnimationTiming
     
     init(
         from startValue: T,
         to endValue: T,
-        startTime: Double,
-        endTime: Double,
+        startTime: TimeInterval,
+        endTime: TimeInterval,
         timing: DuneAnimationTiming = .linear
     ) {
         self.startValue = startValue
@@ -80,7 +80,7 @@ final class DuneAnimation<T: DuneAnimatable> {
     }
     
     
-    func interpolate(_ time: Double) -> T {
+    func interpolate(_ time: TimeInterval) -> T {
         var progress = Math.clampf((time - startTime) / (endTime - startTime), 0.0, 1.0)
         
         if timing == .easeIn {

@@ -13,7 +13,7 @@ final class Worm: DuneNode {
     private var wormSprite: Sprite?
     private var skySprite: Sprite?
     
-    private var currentTime: Double = 0.0
+    private var currentTime: TimeInterval = 0.0
     private let engine = DuneEngine.shared
     
     init() {
@@ -34,7 +34,7 @@ final class Worm: DuneNode {
     }
     
     
-    override func update(_ elapsedTime: Double) {
+    override func update(_ elapsedTime: TimeInterval) {
         currentTime += elapsedTime
                 
         if currentTime > 8.0 {

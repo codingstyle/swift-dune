@@ -8,13 +8,10 @@
 import Foundation
 
 final class Logo: DuneNode {
+    private let engine = DuneEngine.shared
     private var contextBuffer = PixelBuffer(width: 320, height: 200)
     
-    private var engine = DuneEngine.shared
-
-    
-    private var currentTick: UInt64 = 0
-    private var currentTime: Double = 0.0
+    private var currentTime: TimeInterval = 0.0
     private var isPaletteReset = false
 
     private var circlePalette: ContiguousArray<UInt32> = []
@@ -71,7 +68,7 @@ final class Logo: DuneNode {
     }
 
     
-    override func update(_ elapsedTime: Double) {
+    override func update(_ elapsedTime: TimeInterval) {
         guard let cryoVideo = video else {
             return
         }

@@ -18,7 +18,7 @@ final class Credits: DuneNode {
     private var skySprite: Sprite?
     private var duneSprite: Sprite?
 
-    private var currentTime: Double = 0.0
+    private var currentTime: TimeInterval = 0.0
     private var scrollY: Int16 = 152
     private var scrollAnimation: DuneAnimation<Int16>?
     
@@ -97,7 +97,7 @@ final class Credits: DuneNode {
     }
     
     
-    override func update(_ elapsedTime: Double) {
+    override func update(_ elapsedTime: TimeInterval) {
         currentTime += elapsedTime
 
         guard let scrollAnimation = scrollAnimation else {

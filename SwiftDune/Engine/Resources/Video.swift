@@ -221,7 +221,7 @@ final class Video {
     
     
     private func parseSoundBlock() {
-        let chunkTag = resource.stream!.readUInt16()
+        // let chunkTag = resource.stream!.readUInt16()
         let chunkSize = UInt32(resource.stream!.readUInt16())
 
         resource.stream!.skip(chunkSize - 4)

@@ -21,12 +21,12 @@ final class Ornithopter: DuneNode {
     private var skySprite: Sprite?
     private var scenery: Scenery?
     
-    private var currentTime: Double = 0.0
+    private var currentTime: TimeInterval = 0.0
     private let engine = DuneEngine.shared
     
     private var feetFrameIndex: UInt16 = 2
     private var wingFrameIndex: UInt16 = 8
-    private var animationStartTime: Double = 0.0
+    private var animationStartTime: TimeInterval = 0.0
     
     private var ornyPosition = DunePoint(68, 56)
     private var takeOffAnimation = DuneAnimation<DunePoint>(

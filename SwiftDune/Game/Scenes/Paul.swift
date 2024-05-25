@@ -15,7 +15,7 @@ enum PaulBackground: String {
 
 final class Paul: DuneNode {
     private let engine = DuneEngine.shared
-    private var currentTime: Double = 0.0
+    private var currentTime: TimeInterval = 0.0
     private var contextBuffer = PixelBuffer(width: 320, height: 152)
     
     private var paulSprite: Sprite?
@@ -24,7 +24,7 @@ final class Paul: DuneNode {
     private var skySprite: Sprite?
     private var fadeIn: Bool = false
     private var fadeOut: Bool = false
-    private var duration: Double = 8.0
+    private var duration: TimeInterval = 8.0
 
     var background: PaulBackground
     
@@ -71,12 +71,12 @@ final class Paul: DuneNode {
         }
         
         if let durationParam = params["duration"] {
-            self.duration = durationParam as! Double
+            self.duration = durationParam as! TimeInterval
         }
     }
     
     
-    override func update(_ elapsedTime: Double) {
+    override func update(_ elapsedTime: TimeInterval) {
         currentTime += elapsedTime
         
         if currentTime > 8.0 {

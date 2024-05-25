@@ -28,7 +28,7 @@ final class Flight: DuneNode {
     private var dunesSprite: Sprite?
     private var skySprite: Sprite?
     
-    private var currentTime: Double = 0.0
+    private var currentTime: TimeInterval = 0.0
     private var frameCount: UInt32 = 0
     private let engine = DuneEngine.shared
     
@@ -62,7 +62,7 @@ final class Flight: DuneNode {
     }
     
     
-    override func update(_ elapsedTime: Double) {
+    override func update(_ elapsedTime: TimeInterval) {
         currentTime += elapsedTime
         
         guard let dunesSprite = dunesSprite else {

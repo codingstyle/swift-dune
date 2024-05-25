@@ -31,12 +31,12 @@ final class Sietch: DuneNode {
     private var skySprite: Sprite?
     private var characterSprite: Sprite?
     
-    private var currentTime: Double = 0.0
+    private var currentTime: TimeInterval = 0.0
     private let engine = DuneEngine.shared
     
     private var currentRoom: SietchRoom = .room8
     private var markers: Dictionary<Int, RoomCharacter> = [:]
-    private var duration: Double = 0.0
+    private var duration: TimeInterval = 0.0
     private var character: DuneCharacter = .none
     
     private var waterRadius = DunePoint(15, 3)
@@ -92,7 +92,7 @@ final class Sietch: DuneNode {
         }
 
         if let duration = params["duration"] {
-            self.duration = duration as! Double
+            self.duration = duration as! TimeInterval
         }
         
         if let character = params["character"] {
@@ -101,7 +101,7 @@ final class Sietch: DuneNode {
     }
     
     
-    override func update(_ elapsedTime: Double) {
+    override func update(_ elapsedTime: TimeInterval) {
         currentTime += elapsedTime
         
         if duration != 0.0 && currentTime > duration {

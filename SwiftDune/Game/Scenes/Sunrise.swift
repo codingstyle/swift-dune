@@ -16,7 +16,7 @@ final class Sunrise: DuneNode {
     private var lietSprite: Sprite?
     private var villageSprite: Sprite?
 
-    private var currentTime: Double = 0.0
+    private var currentTime: TimeInterval = 0.0
     private let engine = DuneEngine.shared
     
     private var currentPaletteIndex = -1
@@ -30,7 +30,7 @@ final class Sunrise: DuneNode {
     private var zoomOut = false
     private var mode: DuneLightMode = .sunrise
     private var character: DuneCharacter = .none
-    private var duration: Double = 4.0
+    private var duration: TimeInterval = 4.0
 
     init() {
         super.init("Sunrise")
@@ -75,7 +75,7 @@ final class Sunrise: DuneNode {
     
     override func onParamsChange() {
         if let duration = params["duration"] {
-            self.duration = duration as! Double
+            self.duration = duration as! TimeInterval
         }
         
         if let mode = params["mode"] {
@@ -104,7 +104,7 @@ final class Sunrise: DuneNode {
     }
     
     
-    override func update(_ elapsedTime: Double) {
+    override func update(_ elapsedTime: TimeInterval) {
         if currentTime > duration {
             DuneEngine.shared.sendEvent(self, .nodeEnded)
             return
