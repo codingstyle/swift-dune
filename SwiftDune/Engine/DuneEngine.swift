@@ -14,7 +14,7 @@ final class DuneEngine {
     static let shared = DuneEngine()
     
     var palette = Palette()
-    // var audioPlayer = AudioPlayer()
+    var audioPlayer = AudioPlayer()
     var keyboard = Keyboard()
     
     var isRunning: Bool = false

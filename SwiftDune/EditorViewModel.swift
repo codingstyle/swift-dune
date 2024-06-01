@@ -103,16 +103,8 @@ class EditorViewModel: ObservableObject {
             dialogue = engine.loadSentence(selection.resourceName)
         } else if selection.resourceType == .sound {
             sound = engine.loadSound(selection.resourceName)
-            sound!.dumpInfo()
-            sound!.saveAsVOC()
-            
-            let blocks = sound!.asPCMBlocks()
-            var i = 0
-            
-            while i < blocks.count {
-                blocks[i].saveAsWAV("\(selection.resourceName)_\(i).WAV")
-                i += 1
-            }
+            sound!.dumpInfo()            
+            engine.audioPlayer.play(sound!)
         } else if selection.resourceType == .scene {
             scenery = engine.loadScenery(selection.resourceName)
         } else if selection.resourceType == .video {

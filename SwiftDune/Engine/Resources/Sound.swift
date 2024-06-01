@@ -9,15 +9,10 @@ import Foundation
 
 // Sound effect.
 // Unpacked HSQ resource is a Creative Voice (VOC) file format
-// SD5.HSQ seems uncompressed ??
 
 // @see https://en.wikipedia.org/wiki/Creative_Voice_file
 // @see https://wiki.multimedia.cx/index.php/Creative_Voice
 // @see https://code.videolan.org/videolan/vlc/-/blob/master/modules/demux/voc.c
-
-// @see https://fr.wikipedia.org/wiki/Waveform_Audio_File_Format
-
-// Convert PCM8 to float : https://github.com/OpenRakis/Spice86/blob/master/src/Spice86.Core/Backend/Audio/SampleConverter.cs
 
 enum SoundError: Error {
     case invalidSignature
@@ -85,6 +80,7 @@ final class Sound {
         self.resource = Resource(fileName, uncompressed: fileName == "SD5.HSQ")
         self.engine = engine
     }
+    
     
     func play() {
         
