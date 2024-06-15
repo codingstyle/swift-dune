@@ -23,14 +23,15 @@ struct FlightPath {
 }
 
 final class Flight: DuneNode {
+    private let engine = DuneEngine.shared
     private var contextBuffer = PixelBuffer(width: 320, height: 152)
 
     private var dunesSprite: Sprite?
     private var skySprite: Sprite?
     
     private var currentTime: TimeInterval = 0.0
+    private var duration: TimeInterval = 16.0
     private var frameCount: UInt32 = 0
-    private let engine = DuneEngine.shared
     
     private var flightSprites: [FlightSprite] = []
     private let flightPaths: [FlightPath] = [
@@ -62,8 +63,18 @@ final class Flight: DuneNode {
     }
     
     
+    override func onParamsChange() {
+        
+    }
+    
+    
     override func update(_ elapsedTime: TimeInterval) {
         currentTime += elapsedTime
+        
+        if currentTime > duration {
+            engine.sendEvent(self, .nodeEnded)
+            return
+        }
         
         guard let dunesSprite = dunesSprite else {
             return

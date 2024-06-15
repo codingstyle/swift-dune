@@ -1,7 +1,5 @@
 # TODO
 
-- [ ] FIX: change Double to TimeInterval on all time vars
-
 - [ ] ADD: call a worm animation
 - [ ] ADD: Ornithopter flight animated dunes
 - [ ] ADD: Arrakeen with dunes missing intro screen
@@ -22,8 +20,9 @@
 - [ ] 4bpp/8bpp sprite rendering ?
 - [ ] Reverse engineer animations for SHAI, DEATH, and ATTACK
 - [ ] Handle mouse cursor and events
-- [ ] FIX: VOC sound
 
+- [X] FIX: change Double to TimeInterval on all time vars
+- [X] FIX: VOC sound
 - [X] Create a better animation system
 - [X] Animation improvement with DunePoint/Generic types with interface to implement ?
 - [X] FIX: Ornithopter takeoff animation

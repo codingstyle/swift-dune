@@ -43,14 +43,14 @@ final class Palette {
     }
     
     
-    func cgColor(at index: Int) -> CGColor {
+    func color(at index: Int) -> DuneColor {
         let color: UInt32 = rawPointer[index]
         
-        return CGColor(
-            red: CGFloat(color & 0xFF) / 255.0,
-            green: CGFloat((color >> 8) & 0xFF) / 255.0,
-            blue: CGFloat((color >> 16) & 0xFF) / 255.0,
-            alpha: CGFloat(color >> 24) / 255.0
+        return DuneColor(
+            UInt8(color & 0xFF),
+            UInt8((color >> 8) & 0xFF),
+            UInt8((color >> 16) & 0xFF),
+            UInt8((color >> 24) & 0xFF)
         )
     }
     

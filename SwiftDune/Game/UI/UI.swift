@@ -24,6 +24,12 @@ final class UI: DuneNode, DuneEventObserver {
     private var paletteSprite: Sprite?
     
     private var flags: UInt16 = UIFlags.leftPanelGlobe.rawValue
+    private var menuItems: [UInt16] = []
+    
+    private var commands: Sentence?
+    private var font: GameFont?
+    
+    private let menuRect = DuneRect(92, 159, 136, 40)
 
     init() {
         super.init("UI")
@@ -33,6 +39,8 @@ final class UI: DuneNode, DuneEventObserver {
         engine.addEventObserver(self)
         uiSprite = engine.loadSprite("ICONES.HSQ")
         paletteSprite = engine.loadSprite("FRESK.HSQ")
+        commands = Sentence(.command)
+        font = GameFont()
     }
     
     
@@ -75,15 +83,8 @@ final class UI: DuneNode, DuneEventObserver {
         uiSprite.drawFrame(15, x: 126, y: 148, buffer: buffer)
         uiSprite.drawFrame(14, x: 92, y: 152, buffer: buffer)
         
-        // Commands list
-        uiSprite.drawFrame(27, x: 92, y: 159, buffer: buffer)
-        uiSprite.drawFrame(27, x: 92, y: 167, buffer: buffer)
-        uiSprite.drawFrame(27, x: 92, y: 175, buffer: buffer)
-        uiSprite.drawFrame(27, x: 92, y: 183, buffer: buffer)
-        uiSprite.drawFrame(27, x: 92, y: 191, buffer: buffer)
-
         // Head
-        let headState = 16 /* 16-25 */
+        // let headState = 16 /* 16-25 */
         uiSprite.drawFrame(25, x: 150, y: 137, buffer: buffer)
         uiSprite.drawFrame(12, x: 2, y: 154, buffer: buffer)
         uiSprite.drawFrame(12, x: 253, y: 154, buffer: buffer)
@@ -95,9 +96,59 @@ final class UI: DuneNode, DuneEventObserver {
         if flags & UIFlags.rightPanelRoomDirections.rawValue != 0x0 {
             uiSprite.drawFrame(33, x: 255, y: 162, buffer: buffer)
         }
+
+        renderMenus(buffer)
     }
     
-    func onEvent(_ source: String, _ e: DuneEvent) {
+    
+    private func renderMenus(_ buffer: PixelBuffer) {
+        guard let uiSprite = uiSprite,
+            let commands = commands,
+            let font = font else {
+            return
+        }
         
+        // Colors for text and background
+        let lightColor = engine.palette.color(at: 250)
+        let darkColor = engine.palette.color(at: 243)
+        
+        // Commands list
+        Primitives.fillRect(menuRect, 250, buffer, isOffset: false)
+        
+        // Menu item captions
+        var i: Int = 0
+        var selectedMenuIndex: Int = -1
+        
+        if menuRect.contains(engine.mouse.coordinates) {
+            selectedMenuIndex = Math.clamp(Int((engine.mouse.coordinates.y - 159) / 8), 0, 5)
+        }
+        
+        while i < 5 {
+            let y = 159 + Int16(8 * i)
+
+            uiSprite.drawFrame(27, x: 92, y: y, buffer: buffer)
+
+            if i == selectedMenuIndex {
+                Primitives.fillRect(DuneRect(93, y + 1, 134, 7), 250, buffer, isOffset: false)
+            }
+
+            if i < menuItems.count {
+                let sentence = commands.sentence(at: menuItems[i])
+                font.color = i == selectedMenuIndex ? darkColor : lightColor
+                font.render(sentence, rect: DuneRect(97, y + 1, 120, 8), buffer: buffer, style: .small)
+            }
+
+            i += 1
+        }
+    }
+    
+    
+    func onEvent(_ source: String, _ e: DuneEvent) {
+        switch e {
+        case .uiMenuChanged(let items):
+            menuItems = items
+        default:
+            break
+        }
     }
 }

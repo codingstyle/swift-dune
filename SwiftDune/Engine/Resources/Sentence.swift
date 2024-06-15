@@ -24,7 +24,7 @@ final class Sentence {
     private let engine = DuneEngine.shared
     private var resource: Resource
     
-    convenience init(_ type: SentenceType, language: SentenceLanguage) {
+    convenience init(_ type: SentenceType, language: SentenceLanguage = .french) {
         let fileName = type.rawValue.replacingOccurrences(of: "x", with: "\(language.rawValue)")
         self.init(fileName)
     }

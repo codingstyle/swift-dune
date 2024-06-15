@@ -16,6 +16,7 @@ final class DuneEngine {
     var palette = Palette()
     var audioPlayer = AudioPlayer()
     var keyboard = Keyboard()
+    var mouse = Mouse()
     
     var isRunning: Bool = false
     var onRender: ((_ buffer: PixelBuffer) -> Void)?

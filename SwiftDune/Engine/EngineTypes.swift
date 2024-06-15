@@ -83,6 +83,10 @@ struct DuneRect {
     }
     
     static let fullScreen = DuneRect(0, 0, 320, 152)
+    
+    func contains(_ pt: DunePoint) -> Bool {
+        return pt.x >= x && pt.x < x + Int16(width) && pt.y >= y && pt.y < y + Int16(height)
+    }
 }
 
 
@@ -118,6 +122,7 @@ struct DuneColor {
 
 enum DuneEvent {
     case nodeEnded
+    case uiMenuChanged(items: [UInt16])
 }
 
 protocol DuneEventObserver: AnyObject {

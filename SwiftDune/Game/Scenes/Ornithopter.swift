@@ -15,6 +15,7 @@ enum OrnithopterFlightMode: Int {
 
 
 final class Ornithopter: DuneNode {
+    private let engine = DuneEngine.shared
     private var contextBuffer = PixelBuffer(width: 320, height: 152)
 
     private var ornySprite: Sprite?
@@ -22,7 +23,7 @@ final class Ornithopter: DuneNode {
     private var scenery: Scenery?
     
     private var currentTime: TimeInterval = 0.0
-    private let engine = DuneEngine.shared
+    private var duration: TimeInterval = 4.6
     
     private var feetFrameIndex: UInt16 = 2
     private var wingFrameIndex: UInt16 = 8
@@ -65,6 +66,11 @@ final class Ornithopter: DuneNode {
     
     override func update(_ elapsedTime: Double) {
         currentTime += elapsedTime
+
+        if currentTime > duration {
+            engine.sendEvent(self, .nodeEnded)
+            return
+        }
 
         wingFrameIndex = wingAnimation.interpolate(currentTime)
         feetFrameIndex = feetAnimation.interpolate(currentTime)

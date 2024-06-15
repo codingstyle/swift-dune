@@ -36,6 +36,7 @@
 		0682820C2B3DA208009C9FF7 /* Paul.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0682820B2B3DA208009C9FF7 /* Paul.swift */; };
 		0682820E2B3E06C5009C9FF7 /* Sunrise.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0682820D2B3E06C5009C9FF7 /* Sunrise.swift */; };
 		068300842A9D080800414896 /* Sound.swift in Sources */ = {isa = PBXBuildFile; fileRef = 068300832A9D080800414896 /* Sound.swift */; };
+		06892D522C19750F00B08B22 /* Mouse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06892D512C19750F00B08B22 /* Mouse.swift */; };
 		068965B82B5F046A005A19D7 /* UI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 068965B72B5F046A005A19D7 /* UI.swift */; };
 		068E195D2B68420A0071DD36 /* Fresk.swift in Sources */ = {isa = PBXBuildFile; fileRef = 068E195C2B68420A0071DD36 /* Fresk.swift */; };
 		068E195F2B6928E90071DD36 /* Primitives.swift in Sources */ = {isa = PBXBuildFile; fileRef = 068E195E2B6928E90071DD36 /* Primitives.swift */; };
@@ -103,6 +104,7 @@
 		0682820B2B3DA208009C9FF7 /* Paul.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Paul.swift; sourceTree = "<group>"; };
 		0682820D2B3E06C5009C9FF7 /* Sunrise.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sunrise.swift; sourceTree = "<group>"; };
 		068300832A9D080800414896 /* Sound.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sound.swift; sourceTree = "<group>"; };
+		06892D512C19750F00B08B22 /* Mouse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Mouse.swift; sourceTree = "<group>"; };
 		068965B72B5F046A005A19D7 /* UI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UI.swift; sourceTree = "<group>"; };
 		068E195C2B68420A0071DD36 /* Fresk.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Fresk.swift; sourceTree = "<group>"; };
 		068E195E2B6928E90071DD36 /* Primitives.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Primitives.swift; sourceTree = "<group>"; };
@@ -302,6 +304,7 @@
 			isa = PBXGroup;
 			children = (
 				06AB96D92BEE160B00482823 /* Keyboard.swift */,
+				06892D512C19750F00B08B22 /* Mouse.swift */,
 			);
 			path = Input;
 			sourceTree = "<group>";
@@ -445,6 +448,7 @@
 				062439FA2A97E5A200981BCC /* Sprite.swift in Sources */,
 				06A7E8662AD41B2F0042D878 /* GameView.swift in Sources */,
 				0604932D2AEC552300A6A46E /* TextDetailsView.swift in Sources */,
+				06892D522C19750F00B08B22 /* Mouse.swift in Sources */,
 				0638C2572AD29B2F006B00CF /* Credits.swift in Sources */,
 				06DC67A32BE2320B0067DFEA /* Globe.swift in Sources */,
 			);

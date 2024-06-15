@@ -17,6 +17,8 @@ struct RenderView: NSViewRepresentable {
     private var renderLayer: RenderLayer
     private var imageView: NSImageView
     
+    static let tagID = 0x4d75616427446962
+    
     private var bitmapRep = NSBitmapImageRep(
         bitmapDataPlanes: nil,
         pixelsWide: 320,
@@ -38,6 +40,7 @@ struct RenderView: NSViewRepresentable {
     
     
     func makeNSView(context: Context) -> NSImageView {
+        imageView.tag = RenderView.tagID // Muad'Dib in hexa
         imageView.wantsLayer = true
         imageView.layer?.backgroundColor = NSColor.black.cgColor
         imageView.sizeToFit()
