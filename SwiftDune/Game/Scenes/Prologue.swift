@@ -41,12 +41,13 @@ final class Prologue: DuneNode, DuneEventObserver {
         attachNode(Sietch())
         attachNode(Palace())
         attachNode(Baron())
+        attachNode(DesertWalk())
         attachNode(PrologueSubtitle())
     }
     
     
     override func onEnable() {
-        queue.enqueue(PrologueSteps(
+        /*queue.enqueue(PrologueSteps(
             mainNode: DuneNodeParams("Stars", [ "mode": StarsMode.planets ]),
             subtitle: DuneNodeParams("PrologueSubtitle", [ "sentenceNumber": 267 ])
         ))
@@ -74,10 +75,14 @@ final class Prologue: DuneNode, DuneEventObserver {
             mainNode: DuneNodeParams("Paul", [ "background": PaulBackground.red ]),
             subtitle: DuneNodeParams("PrologueSubtitle", [ "sentenceNumber": 273 ])
         ))
-        /*queue.enqueue(PrologueSteps(
-            mainNode: DuneNodeParams("Flight", [ "mode": .night ]),
+        queue.enqueue(PrologueSteps(
+            mainNode: DuneNodeParams("DesertWalk", [ "dayMode": DuneLightMode.night ]),
             subtitle: DuneNodeParams("PrologueSubtitle", [ "sentenceNumber": 274 ])
         ))*/
+        queue.enqueue(PrologueSteps(
+            mainNode: DuneNodeParams("Palace", [ "room": PalaceRoom.stairs, "dayMode": DuneLightMode.sunrise ]),
+            subtitle: DuneNodeParams("PrologueSubtitle", [:])
+        ))
 
         engine.addEventObserver(self)
 

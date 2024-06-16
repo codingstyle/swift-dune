@@ -13,7 +13,6 @@ final class PrologueSubtitle: DuneNode {
     private var gameFont: GameFont?
     private var sentences: Sentence?
     private var sentenceNumber: UInt16 = 0
-    private let subtitleTextColor = DuneColor(159, 90, 31)
     private let textBoxRect = DuneRect(0, 152, 320, 48)
     
     init() {
@@ -47,7 +46,7 @@ final class PrologueSubtitle: DuneNode {
         }
         
         let sentence = sentences.sentence(at: sentenceNumber)
-        gameFont.color = subtitleTextColor        
+        gameFont.color = engine.palette.color(at: 25)
         gameFont.render(sentence, rect: textBoxRect, buffer: buffer, alignment: .justify)
     }
 }

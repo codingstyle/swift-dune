@@ -21,8 +21,8 @@ protocol DuneAnimatable {
 
 extension DunePoint: DuneAnimatable {
     static func interpolated(start: DunePoint, end: DunePoint, frameCount: Double, progress: Double) -> DunePoint {
-        let step = (end - start) / frameCount
-        return start + (step * round(progress * frameCount))
+        let step = ((end - start) * round(progress * frameCount)) / frameCount
+        return start + step
     }
 }
 

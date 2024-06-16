@@ -65,8 +65,9 @@ final class Intro: DuneNode, DuneEventObserver {
             9: RoomCharacter.stilgar
         ]]))
         queue.enqueue(DuneNodeParams("Sietch", [ "room": SietchRoom.water, "duration": 4.0, "character": DuneCharacter.stilgar ]))
-        queue.enqueue(DuneNodeParams("Palace", [ "room": PalaceRoom.stairs, "duration": 4.0 ]))
-        queue.enqueue(DuneNodeParams("Palace", [ "room": PalaceRoom.balcony, "duration": 4.0, "markers": [
+        queue.enqueue(DuneNodeParams("DesertWalk", [ "dayMode": DuneLightMode.day, "duration": 2.0 ]))
+        queue.enqueue(DuneNodeParams("Palace", [ "room": PalaceRoom.stairs, "duration": 2.0 ]))
+        queue.enqueue(DuneNodeParams("Palace", [ "room": PalaceRoom.balcony, "duration": 2.0, "markers": [
             4: RoomCharacter.gurney,
             5: RoomCharacter.duncan,
             6: RoomCharacter.thufir,
@@ -84,7 +85,7 @@ final class Intro: DuneNode, DuneEventObserver {
         queue.enqueue(DuneNodeParams("Paul", [ "background": PaulBackground.red ]))
         queue.enqueue(DuneNodeParams("Kiss", [ "fadeOut": true ]))
         queue.enqueue(DuneNodeParams("Ornithopter", [ "dayMode": DuneLightMode.night, "scenery": SceneryType.sietch, "fadeOut": true ]))
-        queue.enqueue(DuneNodeParams("Flight"))
+        queue.enqueue(DuneNodeParams("Flight", [ "dayMode": DuneLightMode.night ]))
         
         engine.addEventObserver(self)
 

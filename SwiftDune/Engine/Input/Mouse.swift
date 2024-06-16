@@ -50,10 +50,12 @@ final class Mouse {
         var processed = false
 
         guard let contentView = event.window?.contentView else {
+            coordinates.reset()
             return false
         }
 
         guard let renderView = findRenderView(contentView) else {
+            coordinates.reset()
             return false
         }
         
@@ -61,8 +63,11 @@ final class Mouse {
         let eventLocation = NSPoint(x: event.locationInWindow.x, y: contentView.bounds.size.height - event.locationInWindow.y)
 
         if renderFrame.contains(eventLocation) {
-            coordinates = DunePoint(Int16(eventLocation.x - renderFrame.minX) / 2, Int16(eventLocation.y - renderFrame.minY) / 2)
+            coordinates.x = Int16(eventLocation.x - renderFrame.minX) / 2
+            coordinates.y = Int16(eventLocation.y - renderFrame.minY) / 2
             processed = true
+        } else {
+            coordinates.reset()
         }
         
         return processed

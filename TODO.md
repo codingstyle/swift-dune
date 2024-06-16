@@ -1,13 +1,14 @@
 # TODO
 
+- [ ] UPDATE: rewrite editor to use node system
 - [ ] ADD: call a worm animation
 - [ ] ADD: Ornithopter flight animated dunes
-- [ ] ADD: Arrakeen with dunes missing intro screen
+- [ ] ADD: Arrakeen with dunes missing day in intro
+- [ ] ADD: Arrakeen missing night view in prologue
 
 - [ ] UPDATE: new animation system on Stars planet pan
 - [ ] UPDATE: new animation system on Dune title
 - [ ] UPDATE: new animation system on Baron sardaukar
-- [ ] UPDATE: new animation system on Water radius
 - [ ] ADD: define character animations as a sequence
 
 - [ ] UPDATE: Separate foreground/background nodes on Intro
@@ -15,12 +16,15 @@
 
 - [ ] Fade in/out directly on main pixel buffer
 - [ ] Black pixel transition on frame buffer
+- [ ] Page flip transition on frame buffer
+- [ ] Move up transition on frame buffer
 - [ ] Support gradients on polygons
 - [ ] Sprite rendering issue on DUNES
 - [ ] 4bpp/8bpp sprite rendering ?
 - [ ] Reverse engineer animations for SHAI, DEATH, and ATTACK
 - [ ] Handle mouse cursor and events
 
+- [X] UPDATE: new animation system on Water radius
 - [X] FIX: change Double to TimeInterval on all time vars
 - [X] FIX: VOC sound
 - [X] Create a better animation system

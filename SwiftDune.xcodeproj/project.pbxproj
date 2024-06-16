@@ -37,6 +37,7 @@
 		0682820E2B3E06C5009C9FF7 /* Sunrise.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0682820D2B3E06C5009C9FF7 /* Sunrise.swift */; };
 		068300842A9D080800414896 /* Sound.swift in Sources */ = {isa = PBXBuildFile; fileRef = 068300832A9D080800414896 /* Sound.swift */; };
 		06892D522C19750F00B08B22 /* Mouse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06892D512C19750F00B08B22 /* Mouse.swift */; };
+		06892D542C1EE62700B08B22 /* DesertWalk.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06892D532C1EE62700B08B22 /* DesertWalk.swift */; };
 		068965B82B5F046A005A19D7 /* UI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 068965B72B5F046A005A19D7 /* UI.swift */; };
 		068E195D2B68420A0071DD36 /* Fresk.swift in Sources */ = {isa = PBXBuildFile; fileRef = 068E195C2B68420A0071DD36 /* Fresk.swift */; };
 		068E195F2B6928E90071DD36 /* Primitives.swift in Sources */ = {isa = PBXBuildFile; fileRef = 068E195E2B6928E90071DD36 /* Primitives.swift */; };
@@ -105,6 +106,7 @@
 		0682820D2B3E06C5009C9FF7 /* Sunrise.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sunrise.swift; sourceTree = "<group>"; };
 		068300832A9D080800414896 /* Sound.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sound.swift; sourceTree = "<group>"; };
 		06892D512C19750F00B08B22 /* Mouse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Mouse.swift; sourceTree = "<group>"; };
+		06892D532C1EE62700B08B22 /* DesertWalk.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesertWalk.swift; sourceTree = "<group>"; };
 		068965B72B5F046A005A19D7 /* UI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UI.swift; sourceTree = "<group>"; };
 		068E195C2B68420A0071DD36 /* Fresk.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Fresk.swift; sourceTree = "<group>"; };
 		068E195E2B6928E90071DD36 /* Primitives.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Primitives.swift; sourceTree = "<group>"; };
@@ -200,6 +202,7 @@
 				062779652B9AEB940046E068 /* Sky.swift */,
 				06E8FC262BC3C77300F78082 /* DesertBackground.swift */,
 				06AB96DB2BEFC4FD00482823 /* Flight.swift */,
+				06892D532C1EE62700B08B22 /* DesertWalk.swift */,
 			);
 			path = Scenes;
 			sourceTree = "<group>";
@@ -434,6 +437,7 @@
 				06AB96D52BEB7DC300482823 /* Attack.swift in Sources */,
 				06A7E8822AD6FA400042D878 /* EditorView.swift in Sources */,
 				0699D27E2A93D245006287E0 /* DuneEngine.swift in Sources */,
+				06892D542C1EE62700B08B22 /* DesertWalk.swift in Sources */,
 				066D9D3B2B4A9EC40003ADD3 /* LogoSwap.swift in Sources */,
 				06243A1C2A9B6E8800981BCC /* Palette.swift in Sources */,
 				06C16D872B1C8F0100CBEAA2 /* PixelBuffer.swift in Sources */,

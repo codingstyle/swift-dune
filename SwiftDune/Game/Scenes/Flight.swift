@@ -27,7 +27,8 @@ final class Flight: DuneNode {
     private var contextBuffer = PixelBuffer(width: 320, height: 152)
 
     private var dunesSprite: Sprite?
-    private var skySprite: Sprite?
+    private var sky: Sky?
+    private var dayMode: DuneLightMode = .night
     
     private var currentTime: TimeInterval = 0.0
     private var duration: TimeInterval = 16.0
@@ -53,18 +54,20 @@ final class Flight: DuneNode {
     
     override func onEnable() {
         dunesSprite = Sprite("DUNES.HSQ")
-        skySprite = Sprite("SKY.HSQ")
+        sky = Sky()
     }
     
     
     override func onDisable() {
         dunesSprite = nil
-        skySprite = nil
+        sky = nil
     }
     
     
     override func onParamsChange() {
-        
+        if let dayMode = params["dayMode"] {
+            self.dayMode = dayMode as! DuneLightMode
+        }
     }
     
     
@@ -144,27 +147,20 @@ final class Flight: DuneNode {
     
     
     private func drawBackground(_ buffer: PixelBuffer) {
-        if contextBuffer.tag == 0x01 {
+        if contextBuffer.tag == dayMode.rawValue {
             contextBuffer.render(to: buffer, effect: .none)
             return
         }
         
-        guard let skySprite = skySprite else {
+        guard let sky = sky else {
             return
         }
         
-        skySprite.setAlternatePalette(3)
-
-        for x: Int16 in stride(from: 0, to: 320, by: 40) {
-            skySprite.drawFrame(0, x: x, y: 0, buffer: contextBuffer)
-            skySprite.drawFrame(1, x: x, y: 20, buffer: contextBuffer)
-            skySprite.drawFrame(2, x: x, y: 40, buffer: contextBuffer)
-            skySprite.drawFrame(3, x: x, y: 60, buffer: contextBuffer)
-        }
+        sky.render(contextBuffer)
 
         Primitives.fillRect(DuneRect(0, 78, 320, 74), 63, contextBuffer)
         
         contextBuffer.render(to: buffer, effect: .none)
-        contextBuffer.tag = 0x01
+        contextBuffer.tag = dayMode.rawValue
     }
 }

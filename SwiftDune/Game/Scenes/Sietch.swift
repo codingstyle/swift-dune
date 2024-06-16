@@ -39,6 +39,7 @@ final class Sietch: DuneNode {
     private var duration: TimeInterval = 0.0
     private var character: DuneCharacter = .none
     
+    private let waterInitialRadius = DunePoint(15, 3)
     private var waterRadius = DunePoint(15, 3)
     private var waterRadiusAnimation: DuneAnimation<DunePoint>?
     private let waterCenter = DunePoint(175, 95)
@@ -59,11 +60,12 @@ final class Sietch: DuneNode {
         }
         
         if currentRoom == .water {
+            waterRadius = waterInitialRadius
             waterRadiusAnimation = DuneAnimation<DunePoint>(
                 from: DunePoint.zero,
-                to: DunePoint(320, 26),
+                to: DunePoint(320, 22),
                 startTime: 0.0,
-                endTime: 4.0
+                endTime: 3.0
             )
         }
     }
@@ -109,7 +111,8 @@ final class Sietch: DuneNode {
         }
         
         if let waterRadiusAnimation = waterRadiusAnimation {
-            waterRadius = DunePoint(15, 3) + waterRadiusAnimation.interpolate(currentTime)
+            let interpolatedRadius = waterRadiusAnimation.interpolate(currentTime)
+            waterRadius = waterInitialRadius + interpolatedRadius
         }
     }
     

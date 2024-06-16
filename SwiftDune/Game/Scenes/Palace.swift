@@ -40,6 +40,7 @@ final class Palace: DuneNode {
     private var duration: TimeInterval = 0.0
     private var character: DuneCharacter = .none
     private var zoomRect: DuneRect?
+    private var dayMode: DuneLightMode = .day
     
     init() {
         super.init("Palace")
@@ -69,6 +70,7 @@ final class Palace: DuneNode {
         currentTime = 0.0
         contextBuffer.tag = 0x0000
         zoomRect = nil
+        dayMode = .day
     }
     
     
@@ -92,6 +94,10 @@ final class Palace: DuneNode {
         if let zoom = params["zoom"] {
             self.zoomRect = zoom as? DuneRect
         }
+
+        if let dayMode = params["dayMode"] {
+            self.dayMode = dayMode as! DuneLightMode
+        }
     }
     
     
@@ -111,7 +117,13 @@ final class Palace: DuneNode {
         }
         
         buffer.clearBuffer()
-        skySprite.setAlternatePalette(1)
+        
+        if dayMode == .day {
+            skySprite.setAlternatePalette(1)
+        } else if dayMode == .sunrise {
+            let sunriseProgress = Math.clampf((currentTime - 1.0) / 2.0, 0.0, 1.0)
+            skySprite.setAlternatePalette(16, 3, blend: sunriseProgress)
+        }
 
         var fx: SpriteEffect {
             if let zoomRect = zoomRect {
@@ -137,19 +149,14 @@ final class Palace: DuneNode {
             
             contextBuffer.render(to: buffer, effect: fx)
         } else if currentRoom == .stairs {
-            if contextBuffer.tag != 0x0002 {
-                for x: Int16 in stride(from: 0, to: 200, by: 40) {
-                    skySprite.drawFrame(4, x: x, y: 0, buffer: contextBuffer)
-                    skySprite.drawFrame(5, x: x, y: 30, buffer: contextBuffer)
-                    skySprite.drawFrame(6, x: x, y: 60, buffer: contextBuffer)
-                    skySprite.drawFrame(7, x: x, y: 90, buffer: contextBuffer)
-                }
-                
-                palaceScenery.drawRoom(currentRoom.rawValue, buffer: contextBuffer)
-                contextBuffer.tag = 0x0002
+            for x: Int16 in stride(from: 0, to: 200, by: 40) {
+                skySprite.drawFrame(4, x: x, y: 0, buffer: buffer)
+                skySprite.drawFrame(5, x: x, y: 30, buffer: buffer)
+                skySprite.drawFrame(6, x: x, y: 60, buffer: buffer)
+                skySprite.drawFrame(7, x: x, y: 90, buffer: buffer)
             }
             
-            contextBuffer.render(to: buffer, effect: fx)
+            palaceScenery.drawRoom(currentRoom.rawValue, buffer: buffer)
         }
         
         if let characterSprite = characterSprite {

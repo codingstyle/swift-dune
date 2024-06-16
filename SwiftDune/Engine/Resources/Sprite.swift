@@ -608,8 +608,11 @@ final class Sprite: Equatable {
         }
     }
 
-    
     func drawFrame(_ index: UInt16, x: Int16, y: Int16, buffer: PixelBuffer, effect: SpriteEffect = .none) {
+        drawFrame(index, x: x, y: y, buffer: buffer, effects: [])
+    }
+    
+    func drawFrame(_ index: UInt16, x: Int16, y: Int16, buffer: PixelBuffer, effects: [SpriteEffect]) {
         let bufferWidth = buffer.width
         let bufferHeight = buffer.height
         
@@ -626,32 +629,33 @@ final class Sprite: Equatable {
         var flipY = false
         var scaleRatio = 1.0
         
-        switch effect {
-        case .fadeIn(let start, let duration, let current):
-            let progress = (current - start) / duration
-            opacity = Math.clampf(progress, 0.0, 1.0)
-            break
-        case .fadeOut(let end, let duration, let current):
-            let progress = (end - current) / duration
-            opacity = Math.clampf(progress, 0.0, 1.0)
-            break
-        case .transform(let offset, let flipHorizontal, let flipVertical, let scaleFactor):
-            flipX = flipHorizontal
-            flipY = flipVertical
-            roomPaletteOffset = offset != 0 ? Int(offset) - Int(frameInfo.paletteOffset) : 0
-            
-            if scaleFactor != 1.0 {
-                scaleRatio = scaleFactor
-                alignedFrameWidth = Int(Double(alignedFrameWidth) * scaleRatio)
-                frameWidth = Int(Double(frameWidth) * scaleRatio)
-                frameHeight = Int(Double(frameHeight) * scaleRatio)
+        for effect in effects {
+            switch effect {
+            case .fadeIn(let start, let duration, let current):
+                let progress = (current - start) / duration
+                opacity = Math.clampf(progress, 0.0, 1.0)
+                break
+            case .fadeOut(let end, let duration, let current):
+                let progress = (end - current) / duration
+                opacity = Math.clampf(progress, 0.0, 1.0)
+                break
+            case .transform(let offset, let flipHorizontal, let flipVertical, let scaleFactor):
+                flipX = flipHorizontal
+                flipY = flipVertical
+                roomPaletteOffset = offset != 0 ? Int(offset) - Int(frameInfo.paletteOffset) : 0
+                
+                if scaleFactor != 1.0 {
+                    scaleRatio = scaleFactor
+                    alignedFrameWidth = Int(Double(alignedFrameWidth) * scaleRatio)
+                    frameWidth = Int(Double(frameWidth) * scaleRatio)
+                    frameHeight = Int(Double(frameHeight) * scaleRatio)
+                }
+
+                break
+            default:
+                break
             }
-
-            break
-        default:
-            opacity = 1.0
         }
-
         
         // Do not render sprites outside the screen
         let x1 = Int(x)

@@ -24,12 +24,17 @@ protocol DuneNumeric {
 
 
 struct DunePoint: DuneNumeric {
-    let x: Int16
-    let y: Int16
+    var x: Int16
+    var y: Int16
     
     init(_ x: Int16, _ y: Int16) {
         self.x = x
         self.y = y
+    }
+    
+    mutating func reset() {
+        self.x = 0
+        self.y = 0
     }
     
     static func + (lhs: DunePoint, rhs: DunePoint) -> DunePoint {
@@ -37,7 +42,9 @@ struct DunePoint: DuneNumeric {
     }
 
     static func += (lhs: inout DunePoint, rhs: DunePoint) -> DunePoint {
-        return DunePoint(lhs.x + rhs.x, lhs.y + rhs.y)
+        lhs.x += rhs.x
+        lhs.y += rhs.y
+        return lhs
     }
     
     static func - (lhs: DunePoint, rhs: DunePoint) -> DunePoint {
@@ -45,15 +52,23 @@ struct DunePoint: DuneNumeric {
     }
 
     static func -= (lhs: inout DunePoint, rhs: DunePoint) -> DunePoint {
-        return DunePoint(lhs.x - rhs.x, lhs.y - rhs.y)
+        lhs.x -= rhs.x
+        lhs.y -= rhs.y
+        return lhs
     }
 
     static func * (lhs: DunePoint, rhs: Double) -> DunePoint {
-        return DunePoint(Int16(Double(lhs.x) * rhs), Int16(Double(lhs.y) * rhs))
+        let x: Int = Int(Double(lhs.x) * rhs)
+        let y: Int = Int(Double(lhs.y) * rhs)
+
+        return DunePoint(Int16(truncatingIfNeeded: x), Int16(truncatingIfNeeded: y))
     }
 
     static func *= (lhs: inout DunePoint, rhs: Double) -> DunePoint {
-        return DunePoint(Int16(Double(lhs.x) * rhs), Int16(Double(lhs.y) * rhs))
+        lhs.x = Int16(Double(lhs.x) * rhs)
+        lhs.y = Int16(Double(lhs.y) * rhs)
+        
+        return lhs
     }
 
     static func / (lhs: DunePoint, rhs: Double) -> DunePoint {
@@ -61,19 +76,20 @@ struct DunePoint: DuneNumeric {
     }
 
     static func /= (lhs: inout DunePoint, rhs: Double) -> DunePoint {
-        return DunePoint(Int16(Double(lhs.x) / rhs), Int16(Double(lhs.y) / rhs))
+        lhs.x = Int16(Double(lhs.x) / rhs)
+        lhs.y = Int16(Double(lhs.y) / rhs)
+        return lhs
     }
-
 
     static let zero = DunePoint(0, 0)
 }
 
 
 struct DuneRect {
-    let x: Int16
-    let y: Int16
-    let width: UInt16
-    let height: UInt8
+    var x: Int16
+    var y: Int16
+    var width: UInt16
+    var height: UInt8
     
     init(_ x: Int16, _ y: Int16, _ width: UInt16, _ height: UInt8) {
         self.x = x
@@ -85,7 +101,7 @@ struct DuneRect {
     static let fullScreen = DuneRect(0, 0, 320, 152)
     
     func contains(_ pt: DunePoint) -> Bool {
-        return pt.x >= x && pt.x < x + Int16(width) && pt.y >= y && pt.y < y + Int16(height)
+        return (pt.x >= x) && (pt.x < x + Int16(width)) && (pt.y >= y) && (pt.y < y + Int16(height))
     }
 }
 

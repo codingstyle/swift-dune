@@ -30,6 +30,8 @@ final class UI: DuneNode, DuneEventObserver {
     private var font: GameFont?
     
     private let menuRect = DuneRect(92, 159, 136, 40)
+    private var menuItemBackgroundRect = DuneRect(93, 159, 134, 7)
+    private var menuItemTextRect = DuneRect(97, 159, 120, 8)
 
     init() {
         super.init("UI")
@@ -123,19 +125,24 @@ final class UI: DuneNode, DuneEventObserver {
             selectedMenuIndex = Math.clamp(Int((engine.mouse.coordinates.y - 159) / 8), 0, 5)
         }
         
+        menuItemBackgroundRect.y = 159
+        menuItemTextRect.y = 159
+        
         while i < 5 {
             let y = 159 + Int16(8 * i)
+            menuItemBackgroundRect.y = y + 1
+            menuItemTextRect.y = y + 1
 
             uiSprite.drawFrame(27, x: 92, y: y, buffer: buffer)
 
             if i == selectedMenuIndex {
-                Primitives.fillRect(DuneRect(93, y + 1, 134, 7), 250, buffer, isOffset: false)
+                Primitives.fillRect(menuItemBackgroundRect, 250, buffer, isOffset: false)
             }
 
             if i < menuItems.count {
                 let sentence = commands.sentence(at: menuItems[i])
                 font.color = i == selectedMenuIndex ? darkColor : lightColor
-                font.render(sentence, rect: DuneRect(97, y + 1, 120, 8), buffer: buffer, style: .small)
+                font.render(sentence, rect: menuItemTextRect, buffer: buffer, style: .small)
             }
 
             i += 1

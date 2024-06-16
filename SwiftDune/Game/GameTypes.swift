@@ -24,8 +24,8 @@ enum DuneCharacter: String {
     case smuggler = "SMUG.HSQ"
 }
 
-enum DuneLightMode {
-    case sunrise
+enum DuneLightMode: UInt32 {
+    case sunrise = 0
     case day
     case sunset
     case night
