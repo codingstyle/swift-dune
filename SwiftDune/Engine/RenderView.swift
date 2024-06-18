@@ -17,7 +17,7 @@ struct RenderView: NSViewRepresentable {
     private var renderLayer: RenderLayer
     private var imageView: NSImageView
     
-    static let tagID = 0x4d75616427446962
+    static let tagID = 0x4d75616427446962  // Muad'Dib in hexa
     
     private var bitmapRep = NSBitmapImageRep(
         bitmapDataPlanes: nil,
@@ -27,7 +27,7 @@ struct RenderView: NSViewRepresentable {
         samplesPerPixel: 4,
         hasAlpha: true,
         isPlanar: false,
-        colorSpaceName: .deviceRGB,
+        colorSpaceName: .calibratedRGB,
         bytesPerRow: 320 * 4,
         bitsPerPixel: 32
     )!
@@ -40,7 +40,8 @@ struct RenderView: NSViewRepresentable {
     
     
     func makeNSView(context: Context) -> NSImageView {
-        imageView.tag = RenderView.tagID // Muad'Dib in hexa
+        imageView.tag = RenderView.tagID
+        imageView.imageScaling = .scaleProportionallyUpOrDown
         imageView.wantsLayer = true
         imageView.layer?.backgroundColor = NSColor.black.cgColor
         imageView.sizeToFit()
@@ -50,6 +51,8 @@ struct RenderView: NSViewRepresentable {
         renderLayer.magnificationFilter = .nearest
         renderLayer.minificationFilter = .nearest
         renderLayer.allowsEdgeAntialiasing = false
+        renderLayer.shouldRasterize = false
+        renderLayer.contentsScale = NSScreen.main!.backingScaleFactor
         
         engine.wrappedValue.onRender = self.onRender
 
@@ -87,7 +90,8 @@ class RenderLayer: CALayer {
             print("RenderLayer: No buffer")
             return
         }
-         
+        
+        context.interpolationQuality = .none
         context.draw(buffer.cgImage!, in: self.bounds)
     }
 }
