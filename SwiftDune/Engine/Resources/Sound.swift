@@ -107,7 +107,7 @@ enum VOCDataBlock {
         case .unsigned8bitPCM:
             sample = convertUnsigned8bitPCMToFloat32PCM(bytes)
         default:
-            print("Unsupported codec: \(codec)")
+            DuneEngine.shared.logger.log(.error, "Unsupported codec: \(codec)")
         }
 
         let format = AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: samplingRate, channels: 1, interleaved: false)!
@@ -209,9 +209,9 @@ final class Sound {
         
         do {
             try data.write(to: fileURL)
-            print("Array saved to file: \(fileURL.absoluteString)")
+            engine.logger.log(.info, "Array saved to file: \(fileURL.absoluteString)")
         } catch {
-            print("Error saving \(fileName): \(error)")
+            engine.logger.log(.error, "Error saving \(fileName): \(error)")
         }
     }
     
@@ -297,28 +297,27 @@ final class Sound {
     }
     
     func dumpInfo() {
-        print("")
-        print("File: \(resource.fileName)")
-        print("Signature: \(signature!)")
-        print("Version: \(version >> 8).\(version & 0xFF)")
-        print("Blocks:")
+        engine.logger.log(.debug, "File: \(resource.fileName)")
+        engine.logger.log(.debug, "Signature: \(signature!)")
+        engine.logger.log(.debug, "Version: \(version >> 8).\(version & 0xFF)")
+        engine.logger.log(.debug, "Blocks:")
         
         for i in 0..<dataBlocks.count {
             switch dataBlocks[i] {
             case .terminate:
-                print("- Terminate")
+                engine.logger.log(.debug, "- Terminate")
             case .soundData(let codec, let samplingRate, let bytes):
-                print("- Sound data: codec=\(codec), samplingRate=\(samplingRate), bytes=\(bytes.count)")
+                engine.logger.log(.debug, "- Sound data: codec=\(codec), samplingRate=\(samplingRate), bytes=\(bytes.count)")
             case .repetition(let count):
-                print("- Repeat block start: count=\(count)")
+                engine.logger.log(.debug, "- Repeat block start: count=\(count)")
             case .endRepetition:
-                print("- Repeat block end")
+                engine.logger.log(.debug, "- Repeat block end")
             case .silence(let codec, let length, let samplingRate):
-                print("- Silence: codec=\(codec), length=\(length), samplingRate=\(samplingRate)")
+                engine.logger.log(.debug, "- Silence: codec=\(codec), length=\(length), samplingRate=\(samplingRate)")
             case .string(let s):
-                print("- String: \(s)")
+                engine.logger.log(.debug, "- String: \(s)")
             case .marker(let bytes):
-                print("- Marker: bytes=\(bytes.count)")
+                engine.logger.log(.debug, "- Marker: bytes=\(bytes.count)")
             }
         }
 

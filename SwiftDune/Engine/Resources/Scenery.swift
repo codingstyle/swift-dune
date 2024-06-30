@@ -207,10 +207,9 @@ final class Scenery {
             let markerCount = resource.stream!.readByte() // Room marker count
             var markerIndex = 0
             
-            print("")
-            print("--------------------------------------------------------------------------------------")
-            print("")
-            print("ROOM #\(i): markers=\(markerCount), offset=\(room.offset)")
+            engine.logger.log(.debug, "--------------------------------------------------------------------------------------")
+            engine.logger.log(.debug, "")
+            engine.logger.log(.debug, "ROOM #\(i): markers=\(markerCount), offset=\(room.offset)")
             
             // Processes room blocks
             while !resource.stream!.isEOF() && resource.stream!.readUInt16LE(peek: true) != 0xFFFF {
@@ -218,7 +217,7 @@ final class Scenery {
                 
                 if command == 0x00 {
                     // Invalid command
-                    print(" - Invalid command")
+                    engine.logger.log(.error, " - Invalid command")
                 } else if command <= 0x3F {
                     // Command = 0x01 => Marker
                     // Command <= 0x3F => Sprite blit
@@ -250,7 +249,7 @@ final class Scenery {
                         room.commands.append(roomMarker)
                         markerIndex += 1
 
-                        print(" - Marker: x=\(x), y=\(y), flipX=\(flipX), flipY=\(flipY), scaleFlag=\(scaleFactor), modificator=\(String.fromByte(modificator))")
+                        engine.logger.log(.debug, " - Marker: x=\(x), y=\(y), flipX=\(flipX), flipY=\(flipY), scaleFlag=\(scaleFactor), modificator=\(String.fromByte(modificator))")
                     } else {
                         let roomSprite = RoomSprite(
                             spriteID: command - 1,
@@ -262,7 +261,7 @@ final class Scenery {
                         )
                         room.commands.append(roomSprite)
                         
-                        print(" - Sprite: id=\(command), x=\(x), y=\(y), flipX=\(flipX), flipY=\(flipY), scaleFlag=\(scaleFactor), paletteOffset=\(paletteOffset), modificator=\(String.fromByte(modificator))")
+                        engine.logger.log(.debug, " - Sprite: id=\(command), x=\(x), y=\(y), flipX=\(flipX), flipY=\(flipY), scaleFlag=\(scaleFactor), paletteOffset=\(paletteOffset), modificator=\(String.fromByte(modificator))")
                     }
                 } else {
                     let paletteIndex = command & 0x7F
@@ -300,10 +299,10 @@ final class Scenery {
                         
                         room.commands.append(polygon)
 
-                        print(" - Polygon: baseColorIndex=\(paletteIndex), horizontalEffect=\(horizontalEffect), verticalEffect=\(verticalEffect)")
+                        engine.logger.log(.debug, " - Polygon: baseColorIndex=\(paletteIndex), horizontalEffect=\(horizontalEffect), verticalEffect=\(verticalEffect)")
                         
                         polygon.points.forEach { pt in
-                            print("   -> x=\(pt.x), y=\(pt.y), flag=\(pt.flag)")
+                            engine.logger.log(.debug, "   -> x=\(pt.x), y=\(pt.y), flag=\(pt.flag)")
                         }
                     } else if (drawCommand >> 6) == 3 {
                         // Line
@@ -312,7 +311,7 @@ final class Scenery {
                         let x2 = Int16(resource.stream!.readUInt16LE())
                         let y2 = Int16(resource.stream!.readUInt16LE())
 
-                        print(" - Line: x1=\(x1), y1=\(y1), x2=\(x2), y2=\(y2)")
+                        engine.logger.log(.debug, " - Line: x1=\(x1), y1=\(y1), x2=\(x2), y2=\(y2)")
                         
                         let line = RoomLine(pt1: DunePoint(x1, y1), pt2: DunePoint(x2, y2), paletteOffset: paletteIndex)
                         room.commands.append(line)

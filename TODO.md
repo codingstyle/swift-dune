@@ -7,7 +7,6 @@
 - [ ] ADD: Arrakeen missing night view in prologue
 
 - [ ] UPDATE: new animation system on Stars planet pan
-- [ ] UPDATE: new animation system on Dune title
 - [ ] UPDATE: new animation system on Baron sardaukar
 - [ ] ADD: define character animations as a sequence
 
@@ -24,6 +23,8 @@
 - [ ] Reverse engineer animations for SHAI, DEATH, and ATTACK
 - [ ] Handle mouse cursor and events
 
+- [X] UPDATE: new animation system on Dune title
+- [X] ADD: Metal renderer
 - [X] UPDATE: new animation system on Water radius
 - [X] FIX: change Double to TimeInterval on all time vars
 - [X] FIX: VOC sound

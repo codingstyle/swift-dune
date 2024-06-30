@@ -147,7 +147,7 @@ final class Flight: DuneNode {
     
     
     private func drawBackground(_ buffer: PixelBuffer) {
-        if contextBuffer.tag == dayMode.rawValue {
+        if contextBuffer.tag == dayMode.asInt {
             contextBuffer.render(to: buffer, effect: .none)
             return
         }
@@ -161,6 +161,6 @@ final class Flight: DuneNode {
         Primitives.fillRect(DuneRect(0, 78, 320, 74), 63, contextBuffer)
         
         contextBuffer.render(to: buffer, effect: .none)
-        contextBuffer.tag = dayMode.rawValue
+        contextBuffer.tag = dayMode.asInt
     }
 }

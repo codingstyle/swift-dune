@@ -7,14 +7,31 @@
 
 import Foundation
 
-class Metrics {
+
+enum LogLevel {
+    case debug
+    case info
+    case warn
+    case error
+}
+
+
+class Logger {
     private var metrics: [(Double, Double)] = []
     private let maxEntries: Int = 500
-    private let queue = DispatchQueue(label: "com.dunemetrics.queue", attributes: .concurrent)
+    private let metricsQueue = DispatchQueue(label: "com.dunelogger.queue", attributes: .concurrent)
+    private let loggingQueue = DispatchQueue(label: "com.dunemetrics.queue", attributes: .concurrent)
+    
+    
+    func log(_ level: LogLevel, _ s: String) {
+        loggingQueue.async {
+            print(s)
+        }
+    }
     
     
     func addMetric(_ value: Double, at time: TimeInterval) {
-        queue.async(flags: .barrier) { [weak self] in
+        metricsQueue.async(flags: .barrier) { [weak self] in
             guard let self = self else { return }
             metrics.append((time, value))
             
@@ -28,7 +45,7 @@ class Metrics {
     func getLastMetrics() -> [(Double, Double)] {
         var result: [(Double, Double)] = []
         
-        queue.sync {
+        metricsQueue.sync {
             result = metrics.suffix(maxEntries)
         }
         

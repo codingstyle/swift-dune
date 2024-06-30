@@ -25,18 +25,18 @@ class AudioPlayer {
     private func initAudioEngine() {
         // Start the audio engine
          do {
-             // Attach mixer
-             let outputAudioFormat = audioEngine.mainMixerNode.outputFormat(forBus: 0)
-             audioEngine.mainMixerNode.outputVolume = 0.1
-             audioEngine.connect(audioEngine.mainMixerNode, to: audioEngine.outputNode, format: outputAudioFormat)
+            // Attach mixer
+            let outputAudioFormat = audioEngine.mainMixerNode.outputFormat(forBus: 0)
+            audioEngine.mainMixerNode.outputVolume = 0.1
+            audioEngine.connect(audioEngine.mainMixerNode, to: audioEngine.outputNode, format: outputAudioFormat)
 
-             // Attach player node with 11500 Hz sample rate
-             audioEngine.attach(playerNode)
-             audioEngine.connect(playerNode, to: audioEngine.mainMixerNode, format: playerAudioFormat)
-             
-             audioEngine.prepare()
-             try audioEngine.start()
-             print("[AudioPlayer] Engine started.")
+            // Attach player node with 11500 Hz sample rate
+            audioEngine.attach(playerNode)
+            audioEngine.connect(playerNode, to: audioEngine.mainMixerNode, format: playerAudioFormat)
+
+            audioEngine.prepare()
+            try audioEngine.start()
+            print("[AudioPlayer] Engine started.")
         } catch {
             print("Error starting the audio engine: \(error.localizedDescription)")
         }

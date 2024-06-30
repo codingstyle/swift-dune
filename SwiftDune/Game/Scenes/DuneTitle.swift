@@ -14,8 +14,9 @@ final class DuneTitle: DuneNode {
     private var titleSprite: Sprite?
     
     private var currentTime: TimeInterval = 0.0
-    private var scrollY: Int = 0
     private let engine = DuneEngine.shared
+    
+    private var scrollAnimation: DuneAnimation<Int16>?
     
     init() {
         super.init("DuneTitle")
@@ -25,6 +26,8 @@ final class DuneTitle: DuneNode {
     override func onEnable() {
         self.titleSprite = engine.loadSprite("INTDS.HSQ")
         self.skySprite = engine.loadSprite("SKY.HSQ")
+        
+        scrollAnimation = DuneAnimation<Int16>(from: 0, to: 152, startTime: 2.5, endTime: 6.5)
     }
     
     
@@ -32,7 +35,6 @@ final class DuneTitle: DuneNode {
         titleSprite = nil
         skySprite = nil
         currentTime = 0.0
-        scrollY = 0
     }
     
     
@@ -43,17 +45,17 @@ final class DuneTitle: DuneNode {
             engine.sendEvent(self, .nodeEnded)
             return
         }
-        
-        let progress = ((currentTime - 2.5) / 4.0) * 152.0
-        scrollY = Int(Math.clampf(progress, 0.0, 152.0))
     }
     
     
     override func render(_ buffer: PixelBuffer) {
         guard let titleSprite = titleSprite,
-              let skySprite = skySprite else {
+              let skySprite = skySprite,
+              let scrollAnimation = scrollAnimation else {
             return
         }
+
+        let scrollY = scrollAnimation.interpolate(currentTime)
         
         if contextBuffer.tag < 0x0011 {
             buffer.clearBuffer()
@@ -85,12 +87,12 @@ final class DuneTitle: DuneNode {
                 return .none
             }
             
-            contextBuffer.render(to: buffer, effect: fxStart, y: scrollY)
+            contextBuffer.render(to: buffer, effect: fxStart, y: Int(scrollY))
         }
         
         // Gradient sky and title fade
         if scrollY > 0 && contextBuffer.tag < 0x0012 && currentTime <= 9.5 {
-            let skyScrollY = Int16(scrollY) - 152
+            let skyScrollY = scrollY - 152
             titleSprite.drawFrame(2, x: 0, y: skyScrollY, buffer: buffer)
             titleSprite.drawFrame(3, x: 0, y: skyScrollY + 95, buffer: buffer)
             titleSprite.drawFrame(4, x: 0, y: skyScrollY + 123, buffer: buffer)

@@ -10,6 +10,10 @@ import AppKit
 import Darwin
 import UniformTypeIdentifiers
 
+protocol DuneEngineDelegate {
+    func renderDidFinish()
+}
+
 final class DuneEngine {
     static let shared = DuneEngine()
     
@@ -17,23 +21,32 @@ final class DuneEngine {
     var audioPlayer = AudioPlayer()
     var keyboard = Keyboard()
     var mouse = Mouse()
+    var renderer = Renderer()
+    var logger = Logger()
     
+    var delegate: DuneEngineDelegate?
+
     var isRunning: Bool = false
-    var onRender: ((_ buffer: PixelBuffer) -> Void)?
-    var onPostRender: (() -> Void)?
-    var gameTime: TimeInterval = 0.0
-    var fpsMetrics = Metrics()
 
     let frameRate = 60.0
     let frameSizeInBytes = 256000 // 320 * 200 * 4
     let rowSizeInBytes = 1280 // 320 * 4
 
+    private var gameTime: TimeInterval = 0.0
+
     private var screenBuffers: [PixelBuffer] = []
     private var offscreenBufferIndex = 1
     
+    private var currentTime: TimeInterval = 0.0
+    private var lastTime: TimeInterval = 0.0
+
     var rootNode: DuneNode = DuneNode("Root")
     
     private var eventObservers: [DuneEventObserver] = []
+    
+    var currentScreenBuffer: PixelBuffer {
+        return screenBuffers[offscreenBufferIndex]
+    }
     
     init() {
         screenBuffers.append(PixelBuffer(width: 320, height: 200))
@@ -73,16 +86,16 @@ final class DuneEngine {
     
 
     func gameLoop() {
-        print("Starting game loop...")
+        logger.log(.info, "Starting game loop...")
         
-        var lastTime = ProcessInfo.processInfo.systemUptime
+        lastTime = ProcessInfo.processInfo.systemUptime
 
         while true {
             if !isRunning {
                 break
             }
 
-            let currentTime = ProcessInfo.processInfo.systemUptime
+            currentTime = ProcessInfo.processInfo.systemUptime
             let elapsedTime = currentTime - lastTime
             gameTime += elapsedTime
 
@@ -90,18 +103,6 @@ final class DuneEngine {
 
             update(elapsedTime)
             render()
-
-            let renderingTime = ProcessInfo.processInfo.systemUptime - currentTime
-            lastTime = currentTime
-            
-            let sleepTime = (1.0 / frameRate) - renderingTime
-            
-            if sleepTime > 0.0 {
-                usleep(useconds_t(sleepTime * 1000.0))
-            }
-
-            fpsMetrics.addMetric(1.0 / (renderingTime + (sleepTime > 0.0 ? sleepTime : 0.0)), at: gameTime)
-            onPostRender?()
         }
     }
     
@@ -130,11 +131,24 @@ final class DuneEngine {
         
         // Sends update to the front
         DispatchQueue.main.sync {
-            onRender?(currentOffscreenBuffer)
+            renderer.update(currentOffscreenBuffer)
         }
 
         // Swap the pixel buffers
         offscreenBufferIndex = (offscreenBufferIndex + 1) % screenBuffers.count
+        
+        let renderingTime = ProcessInfo.processInfo.systemUptime - currentTime
+        lastTime = currentTime
+        
+        let sleepTime = (1.0 / frameRate) - renderingTime
+        
+        if sleepTime > 0.0 {
+            usleep(useconds_t(sleepTime * 1000.0))
+        }
+
+        logger.addMetric(1.0 / (renderingTime + (sleepTime > 0.0 ? sleepTime : 0.0)), at: gameTime)
+        
+        delegate?.renderDidFinish()
     }
     
     
@@ -163,7 +177,7 @@ final class DuneEngine {
             try sound.load()
             return sound
         } catch {
-            print("Error loading sound: \(fileName) = \(error)")
+            logger.log(.error, "Error loading sound: \(fileName) = \(error)")
         }
         
         return nil

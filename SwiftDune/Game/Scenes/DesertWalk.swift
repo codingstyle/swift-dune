@@ -97,7 +97,7 @@ final class DesertWalk: DuneNode {
     
     
     private func drawBackground(_ buffer: PixelBuffer) {
-        if contextBuffer.tag == dayMode.rawValue {
+        if contextBuffer.tag == dayMode.asInt {
             contextBuffer.render(to: buffer, effect: .none)
             return
         }
@@ -111,6 +111,6 @@ final class DesertWalk: DuneNode {
         Primitives.fillRect(DuneRect(0, 76, 320, 76), 63, contextBuffer)
         
         contextBuffer.render(to: buffer, effect: .none)
-        contextBuffer.tag = dayMode.rawValue
+        contextBuffer.tag = dayMode.asInt
     }
 }

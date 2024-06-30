@@ -138,7 +138,7 @@ final class Video {
             let startOffset = UInt32(resource.stream!.offset)
             let superchunkSize = UInt32(resource.stream!.readUInt16LE())
             let endSuperchunkOffset = startOffset + superchunkSize
-            print("Super chunk size: \(superchunkSize)")
+            engine.logger.log(.debug, "Super chunk size: \(superchunkSize)")
             
             var videoFrame = VideoFrame()
             
@@ -146,22 +146,22 @@ final class Video {
                 let chunkTag = resource.stream!.readUInt16LE(peek: true)
                 
                 if chunkTag == VideoTwoCC.pl.rawValue {
-                    print("PL ->")
+                    engine.logger.log(.debug, "PL ->")
                     let paletteBlock = parsePaletteBlock()
                     videoFrame.paletteBlock = paletteBlock
                 } else if chunkTag == VideoTwoCC.sd.rawValue {
-                    print("SD ->")
+                    engine.logger.log(.debug, "SD ->")
                     parseSoundBlock()
                 } else if chunkTag == VideoTwoCC.mm.rawValue {
-                    print("MM ->")
+                    engine.logger.log(.debug, "MM ->")
                     let size = resource.stream!.readUInt16LE()
                     resource.stream!.skip(UInt32(size) - 4)
                 } else if chunkTag == VideoTwoCC.kl.rawValue {
-                    print("KL ->")
+                    engine.logger.log(.debug, "KL ->")
                     let size = resource.stream!.readUInt16LE()
                     resource.stream!.skip(UInt32(size) - 4)
                 } else if chunkTag == VideoTwoCC.pt.rawValue {
-                    print("PT ->")
+                    engine.logger.log(.debug, "PT ->")
                     let size = resource.stream!.readUInt16LE()
                     resource.stream!.skip(UInt32(size) - 4)
                 } else {
@@ -244,7 +244,7 @@ final class Video {
 
         // Width or height at zero means we repeat previous frame
         if width == 0 || height == 0 {
-            print("VIDEO -> Repeat previous frame")
+            engine.logger.log(.debug, "VIDEO -> Repeat previous frame")
             return nil
         }
 
@@ -255,9 +255,9 @@ final class Video {
         let salt = resource.stream!.readByte()
         let sum = ((uncompressedSize >> 8) + (uncompressedSize & 0xFF) + (compressedSize >> 8) + (compressedSize & 0xFF) + UInt16(salt)) & 0xFF
 
-        print("Checksum = \(sum)")
-        print("uncompressedSize = \(uncompressedSize)")
-        print("computedSize = \(61669 - resource.stream!.offset)")
+        engine.logger.log(.debug, "Checksum = \(sum)")
+        engine.logger.log(.debug, "uncompressedSize = \(uncompressedSize)")
+        engine.logger.log(.debug, "computedSize = \(61669 - resource.stream!.offset)")
 
         let compressedBytes = resource.stream!.readBytes(UInt32(compressedSize) - 6)
         let frameStream = ResourceStream(compressedBytes)

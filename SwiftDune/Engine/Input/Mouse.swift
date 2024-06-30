@@ -33,7 +33,7 @@ final class Mouse {
     
     private func findRenderView(_ parentView: NSView) -> NSView? {
         for view in parentView.subviews {
-            if view.tag == RenderView.tagID {
+            if view.tag == MetalRenderView.tagID {
                 return view
             }
             

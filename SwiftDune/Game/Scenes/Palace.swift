@@ -29,7 +29,7 @@ final class Palace: DuneNode {
     private var contextBuffer = PixelBuffer(width: 320, height: 152)
     
     private var palaceScenery: Scenery?
-    private var skySprite: Sprite?
+    private var sky: Sky?
     private var characterSprite: Sprite?
 
     private var currentTime: TimeInterval = 0.0
@@ -49,7 +49,7 @@ final class Palace: DuneNode {
     
     override func onEnable() {
         palaceScenery = Scenery("PALACE.SAL")
-        skySprite = Sprite("SKY.HSQ")
+        sky = Sky()
         
         engine.palette.clear()
         palaceScenery?.characters = markers
@@ -62,7 +62,7 @@ final class Palace: DuneNode {
     
     override func onDisable() {
         palaceScenery = nil
-        skySprite = nil
+        sky = nil
         characterSprite = nil
         
         markers = [:]
@@ -112,17 +112,18 @@ final class Palace: DuneNode {
     
     override func render(_ buffer: PixelBuffer) {
         guard let palaceScenery = palaceScenery,
-              let skySprite = skySprite else {
+              let sky = sky else {
             return
         }
         
         buffer.clearBuffer()
-        
-        if dayMode == .day {
-            skySprite.setAlternatePalette(1)
-        } else if dayMode == .sunrise {
+
+        // TODO: improve this according to day time
+        if currentRoom == .stairs {
             let sunriseProgress = Math.clampf((currentTime - 1.0) / 2.0, 0.0, 1.0)
-            skySprite.setAlternatePalette(16, 3, blend: sunriseProgress)
+            sky.lightMode = .custom(index: 16, prevIndex: 3, blend: sunriseProgress)
+        } else {
+            sky.lightMode = .day
         }
 
         var fx: SpriteEffect {
@@ -136,25 +137,14 @@ final class Palace: DuneNode {
         // Apply sky gradient with blue palette
         if currentRoom == .porch || currentRoom == .balcony {
             if contextBuffer.tag != 0x0001 {
-                for x: Int16 in stride(from: 160, to: 320, by: 40) {
-                    skySprite.drawFrame(0, x: x, y: 0, buffer: contextBuffer)
-                    skySprite.drawFrame(1, x: x, y: 20, buffer: contextBuffer)
-                    skySprite.drawFrame(2, x: x, y: 40, buffer: contextBuffer)
-                    skySprite.drawFrame(3, x: x, y: 60, buffer: contextBuffer)
-                }
-
+                sky.render(buffer, width: 160, at: 160)
                 palaceScenery.drawRoom(currentRoom.rawValue, buffer: contextBuffer)
                 contextBuffer.tag = 0x0001
             }
             
             contextBuffer.render(to: buffer, effect: fx)
         } else if currentRoom == .stairs {
-            for x: Int16 in stride(from: 0, to: 200, by: 40) {
-                skySprite.drawFrame(4, x: x, y: 0, buffer: buffer)
-                skySprite.drawFrame(5, x: x, y: 30, buffer: buffer)
-                skySprite.drawFrame(6, x: x, y: 60, buffer: buffer)
-                skySprite.drawFrame(7, x: x, y: 90, buffer: buffer)
-            }
+            sky.render(buffer, width: 200, at: 0, type: .large)
             
             palaceScenery.drawRoom(currentRoom.rawValue, buffer: buffer)
         }

@@ -54,7 +54,7 @@ struct RenderView: NSViewRepresentable {
         renderLayer.shouldRasterize = false
         renderLayer.contentsScale = NSScreen.main!.backingScaleFactor
         
-        engine.wrappedValue.onRender = self.onRender
+        //engine.wrappedValue.onRender = self.onRender
 
         return imageView
     }

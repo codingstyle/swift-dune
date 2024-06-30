@@ -29,7 +29,7 @@
 		0638C2572AD29B2F006B00CF /* Credits.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0638C2562AD29B2F006B00CF /* Credits.swift */; };
 		06566A692ADEA3A800AF5734 /* Font.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06566A682ADEA3A800AF5734 /* Font.swift */; };
 		06566A6B2ADEFDD500AF5734 /* FontDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06566A6A2ADEFDD500AF5734 /* FontDetailsView.swift */; };
-		065AEE8B2B93B2B000547487 /* Metrics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 065AEE8A2B93B2B000547487 /* Metrics.swift */; };
+		065AEE8B2B93B2B000547487 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 065AEE8A2B93B2B000547487 /* Logger.swift */; };
 		066D9D3B2B4A9EC40003ADD3 /* LogoSwap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 066D9D3A2B4A9EC40003ADD3 /* LogoSwap.swift */; };
 		066D9D3D2B4AA0510003ADD3 /* Stars.swift in Sources */ = {isa = PBXBuildFile; fileRef = 066D9D3C2B4AA0510003ADD3 /* Stars.swift */; };
 		06799CBB2B3600B000A196A3 /* Worm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06799CBA2B3600AF00A196A3 /* Worm.swift */; };
@@ -38,6 +38,8 @@
 		068300842A9D080800414896 /* Sound.swift in Sources */ = {isa = PBXBuildFile; fileRef = 068300832A9D080800414896 /* Sound.swift */; };
 		06892D522C19750F00B08B22 /* Mouse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06892D512C19750F00B08B22 /* Mouse.swift */; };
 		06892D542C1EE62700B08B22 /* DesertWalk.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06892D532C1EE62700B08B22 /* DesertWalk.swift */; };
+		06892D572C3031F400B08B22 /* Renderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06892D562C3031F400B08B22 /* Renderer.swift */; };
+		06892D592C31CAE700B08B22 /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 06892D582C31CAE700B08B22 /* Shaders.metal */; };
 		068965B82B5F046A005A19D7 /* UI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 068965B72B5F046A005A19D7 /* UI.swift */; };
 		068E195D2B68420A0071DD36 /* Fresk.swift in Sources */ = {isa = PBXBuildFile; fileRef = 068E195C2B68420A0071DD36 /* Fresk.swift */; };
 		068E195F2B6928E90071DD36 /* Primitives.swift in Sources */ = {isa = PBXBuildFile; fileRef = 068E195E2B6928E90071DD36 /* Primitives.swift */; };
@@ -51,7 +53,6 @@
 		06A494042B2634AC00D60425 /* DuneTitle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06A494032B2634AC00D60425 /* DuneTitle.swift */; };
 		06A7E8662AD41B2F0042D878 /* GameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06A7E8652AD41B2F0042D878 /* GameView.swift */; };
 		06A7E8682AD41B5F0042D878 /* GameViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06A7E8672AD41B5F0042D878 /* GameViewModel.swift */; };
-		06A7E86A2AD527040042D878 /* RenderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06A7E8692AD527040042D878 /* RenderView.swift */; };
 		06A7E8822AD6FA400042D878 /* EditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06A7E8812AD6FA400042D878 /* EditorView.swift */; };
 		06A7E8842AD6FBA80042D878 /* EditorViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06A7E8832AD6FBA80042D878 /* EditorViewModel.swift */; };
 		06A7E8872AD700910042D878 /* SpriteListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06A7E8862AD700910042D878 /* SpriteListView.swift */; };
@@ -98,7 +99,7 @@
 		0638C2562AD29B2F006B00CF /* Credits.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Credits.swift; sourceTree = "<group>"; };
 		06566A682ADEA3A800AF5734 /* Font.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Font.swift; sourceTree = "<group>"; };
 		06566A6A2ADEFDD500AF5734 /* FontDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FontDetailsView.swift; sourceTree = "<group>"; };
-		065AEE8A2B93B2B000547487 /* Metrics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Metrics.swift; sourceTree = "<group>"; };
+		065AEE8A2B93B2B000547487 /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
 		066D9D3A2B4A9EC40003ADD3 /* LogoSwap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogoSwap.swift; sourceTree = "<group>"; };
 		066D9D3C2B4AA0510003ADD3 /* Stars.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Stars.swift; sourceTree = "<group>"; };
 		06799CBA2B3600AF00A196A3 /* Worm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Worm.swift; sourceTree = "<group>"; };
@@ -107,6 +108,8 @@
 		068300832A9D080800414896 /* Sound.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sound.swift; sourceTree = "<group>"; };
 		06892D512C19750F00B08B22 /* Mouse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Mouse.swift; sourceTree = "<group>"; };
 		06892D532C1EE62700B08B22 /* DesertWalk.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesertWalk.swift; sourceTree = "<group>"; };
+		06892D562C3031F400B08B22 /* Renderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Renderer.swift; sourceTree = "<group>"; };
+		06892D582C31CAE700B08B22 /* Shaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
 		068965B72B5F046A005A19D7 /* UI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UI.swift; sourceTree = "<group>"; };
 		068E195C2B68420A0071DD36 /* Fresk.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Fresk.swift; sourceTree = "<group>"; };
 		068E195E2B6928E90071DD36 /* Primitives.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Primitives.swift; sourceTree = "<group>"; };
@@ -122,7 +125,6 @@
 		06A494032B2634AC00D60425 /* DuneTitle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuneTitle.swift; sourceTree = "<group>"; };
 		06A7E8652AD41B2F0042D878 /* GameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameView.swift; sourceTree = "<group>"; };
 		06A7E8672AD41B5F0042D878 /* GameViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewModel.swift; sourceTree = "<group>"; };
-		06A7E8692AD527040042D878 /* RenderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RenderView.swift; sourceTree = "<group>"; };
 		06A7E8812AD6FA400042D878 /* EditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorView.swift; sourceTree = "<group>"; };
 		06A7E8832AD6FBA80042D878 /* EditorViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorViewModel.swift; sourceTree = "<group>"; };
 		06A7E8862AD700910042D878 /* SpriteListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpriteListView.swift; sourceTree = "<group>"; };
@@ -233,6 +235,15 @@
 			path = Game;
 			sourceTree = "<group>";
 		};
+		06892D552C3031E000B08B22 /* Rendering */ = {
+			isa = PBXGroup;
+			children = (
+				06892D562C3031F400B08B22 /* Renderer.swift */,
+				06892D582C31CAE700B08B22 /* Shaders.metal */,
+			);
+			path = Rendering;
+			sourceTree = "<group>";
+		};
 		0699D2582A93C682006287E0 = {
 			isa = PBXGroup;
 			children = (
@@ -272,6 +283,7 @@
 		0699D2752A93C6F1006287E0 /* Engine */ = {
 			isa = PBXGroup;
 			children = (
+				06892D552C3031E000B08B22 /* Rendering */,
 				06AB96D82BEE15A800482823 /* Input */,
 				0627796A2B9AF94A0046E068 /* Audio */,
 				062779692B9AF9290046E068 /* Graphics */,
@@ -279,10 +291,9 @@
 				0699D27D2A93D245006287E0 /* DuneEngine.swift */,
 				062A77672B53FE9C001CA514 /* EngineTypes.swift */,
 				062A77692B53FEB8001CA514 /* DuneNode.swift */,
-				06A7E8692AD527040042D878 /* RenderView.swift */,
 				061351B32B43647D00A46F67 /* Math.swift */,
 				062A776B2B53FF27001CA514 /* Queue.swift */,
-				065AEE8A2B93B2B000547487 /* Metrics.swift */,
+				065AEE8A2B93B2B000547487 /* Logger.swift */,
 				06AB96D62BEE013300482823 /* Animation.swift */,
 			);
 			path = Engine;
@@ -410,7 +421,7 @@
 				061725EB2B77AA8400254635 /* Kiss.swift in Sources */,
 				062A77682B53FE9C001CA514 /* EngineTypes.swift in Sources */,
 				066D9D3D2B4AA0510003ADD3 /* Stars.swift in Sources */,
-				065AEE8B2B93B2B000547487 /* Metrics.swift in Sources */,
+				065AEE8B2B93B2B000547487 /* Logger.swift in Sources */,
 				062A776A2B53FEB8001CA514 /* DuneNode.swift in Sources */,
 				06566A6B2ADEFDD500AF5734 /* FontDetailsView.swift in Sources */,
 				06D372D72B529939006BDDF3 /* SceneryListView.swift in Sources */,
@@ -418,12 +429,12 @@
 				06AB96DC2BEFC4FD00482823 /* Flight.swift in Sources */,
 				061725EF2B8542A400254635 /* Ornithopter.swift in Sources */,
 				0627796E2BA043280046E068 /* GlobeDetailsView.swift in Sources */,
-				06A7E86A2AD527040042D878 /* RenderView.swift in Sources */,
 				0604932F2AEE6F7D00A6A46E /* VideoDetailsView.swift in Sources */,
 				06B812CD2BB559B90048C8AC /* PrologueSubtitle.swift in Sources */,
 				06B812CB2BB0CF3D0048C8AC /* Prologue.swift in Sources */,
 				06D372D92B529946006BDDF3 /* SceneryDetailsView.swift in Sources */,
 				06A7E8682AD41B5F0042D878 /* GameViewModel.swift in Sources */,
+				06892D572C3031F400B08B22 /* Renderer.swift in Sources */,
 				0638C2552AD298B1006B00CF /* Presents.swift in Sources */,
 				06243A1E2A9B798300981BCC /* Sentence.swift in Sources */,
 				06A7E8842AD6FBA80042D878 /* EditorViewModel.swift in Sources */,
@@ -445,6 +456,7 @@
 				0603BFC02B30BA630022CA3B /* Intro.swift in Sources */,
 				061725F12B8B559900254635 /* Sietch.swift in Sources */,
 				06A023442A9FC5BA0091D581 /* Video.swift in Sources */,
+				06892D592C31CAE700B08B22 /* Shaders.metal in Sources */,
 				06E8FC272BC3C77300F78082 /* DesertBackground.swift in Sources */,
 				06D372D52B516132006BDDF3 /* GameTypes.swift in Sources */,
 				0699D2652A93C682006287E0 /* SwiftDuneApp.swift in Sources */,

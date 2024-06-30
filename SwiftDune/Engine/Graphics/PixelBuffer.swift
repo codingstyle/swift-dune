@@ -100,7 +100,7 @@ final class PixelBuffer {
         
         // Create a data provider from the components array
         guard let dataProvider = CGDataProvider(data: NSData(bytes: self.rawPointer, length: self.frameSizeInBytes)) else {
-            print("Error creating data provider")
+            DuneEngine.shared.logger.log(.error, "Error creating data provider")
             return
         }
         
@@ -108,7 +108,7 @@ final class PixelBuffer {
         let bitmapInfo: CGBitmapInfo = [ CGBitmapInfo(rawValue: CGImageAlphaInfo.noneSkipLast.rawValue), .byteOrder32Big ]
         
         guard let cgImage = CGImage(width: self.width, height: self.height, bitsPerComponent: bitsPerComponent, bitsPerPixel: bytesPerPixel * bitsPerComponent, bytesPerRow: bytesPerRow, space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: bitmapInfo, provider: dataProvider, decode: nil, shouldInterpolate: false, intent: .defaultIntent) else {
-            print("Error creating CGImage")
+            DuneEngine.shared.logger.log(.error, "Error creating CGImage")
             return
         }
         
@@ -116,7 +116,7 @@ final class PixelBuffer {
         let scaledSize = CGSize(width: self.width * scale, height: self.height * scale)
         
         guard let resizedImage = cgImage.resize(to: scaledSize) else {
-            print("Error resizing image")
+            DuneEngine.shared.logger.log(.error, "Error resizing image")
             return
         }
         
@@ -126,7 +126,7 @@ final class PixelBuffer {
         
         // Create a CGImageDestination
         guard let destination = CGImageDestinationCreateWithURL(fileURL as NSURL, kUTTypePNG, 1, nil) else {
-            print("Error creating image destination")
+            DuneEngine.shared.logger.log(.error, "Error creating image destination")
             return
         }
         
@@ -135,10 +135,10 @@ final class PixelBuffer {
         
         // Finalize the destination to write the image to disk
         guard CGImageDestinationFinalize(destination) else {
-            print("Error finalizing image destination")
+            DuneEngine.shared.logger.log(.error, "Error finalizing image destination")
             return
         }
         
-        print("Image saved successfully")
+        DuneEngine.shared.logger.log(.info, "Image saved successfully")
     }
 }

@@ -73,7 +73,7 @@ final class Sentence {
         
         for i in 0..<count {
             let s = sentence(at: i)
-            print("Sentence #\(i): \(s)")
+            engine.logger.log(.debug, "Sentence #\(i): \(s)")
         }
     }
 }

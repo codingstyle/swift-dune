@@ -24,9 +24,24 @@ enum DuneCharacter: String {
     case smuggler = "SMUG.HSQ"
 }
 
-enum DuneLightMode: UInt32 {
-    case sunrise = 0
+enum DuneLightMode: Equatable {
+    case sunrise
     case day
     case sunset
     case night
+    case custom(index: Int, prevIndex: Int, blend: CGFloat)
+    
+    var asInt: UInt32 {
+        switch self {
+            case .sunrise: return 0
+            case .day: return 1
+            case .sunset: return 2
+            case .night: return 3
+            case.custom(_, _, _): return 4
+        }
+    }
+    
+    static func == (lhs: Self, rhs: Self) -> Bool {
+        return lhs.asInt == rhs.asInt
+    }
 }

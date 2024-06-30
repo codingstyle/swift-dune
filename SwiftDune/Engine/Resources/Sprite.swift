@@ -63,7 +63,7 @@ final class Sprite: Equatable {
     }
     
     
-    private var engine: DuneEngine
+    private let engine: DuneEngine = DuneEngine.shared
     private var resource: Resource
     
     private var palette: [SpritePalette] = []
@@ -99,7 +99,6 @@ final class Sprite: Equatable {
     
     init(_ fileName: String) {
         self.resource = Resource(fileName)
-        self.engine = DuneEngine.shared
         
         self.parsePalette()
         self.parseFrames()
@@ -248,8 +247,9 @@ final class Sprite: Equatable {
             }
             
             var paletteChunk = Array<UInt32>(repeating: 0, count: Int(paletteCount))
+            var i: UInt16 = 0
             
-            for i: UInt16 in 0..<paletteCount {
+            while i < paletteCount {
                 if i + paletteStart > 256 {
                     break
                 }
@@ -260,12 +260,13 @@ final class Sprite: Equatable {
                 let a = UInt32(0xFF)
                 
                 paletteChunk[Int(i)] = (a << 24) | (b << 16) | (g << 8) | r
+                i += 1
             }
         
             alternatePalettes.append(SpritePalette(chunk: paletteChunk, start: paletteStart, count: paletteCount))
         }
         
-        print("parseAlternatePalettes(): END OF PARSING \(resource.fileName) -> \(resource.stream!.offset) = \(resource.stream!.size)")
+        engine.logger.log(.debug, "parseAlternatePalettes(): END OF PARSING \(resource.fileName) -> \(resource.stream!.offset) = \(resource.stream!.size)")
     }
     
     
@@ -370,13 +371,17 @@ final class Sprite: Equatable {
                 
         setPalette()
         
-        for i in 0..<Int(frames.count) {
+        var i = 0
+        let framesCount = Int(frames.count)
+        
+        while i < framesCount {
             let frameInfo = frames[i]
             
             frames[i].paletteIndices.withUnsafeMutableBytes { ptr in
                 let intPtr = ptr.bindMemory(to: Int.self)
                 computeFramePixels(frameInfo, buffer: intPtr.baseAddress!)
             }
+            i += 1
         }
         
         //print("parseFrames(): finished reading. resource size=\(resource.stream!.size), anim offset=\(animationOffset)")
@@ -409,7 +414,7 @@ final class Sprite: Equatable {
         let header = resource.stream!.readUInt16()
         
         if (header != 0x0000) {
-            print("parseAnimations(): ERROR - header=0x0000")
+            engine.logger.log(.error, "parseAnimations(): ERROR - header=0x0000")
             // No animation found
             resource.stream!.seek(animationOffset)
             return false
@@ -418,7 +423,7 @@ final class Sprite: Equatable {
         let blockSize = resource.stream!.readUInt16LE() // Block size
         
         if animationOffset + UInt32(blockSize) > resource.stream!.size {
-            print("parseAnimations(): ERROR - Offset and size are above the resource size. animationOffset=\(animationOffset), blockSize=\(blockSize), resourceSize=\(resource.stream!.size)")
+            engine.logger.log(.error, "parseAnimations(): ERROR - Offset and size are above the resource size. animationOffset=\(animationOffset), blockSize=\(blockSize), resourceSize=\(resource.stream!.size)")
             resource.stream!.seek(animationOffset)
             return false
         }
@@ -426,7 +431,7 @@ final class Sprite: Equatable {
         let animX = resource.stream!.readUInt16LE()
         
         if animX > 320 {
-            print("parseAnimations(): ERROR - animX > 320. Something was not parsed correctly")
+            engine.logger.log(.error, "parseAnimations(): ERROR - animX > 320. Something was not parsed correctly")
             resource.stream!.seek(animationOffset)
             return false
         }
@@ -436,7 +441,7 @@ final class Sprite: Equatable {
         let animHeight = resource.stream!.readUInt16LE()
         let animDefinitionOffset = UInt32(resource.stream!.readUInt16LE())
         
-        print("Animation header: size=\(blockSize), x=\(animX), y=\(animY), width=\(animWidth), height=\(animHeight), offset=\(animDefinitionOffset)")
+        engine.logger.log(.debug, "Animation header: size=\(blockSize), x=\(animX), y=\(animY), width=\(animWidth), height=\(animHeight), offset=\(animDefinitionOffset)")
         
         // Reads the first image group def: this is the size of image group header
         let imageGroupSize = resource.stream!.readUInt16LE(peek: true) / 2
@@ -524,7 +529,7 @@ final class Sprite: Equatable {
     func parseAlternateAnimations() {
         resource.stream!.seek(animationOffset)
         
-        print("parseAlternateAnimations(): offset=\(animationOffset), size=\(resource.stream!.size)")
+        engine.logger.log(.debug, "parseAlternateAnimations(): offset=\(animationOffset), size=\(resource.stream!.size)")
 
         if animationOffset >= resource.stream!.size - 2 {
             // No animations found
@@ -541,7 +546,7 @@ final class Sprite: Equatable {
         let header = resource.stream!.readUInt16()
         
         if (header != 0x0000) {
-            print("parseAlternateAnimations(): ERROR - header=0x0000")
+            engine.logger.log(.error, "parseAlternateAnimations(): ERROR - header=0x0000")
             // No animation found
             return
         }
@@ -549,7 +554,7 @@ final class Sprite: Equatable {
         let blockSize = resource.stream!.readUInt16LE() // Block size
         
         if animationOffset + UInt32(blockSize) > resource.stream!.size {
-            print("parseAlternateAnimations(): ERROR - Offset and size are above the resource size. animationOffset=\(animationOffset), blockSize=\(blockSize), resourceSize=\(resource.stream!.size)")
+            engine.logger.log(.error, "parseAlternateAnimations(): ERROR - Offset and size are above the resource size. animationOffset=\(animationOffset), blockSize=\(blockSize), resourceSize=\(resource.stream!.size)")
             return
         }
     }
@@ -557,7 +562,7 @@ final class Sprite: Equatable {
     
     func loadAnimation(_ index: UInt16) {
         guard index < animations.count else {
-            print("Invalid animation index: \(index)")
+            engine.logger.log(.error, "Invalid animation index: \(index)")
             return
         }
         
@@ -581,7 +586,7 @@ final class Sprite: Equatable {
     
     func drawAnimation(_ animIndex: UInt16, buffer: PixelBuffer, time: Double = 0.0, offset: DunePoint = .zero) {
         guard animIndex < animations.count else {
-            print("Invalid animation index: \(animIndex)")
+            engine.logger.log(.error, "Invalid animation index: \(animIndex)")
             return
         }
 
@@ -609,7 +614,7 @@ final class Sprite: Equatable {
     }
 
     func drawFrame(_ index: UInt16, x: Int16, y: Int16, buffer: PixelBuffer, effect: SpriteEffect = .none) {
-        drawFrame(index, x: x, y: y, buffer: buffer, effects: [])
+        drawFrame(index, x: x, y: y, buffer: buffer, effects: [effect])
     }
     
     func drawFrame(_ index: UInt16, x: Int16, y: Int16, buffer: PixelBuffer, effects: [SpriteEffect]) {
@@ -801,43 +806,42 @@ final class Sprite: Equatable {
     
     func debugBytes(_ byteCount: UInt32) {
         let bytes = resource.stream!.readBytes(byteCount, peek: true)
-        print("\(byteCount) BYTES: \(bytes.map { String.fromByte($0) })")
+        engine.logger.log(.debug, "\(byteCount) BYTES: \(bytes.map { String.fromByte($0) })")
     }
     
     
     func dumpInfo() throws {
-        print("------")
-        print("Sprite name: \(resource.fileName)")
-        print("Frame count: \(frames.count)")
+        engine.logger.log(.debug, "------")
+        engine.logger.log(.debug, "Sprite name: \(resource.fileName)")
+        engine.logger.log(.debug, "Frame count: \(frames.count)")
         
         for i in 0..<frames.count {
-            print("Frame #\(i): width=\(frames[i].width), height=\(frames[i].height), compressed=\(frames[i].isCompressed ? "YES": "NO"), paletteOffset=\(frames[i].paletteOffset)")
+            engine.logger.log(.debug, "Frame #\(i): width=\(frames[i].width), height=\(frames[i].height), compressed=\(frames[i].isCompressed ? "YES": "NO"), paletteOffset=\(frames[i].paletteOffset)")
         }
         
-        print("")
-        print("Animation count: \(animations.count)")
+        engine.logger.log(.debug, "Animation count: \(animations.count)")
         
         for i in 0..<animations.count {
-            print("Animation #\(i): width=\(animations[i].width), height=\(animations[i].height), frames=\(animations[i].frames.count)")
+            engine.logger.log(.debug, "Animation #\(i): width=\(animations[i].width), height=\(animations[i].height), frames=\(animations[i].frames.count)")
             
             for j in 0..<animations[i].frames.count {
                 let frame = animations[i].frames[j]
 
-                print("- Frame #\(j): groups=\(frame.groups.count)")
+                engine.logger.log(.debug, "- Frame #\(j): groups=\(frame.groups.count)")
                 
                 for k in 0..<frame.groups.count {
                     let group = frame.groups[k]
 
-                    print("  - Group #\(k): images=\(group.images.count)")
+                    engine.logger.log(.debug, "  - Group #\(k): images=\(group.images.count)")
                     
                     for l in 0..<group.images.count {
-                        print("    - Image #\(l): frame=\(group.images[l].imageNumber), x=\(group.images[l].xOffset), y=\(group.images[l].yOffset)")
+                        engine.logger.log(.debug, "    - Image #\(l): frame=\(group.images[l].imageNumber), x=\(group.images[l].xOffset), y=\(group.images[l].yOffset)")
                     }
                 }
             }
         }
         
-        print("------")
+        engine.logger.log(.debug, "------")
     }
 }
 

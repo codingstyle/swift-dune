@@ -397,9 +397,9 @@ class ResourceStream {
         
         do {
             try dataToWrite.write(to: fileURL)
-            print("File saved successfully at: \(fileURL.path)")
+            DuneEngine.shared.logger.log(.info, "File saved successfully at: \(fileURL.path)")
         } catch {
-            print("Error saving file: \(error.localizedDescription)")
+            DuneEngine.shared.logger.log(.error, "Error saving file: \(error.localizedDescription)")
         }
     }
 }
@@ -414,7 +414,8 @@ class Resource
     var fileName: String
 
     private static let validChecksum = 171
-
+    private let engine = DuneEngine.shared
+    
     private var fileSize: UInt64 = 0
     
     init(_ fileName: String, uncompressed: Bool = false) {
@@ -434,12 +435,12 @@ class Resource
         let fileExtension = String(fileComponents[1])
 
         guard let filePath = Bundle.main.path(forResource: fileNameWithoutExtension, ofType: fileExtension, inDirectory: "DuneFiles") else {
-            print("\(fileName): not found.")
+            engine.logger.log(.error, "\(fileName): not found.")
             return
         }
 
         guard let fileHandle = FileHandle(forReadingAtPath: filePath) else {
-            print("\(fileName): unable to read file.")
+            engine.logger.log(.error, "\(fileName): unable to read file.")
             return
         }
 
@@ -452,7 +453,7 @@ class Resource
             unpackedData = [UInt8](data!)
             stream = ResourceStream(unpackedData)
         } catch {
-            print("\(fileName): unable to read uncompressed file")
+            engine.logger.log(.error, "\(fileName): unable to read uncompressed file")
         }
     }
     
@@ -461,24 +462,24 @@ class Resource
         let fileComponents = fileName.split(separator: ".")
         
         guard fileComponents.count == 2 else {
-            print("\(fileName): no extension found.")
+            engine.logger.log(.error, "\(fileName): no extension found.")
             return
         }
                 
         let fileExtension = String(fileComponents[1])
         
         guard fileExtension == "HSQ" || fileExtension == "SAL" else {
-            print("\(fileExtension) is not a recognized HSQ format.")
+            engine.logger.log(.error, "\(fileExtension) is not a recognized HSQ format.")
             return
         }
 
         guard let filePath = Bundle.main.path(forResource: fileName.replacingOccurrences(of: ".\(fileExtension)", with: ""), ofType: fileExtension, inDirectory: "DuneFiles") else {
-            print("\(fileName): not found.")
+            engine.logger.log(.error, "\(fileName): not found.")
             return
         }
 
         guard let fileHandle = FileHandle(forReadingAtPath: filePath) else {
-            print("\(fileName): unable to read file.")
+            engine.logger.log(.error, "\(fileName): unable to read file.")
             return
         }
 
@@ -499,7 +500,7 @@ class Resource
                 stream = ResourceStream(unpackedData)
             }
         } catch {
-            print("\(fileName): unable to decode file.")
+            engine.logger.log(.error, "\(fileName): unable to decode file.")
             parseRaw()
         }
     }
@@ -526,7 +527,7 @@ class Resource
         let realFileSize = try fileHandle.offset()
         
         if realFileSize != fileSize {
-            print("\(fileName): wrong file size (expected=\(realFileSize), actual=\(fileSize)). HSQ file may be corrupted.")
+            engine.logger.log(.error, "\(fileName): wrong file size (expected=\(realFileSize), actual=\(fileSize)). HSQ file may be corrupted.")
             throw ResourceError.fileSizeMismatch
         }
         
@@ -534,7 +535,7 @@ class Resource
         header.data = try fileHandle.read(upToCount: 6)
 
         if header.checksumValue != Resource.validChecksum {
-            print("\(fileName): invalid checksum. HSQ file may be corrupted.")
+            engine.logger.log(.error, "\(fileName): invalid checksum. HSQ file may be corrupted.")
             throw ResourceError.checksumMismatch
         }
         
@@ -598,9 +599,12 @@ class Resource
                 let currentOffset = unpackedData.count
                 let startCopy = Int(currentOffset) + Int(offset)
                 let endCopy = startCopy + Int(count) - 1
+
+                var i = startCopy
                 
-                for i in startCopy...endCopy {
+                while i <= endCopy {
                     unpackedData.append(unpackedData[i])
+                    i += 1
                 }
             }
         }
@@ -611,10 +615,12 @@ class Resource
 extension UInt16 {
     func asBinaryString() -> String {
         var s: String = ""
+        var i: UInt16 = 0
         
-        for i: UInt16 in 0...15 {
+        while i <= 15 {
             let bitValue = (self & (1 << i)) >> i
             s += "\(bitValue) "
+            i += 1
         }
         
         return s
@@ -653,7 +659,7 @@ extension FileHandle {
         let data = readData(ofLength: MemoryLayout<UInt8>.size * 2)
         
         guard data.count == 2 else {
-            print("readUInt16LE(): Unable to read word")
+            DuneEngine.shared.logger.log(.error, "readUInt16LE(): Unable to read word")
             return 0
         }
         
@@ -668,7 +674,7 @@ extension FileHandle {
         let data = readData(ofLength: MemoryLayout<UInt8>.size)
         
         guard data.count == 1 else {
-            print("readByte(): Unable to read byte")
+            DuneEngine.shared.logger.log(.error, "readByte(): Unable to read byte")
             return 0
         }
 
