@@ -13,13 +13,12 @@
 - [ ] UPDATE: Separate foreground/background nodes on Intro
 - [ ] UPDATE: implement sky as node everywhere
 
+- [ ] Support gradients on polygons
 - [ ] Fade in/out directly on main pixel buffer
 - [ ] Black pixel transition on frame buffer
 - [ ] Page flip transition on frame buffer
 - [ ] Move up transition on frame buffer
-- [ ] Support gradients on polygons
-- [ ] Sprite rendering issue on DUNES
-- [ ] 4bpp/8bpp sprite rendering ?
+- [ ] Sprite rendering issue on DUNES / 4bpp/8bpp sprite rendering ?
 - [ ] Reverse engineer animations for SHAI, DEATH, and ATTACK
 - [ ] Handle mouse cursor and events
 

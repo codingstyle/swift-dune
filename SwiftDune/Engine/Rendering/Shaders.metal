@@ -27,6 +27,6 @@ vertex VertexOut vertex_main(VertexIn in [[stage_in]]) {
 
 fragment float4 fragment_main(VertexOut in [[stage_in]],
                               texture2d<float> texture [[texture(0)]]) {
-    constexpr sampler textureSampler (mag_filter::linear, min_filter::linear);
+    constexpr sampler textureSampler (mag_filter::nearest, min_filter::nearest);
     return texture.sample(textureSampler, in.texCoord);
 }

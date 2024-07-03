@@ -155,6 +155,8 @@ struct Primitives {
     }
     
     
+    // @see https://github.com/madmoose/dune/blob/master/room.cpp
+    
     static func fillPolygon(_ polygon: [DunePoint], _ paletteOffset: Int,_ buffer: PixelBuffer, isOffset: Bool = true) {
         let n = polygon.count
         var minY = Int16.max
@@ -168,11 +170,15 @@ struct Primitives {
         }
 
         // Scanline fill algorithm
-        for y in minY...maxY {
+        var y = minY
+        
+        while y < maxY {
             var intersections: [Int16] = []
 
             // Find intersections with the polygon edges
-            for i in 0..<n {
+            var i = 0
+
+            while i < n {
                 let p1 = polygon[i]
                 let p2 = polygon[(i + 1) % n]
 
@@ -181,13 +187,15 @@ struct Primitives {
                     let intersectionX = p1.x + (y - p1.y) * (p2.x - p1.x) / (p2.y - p1.y)
                     intersections.append(intersectionX)
                 }
+                
+                i += 1
             }
 
             // Sort the intersection points
             intersections.sort()
 
             // Draw horizontal line segments between pairs of intersection points
-            var i = 0
+            i = 0
             
             while i < intersections.count {
                 let x0 = max(0, min(intersections[i], bufferWidth - 1))
@@ -195,6 +203,8 @@ struct Primitives {
                 drawLine(DunePoint(x0, y), DunePoint(x1, y), paletteOffset, buffer, isOffset: isOffset)
                 i += 2
             }
+            
+            y += 1
         }
     }
     

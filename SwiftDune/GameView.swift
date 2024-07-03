@@ -10,6 +10,26 @@ import SwiftUI
 import Charts
 
 
+struct IconButton: View {
+    var imageSystemName: String
+    var action: () -> Void
+    
+    init(_ imageSystemName: String, _ action: @escaping () -> Void) {
+        self.imageSystemName = imageSystemName
+        self.action = action
+    }
+    
+    var body: some View {
+        Button(action: action, label: {
+            Image(systemName: imageSystemName)
+                .font(.system(size: 20))
+                .frame(width: 20, height: 20)
+                .padding(10)
+        })
+    }
+}
+
+
 struct FPSChartView: View {
     var fpsChartData: [GameFPSData]
     
@@ -73,44 +93,25 @@ struct GameView: View {
     var body: some View {
         VStack {
             HStack {
-                Button(action: {
+                IconButton("camera") {
                     viewModel.screenshot()
-                }, label: {
-                    Image(systemName: "camera")
-                        .font(.system(size: 20))
-                        .frame(width: 20, height: 20)
-                        .padding(10)
-                })
+                }
                 
-                Button(action: {
+                IconButton("arrow.clockwise") {
                     viewModel.reset()
-                }, label: {
-                    Image(systemName: "arrow.clockwise")
-                        .font(.system(size: 20))
-                        .frame(width: 20, height: 20)
-                        .padding(10)
-                })
-
-                Button(action: {
+                }
+                
+                IconButton(viewModel.isRunning ? "pause.fill" : "play.fill") {
                     viewModel.togglePlayPause()
-                }, label: {
-                    Image(systemName: viewModel.isRunning ? "pause.fill" : "play.fill")
-                        .font(.system(size: 20))
-                        .frame(width: 20, height: 20)
-                        .padding(10)
-                })
+                }
                 
                 FPSChartView(fpsChartData: viewModel.fpsChartData)
             }
             .frame(minHeight: 120)
             .padding()
-            
-            /*RenderView(engine: $viewModel.engine)
-                .frame(width: 640, height: 400)
-                .aspectRatio(contentMode: .fill)
-                .border(.gray)*/
 
             MetalRenderView()
+                .tag(MetalRenderView.tagID)
                 .frame(width: 640, height: 400)
                 .aspectRatio(contentMode: .fill)
                 .border(.gray)
