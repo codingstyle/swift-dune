@@ -143,7 +143,6 @@ final class Scenery {
     private var characterSprite: Sprite
     
     // Conversion of scale factors
-    //private let transformScale: [Double] = [1.0, 0.9, 0.8, 0.7, 0.68, 0.6, 0.5, 0.4, 0.3, 0.2]
     private let transformScale: [UInt16] = [ 0x100, 0x120, 0x140, 0x160, 0x180, 0x1C0, 0x200, 0x280 ]
         
 
@@ -271,7 +270,7 @@ final class Scenery {
                         // Polygon
                         let horizontalEffect = resource.stream!.readByte()
                         let verticalEffect = resource.stream!.readByte()
-                        
+
                         var polygon = RoomPolygon(paletteOffset: paletteIndex, horizontalEffect: horizontalEffect, verticalEffect: verticalEffect)
                         var cpt: UInt16 = 0
                         var points: [RoomPolygonPoint] = []
@@ -298,7 +297,7 @@ final class Scenery {
                         polygon.points = points
                         
                         room.commands.append(polygon)
-
+                         
                         engine.logger.log(.debug, " - Polygon: baseColorIndex=\(paletteIndex), horizontalEffect=\(horizontalEffect), verticalEffect=\(verticalEffect)")
                         
                         polygon.points.forEach { pt in

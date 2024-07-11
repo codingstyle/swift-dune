@@ -21,13 +21,16 @@ final class Palette {
         clear()
     }
     
+    
     deinit {
         rawPointer.deallocate()
     }
     
+    
     func clear() {
         let _ = memset(rawPointer, 0, paletteSize * colorSize)
     }
+    
     
     func update(_ chunk: inout Array<UInt32>, start: UInt16, count: UInt16) {
         memcpy(rawPointer + Int(start), &chunk, Int(count) * colorSize)

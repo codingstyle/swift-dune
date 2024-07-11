@@ -21,10 +21,13 @@ struct IconButton: View {
     
     var body: some View {
         Button(action: action, label: {
-            Image(systemName: imageSystemName)
-                .font(.system(size: 20))
-                .frame(width: 20, height: 20)
-                .padding(10)
+            ZStack(alignment: .center) {
+                Image(systemName: imageSystemName)
+                    .font(.system(size: 20))
+                    .frame(width: 20, height: 20, alignment: .center)
+            }
+            .frame(maxWidth: 20)
+            .padding(10)
         })
     }
 }

@@ -20,7 +20,7 @@ final class GameViewModel: ObservableObject, DuneEngineDelegate {
     @Published var isRunning = false
     @Published var fpsChartData: [GameFPSData] = []
     
-    var engine = DuneEngine.shared
+    let engine = DuneEngine.shared
 
     init() {
         engine.delegate = self
