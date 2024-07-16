@@ -46,7 +46,7 @@ final class PrologueSubtitle: DuneNode {
         }
         
         let sentence = sentences.sentence(at: sentenceNumber)
-        gameFont.color = engine.palette.color(at: 25)
+        gameFont.paletteIndex = 25
         gameFont.render(sentence, rect: textBoxRect, buffer: buffer, alignment: .justify)
     }
 }

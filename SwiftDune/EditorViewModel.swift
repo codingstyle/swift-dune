@@ -126,7 +126,7 @@ class EditorViewModel: ObservableObject {
 
             if selection.resourceName == "DUNECHAR.HSQ" {
                 gameFont = engine.loadGameFont()
-                gameFont!.color = .black
+                gameFont!.paletteIndex = 1
                 
                 var s = String()
 
@@ -173,7 +173,28 @@ class EditorViewModel: ObservableObject {
             return
         }
         
-        _ = memcpy(imageBuffer, buffer.rawPointer, buffer.frameSizeInBytes)
+        memset(imageBuffer, 0, renderBitmap.bytesPerRow * renderBitmap.pixelsHigh)
+        
+        var n = 0
+        
+        while n < buffer.frameSizeInBytes {
+            let destIndex = n * 4
+            let paletteIndex = buffer.rawPointer[n]
+            
+            if paletteIndex == 0 {
+                n += 1
+                continue
+            }
+            
+            let color = engine.palette.rawPointer[Int(paletteIndex)]
+            imageBuffer[destIndex + 3] = UInt8((color & 0xFF000000) >> 24)
+            imageBuffer[destIndex + 2] = UInt8((color & 0xFF0000) >> 16)
+            imageBuffer[destIndex + 1] = UInt8((color & 0xFF00) >> 8)
+            imageBuffer[destIndex + 0] = UInt8(color & 0xFF)
+            
+            n += 1
+        }
+        
         spriteImage = NSImage(cgImage: renderBitmap.cgImage!, size: .zero)
     }
     

@@ -121,6 +121,8 @@ final class Stars: DuneNode {
             starsSprite.drawFrame(0, x: 0, y: 0, buffer: contextBuffer)
             
             contextBuffer.tag = 0x0008
+
+            engine.palette.stash()
         }
         
         var fx: SpriteEffect {
@@ -161,6 +163,8 @@ final class Stars: DuneNode {
             starsSprite.drawFrame(37, x: 235, y: 106, buffer: contextBuffer)
 
             contextBuffer.tag = 0x0005
+
+            engine.palette.stash()
         }
 
         var fx: SpriteEffect {

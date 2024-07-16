@@ -1,10 +1,12 @@
 # TODO
 
+- [ ] UPDATE: create transitionIn/transitionOut params in intro
+- [ ] ADD: support gradients on polygons
+- [ ] UPDATE: Sprite rendering issue on DUNES / 4bpp/8bpp sprite rendering ?
+
 - [ ] UPDATE: rewrite editor to use node system
 - [ ] ADD: call a worm animation
 - [ ] ADD: Ornithopter flight animated dunes
-- [ ] ADD: Arrakeen with dunes missing day in intro
-- [ ] ADD: Arrakeen missing night view in prologue
 
 - [ ] UPDATE: new animation system on Stars planet pan
 - [ ] UPDATE: new animation system on Baron sardaukar
@@ -13,15 +15,16 @@
 - [ ] UPDATE: Separate foreground/background nodes on Intro
 - [ ] UPDATE: implement sky as node everywhere
 
-- [ ] Support gradients on polygons
-- [ ] Fade in/out directly on main pixel buffer
-- [ ] Black pixel transition on frame buffer
-- [ ] Page flip transition on frame buffer
-- [ ] Move up transition on frame buffer
-- [ ] Sprite rendering issue on DUNES / 4bpp/8bpp sprite rendering ?
 - [ ] Reverse engineer animations for SHAI, DEATH, and ATTACK
 - [ ] Handle mouse cursor and events
 
+- [ ] Page flip transition on frame buffer
+- [ ] Move up transition on frame buffer
+
+- [X] UPDATE: Revamp frame buffers to reference palette indexes
+- [X] Black pixel dissolve transition on frame buffer
+- [X] ADD: Arrakeen with dunes missing day in intro
+- [X] ADD: Arrakeen missing night view in prologue
 - [X] UPDATE: new animation system on Dune title
 - [X] ADD: Metal renderer
 - [X] UPDATE: new animation system on Water radius

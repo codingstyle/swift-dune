@@ -83,7 +83,7 @@ final class Credits: DuneNode {
         duneSprite = engine.loadSprite("INTDS.HSQ", updatePalette: false)
         skySprite = engine.loadSprite("SKY.HSQ", updatePalette: false)
         
-        scrollAnimation = DuneAnimation<Int16>(from: 0, to: 1936, startTime: 0.0, endTime: 52.0)
+        scrollAnimation = DuneAnimation<Int16>(from: 0, to: 1936, startTime: 2.0, endTime: 54.0)
     }
     
     
@@ -104,8 +104,7 @@ final class Credits: DuneNode {
             return
         }
         
-        let scrollOffset = scrollAnimation.interpolate(currentTime)
-        scrollY = 152 - scrollOffset
+        scrollY = 152 - scrollAnimation.interpolate(currentTime)
     }
     
     
@@ -129,9 +128,19 @@ final class Credits: DuneNode {
 
             duneSprite.drawFrame(0, x: 0, y: 60, buffer: backgroundBuffer)
             backgroundBuffer.tag = 0x0001
+
+            engine.palette.stash()
         }
 
-        backgroundBuffer.render(to: contextBuffer, effect: .none)
+        var fx: SpriteEffect {
+            if currentTime < 2.0 {
+                return .fadeIn(start: 0.0, duration: 2.0, current: currentTime)
+            }
+            
+            return .none
+        }
+        
+        backgroundBuffer.render(to: contextBuffer, effect: fx)
         
         // Blit credit sprites
         var i = 0

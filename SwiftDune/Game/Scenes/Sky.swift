@@ -23,7 +23,7 @@ final class Sky {
     }
     
     
-    func render(_ buffer: PixelBuffer, width: Int16 = 320, at offsetX: Int16 = 0, type: SkyType = .narrow) {
+    func setPalette() {
         guard let skySprite = skySprite else {
             return
         }
@@ -40,6 +40,15 @@ final class Sky {
         case .custom(let index, let prevIndex, let blend):
             skySprite.setAlternatePalette(index, prevIndex, blend: blend)
         }
+    }
+    
+    
+    func render(_ buffer: PixelBuffer, width: Int16 = 320, at offsetX: Int16 = 0, type: SkyType = .narrow) {
+        guard let skySprite = skySprite else {
+            return
+        }
+        
+        self.setPalette()
 
         var x: Int16 = offsetX
 

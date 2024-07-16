@@ -10,5 +10,13 @@
             </PersistentString>
          </PersistentStrings>
       </ContextState>
+      <ContextState
+         contextName = "EditorViewModel.blitBuffer():EditorViewModel.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "renderBitmap">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
    </ContextStates>
 </VariablesViewState>

@@ -32,6 +32,8 @@ final class DesertWalk: DuneNode {
     
     
     override func onDisable() {
+        currentTime = 0.0
+        duration = 16.0
         dunesSprite = nil
         dunes2Sprite = nil
         sky = nil
@@ -66,15 +68,12 @@ final class DesertWalk: DuneNode {
     
     
     override func render(_ buffer: PixelBuffer) {
-        drawBackground(buffer)
-        
         guard let dunesSprite = dunesSprite,
-              let dunes2Sprite = dunes2Sprite,
-              let sky = sky else {
+              let dunes2Sprite = dunes2Sprite else {
             return
         }
-        
-        sky.render(buffer)
+
+        drawBackground(buffer)
 
         // Dunes background
         dunesSprite.drawFrame(4, x: 0, y: 78, buffer: buffer, effect: .transform(scale: 0.2))
@@ -93,6 +92,8 @@ final class DesertWalk: DuneNode {
         // Dunes foreground
         dunesSprite.drawFrame(0, x: 210, y: 72, buffer: buffer)
         dunesSprite.drawFrame(4, x: 10, y: 76, buffer: buffer)
+
+        engine.palette.stash()
     }
     
     

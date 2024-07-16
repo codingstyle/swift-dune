@@ -109,10 +109,14 @@ struct GameView: View {
                 }
                 
                 FPSChartView(fpsChartData: viewModel.fpsChartData)
+
+                if !viewModel.palette.isEmpty {
+                    PaletteView(palette: $viewModel.palette)
+                }
             }
             .frame(minHeight: 120)
             .padding()
-
+            
             MetalRenderView()
                 .tag(MetalRenderView.tagID)
                 .frame(width: 640, height: 400)

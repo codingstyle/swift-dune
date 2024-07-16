@@ -66,6 +66,8 @@ final class Worm: DuneNode {
             wormSprite.drawFrame(44, x: 0, y: 74, buffer: contextBuffer)
             
             contextBuffer.tag = 0x0001
+
+            engine.palette.stash()
         }
 
         var fx: SpriteEffect {

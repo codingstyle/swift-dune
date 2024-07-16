@@ -19,21 +19,21 @@ final class PixelBuffer {
     let frameSizeInBytes: Int
     let rowSizeInBytes: Int
     
-    var rawPointer: UnsafeMutablePointer<UInt32>
-    private var clearRawPointer: UnsafeMutablePointer<UInt32>
+    var rawPointer: UnsafeMutablePointer<UInt8>
+    private var clearRawPointer: UnsafeMutablePointer<UInt8>
 
     init(width: Int, height: Int) {
         self.width = width
         self.height = height
         self.frameSize = width * height
-        self.frameSizeInBytes = frameSize * MemoryLayout<UInt32>.size
-        self.rowSizeInBytes = width * MemoryLayout<UInt32>.size
+        self.frameSizeInBytes = frameSize * MemoryLayout<UInt8>.size
+        self.rowSizeInBytes = width * MemoryLayout<UInt8>.size
         
         // Create buffer
-        self.rawPointer = UnsafeMutablePointer<UInt32>.allocate(capacity: frameSize)
+        self.rawPointer = UnsafeMutablePointer<UInt8>.allocate(capacity: frameSize)
         
-        self.clearRawPointer = UnsafeMutablePointer<UInt32>.allocate(capacity: frameSize)
-        self.clearRawPointer.initialize(repeating: 0xFF000000, count: frameSize)
+        self.clearRawPointer = UnsafeMutablePointer<UInt8>.allocate(capacity: frameSize)
+        self.clearRawPointer.initialize(repeating: 0x00, count: frameSize)
     }
     
     deinit {
@@ -55,11 +55,15 @@ final class PixelBuffer {
         switch effect {
         case .fadeIn(let start, let duration, let current):
             let progress = (current - start) / duration
-            Effects.fade(sourceBuffer: self, destBuffer: buffer, progress: progress, offset: y * buffer.rowSizeInBytes)
+            Effects.fade(progress: progress)
+            let size = max(0, (buffer.height - y) * buffer.rowSizeInBytes)
+            self.copyPixels(to: buffer, offset: y * buffer.width, size: size)
             break
         case .fadeOut(let end, let duration, let current):
             let progress = (end - current) / duration
-            Effects.fade(sourceBuffer: self, destBuffer: buffer, progress: progress, offset: y * buffer.rowSizeInBytes)
+            Effects.fade(progress: progress)
+            let size = max(0, (buffer.height - y) * buffer.rowSizeInBytes)
+            self.copyPixels(to: buffer, offset: y * buffer.width, size: size)
             break
         case .flipIn(let start, let duration, let current):
             let progress = (current - start) / duration
@@ -68,6 +72,18 @@ final class PixelBuffer {
         case .flipOut(let end, let duration, let current):
             let progress = (end - current) / duration
             Effects.flip(sourceBuffer: self, destBuffer: buffer, progress: progress, offset: y * buffer.rowSizeInBytes)
+            break
+        case .dissolveIn(let start, let duration, let current):
+            let progress = 1.0 - ((current - start) / duration)
+            let size = max(0, (buffer.height - y) * buffer.rowSizeInBytes)
+            self.copyPixels(to: buffer, offset: y * buffer.width, size: size)
+            Effects.dissolve(destBuffer: buffer, progress: progress, yOffset: y)
+            break
+        case .dissolveOut(let end, let duration, let current):
+            let progress = 1.0 - ((end - current) / duration)
+            let size = max(0, (buffer.height - y) * buffer.rowSizeInBytes)
+            self.copyPixels(to: buffer, offset: y * buffer.width, size: size)
+            Effects.dissolve(destBuffer: buffer, progress: progress, yOffset: y)
             break
         case .pixelate(let end, let duration, let current):
             let progress = (end - current) / duration

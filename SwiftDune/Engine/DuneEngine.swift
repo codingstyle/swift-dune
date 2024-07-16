@@ -29,26 +29,27 @@ final class DuneEngine {
     var isRunning: Bool = false
 
     let frameRate = 60.0
-    let frameSizeInBytes = 256000 // 320 * 200 * 4
-    let rowSizeInBytes = 1280 // 320 * 4
 
     private var gameTime: TimeInterval = 0.0
-
-    private var screenBuffers: [PixelBuffer] = []
-    private var offscreenBufferIndex = 1
-    
     private var currentTime: TimeInterval = 0.0
     private var lastTime: TimeInterval = 0.0
 
     var rootNode: DuneNode = DuneNode("Root")
     
     private var eventObservers: [DuneEventObserver] = []
+
+    var intermediateFrameBuffer: PixelBuffer
     
+    private var screenBuffers: [PixelBuffer] = []
+    private var offscreenBufferIndex = 1
+
     var currentScreenBuffer: PixelBuffer {
         return screenBuffers[offscreenBufferIndex]
     }
     
     init() {
+        intermediateFrameBuffer = PixelBuffer(width: 320, height: 200)
+        
         screenBuffers.append(PixelBuffer(width: 320, height: 200))
         screenBuffers.append(PixelBuffer(width: 320, height: 200))
     }
@@ -65,11 +66,12 @@ final class DuneEngine {
     func reset() {
         isRunning = false
 
-        /*let activeNodes = nodesMap.values.filter { $0.isActive }
+        let activeNodes = rootNode.activeNodes
+        
         activeNodes.forEach { node in
             node.onDisable()
             node.onEnable()
-        }*/
+        }
         
         isRunning = true
     }

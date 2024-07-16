@@ -54,7 +54,7 @@ struct SpriteFrameInfo {
     var height: UInt16 = 0
     var bytesPerRow: UInt16 = 0
     var paletteOffset: UInt8 = 0
-    var paletteIndices: ContiguousArray<Int> = []
+    var paletteIndices: ContiguousArray<UInt8> = []
 }
 
 final class Sprite: Equatable {
@@ -325,7 +325,7 @@ final class Sprite: Equatable {
             frameInfo.realWidth = realWidth
             frameInfo.width = width
             frameInfo.height = height
-            frameInfo.paletteIndices = ContiguousArray<Int>(repeating: 0, count: Int(width) * Int(height))
+            frameInfo.paletteIndices = ContiguousArray<UInt8>(repeating: 0, count: Int(width) * Int(height))
             frameInfo.paletteOffset = paletteOffset
             
             frames.append(frameInfo)
@@ -378,8 +378,8 @@ final class Sprite: Equatable {
             let frameInfo = frames[i]
             
             frames[i].paletteIndices.withUnsafeMutableBytes { ptr in
-                let intPtr = ptr.bindMemory(to: Int.self)
-                computeFramePixels(frameInfo, buffer: intPtr.baseAddress!)
+                let uint8Ptr = ptr.bindMemory(to: UInt8.self)
+                computeFramePixels(frameInfo, buffer: uint8Ptr.baseAddress!)
             }
             i += 1
         }
@@ -613,9 +613,11 @@ final class Sprite: Equatable {
         }
     }
 
+    
     func drawFrame(_ index: UInt16, x: Int16, y: Int16, buffer: PixelBuffer, effect: SpriteEffect = .none) {
         drawFrame(index, x: x, y: y, buffer: buffer, effects: [effect])
     }
+    
     
     func drawFrame(_ index: UInt16, x: Int16, y: Int16, buffer: PixelBuffer, effects: [SpriteEffect]) {
         let bufferWidth = buffer.width
@@ -625,7 +627,7 @@ final class Sprite: Equatable {
         var alignedFrameWidth = Int(frameInfo.width)
         var frameWidth = Int(frameInfo.realWidth)
         var frameHeight = Int(frameInfo.height)
-        var roomPaletteOffset = 0
+        var roomPaletteOffset: Int = 0
         let scaledFrameWidth = alignedFrameWidth
         
         // Effects
@@ -679,8 +681,6 @@ final class Sprite: Equatable {
         let minY1 = max(0, y1)
         let maxY2 = min(y2, bufferHeight)
 
-        let opacityMask = (UInt32(255.0 * Math.clampf(opacity, 0.0, 1.0)) << 24) | 0x00FFFFFF
-        
         var j = minY1
 
         while j < maxY2 {
@@ -695,19 +695,19 @@ final class Sprite: Equatable {
                     continue
                 }
                 
-                paletteIndex += roomPaletteOffset
+                paletteIndex = UInt8(Int(paletteIndex) + roomPaletteOffset)
 
                 let x = flipX ? x2 - (i - x1) - 1 : i
                 let y = flipY ? y2 - (j - y1) - 1 : j
                 
                 let destIndex = y * bufferWidth + x
                 
-                if (engine.palette.rawPointer[paletteIndex] >> 24) == 0x00 {
+                if paletteIndex == 0x00 {
                     i += 1
                     continue
                 }
                 
-                buffer.rawPointer[destIndex] = engine.palette.rawPointer[paletteIndex] & opacityMask
+                buffer.rawPointer[destIndex] = paletteIndex
 
                 i += 1
             }
@@ -717,7 +717,7 @@ final class Sprite: Equatable {
     }
     
     
-    private func computeFramePixels(_ frameInfo: SpriteFrameInfo, buffer: UnsafeMutablePointer<Int>) {
+    private func computeFramePixels(_ frameInfo: SpriteFrameInfo, buffer: UnsafeMutablePointer<UInt8>) {
         // Skip 4 bytes of frame header to access the pixels
         resource.stream!.seek(frameInfo.startOffset + 4)
         
@@ -742,7 +742,7 @@ final class Sprite: Equatable {
             while current < totalSize {
                 pixel = resourceBuffer[Int(current / 2)]
                 
-                let paletteIndex1 = Int(pixel & 0xf) + paletteOffset
+                let paletteIndex1 = UInt8(Int(pixel & 0xf) + paletteOffset)
                 let index1 = getIndex(current)
                 
                 buffer[index1] = paletteIndex1
@@ -752,7 +752,7 @@ final class Sprite: Equatable {
                     break
                 }
                 
-                let paletteIndex2 = Int(pixel >> 4) + paletteOffset
+                let paletteIndex2 = UInt8(Int(pixel >> 4) + paletteOffset)
                 let index2 = getIndex(current)
 
                 buffer[index2] = paletteIndex2
@@ -777,7 +777,7 @@ final class Sprite: Equatable {
                         pixel = resource.stream!.readByte()
                     }
                     
-                    let paletteIndex1 = Int(pixel & 0xf) + paletteOffset
+                    let paletteIndex1 = UInt8(Int(pixel & 0xf) + paletteOffset)
                     let index1 = getIndex(current)
                     buffer[index1] = paletteIndex1
                     
@@ -787,7 +787,7 @@ final class Sprite: Equatable {
                         break
                     }
                     
-                    let paletteIndex2 = Int(pixel >> 4) + paletteOffset
+                    let paletteIndex2 = UInt8(Int(pixel >> 4) + paletteOffset)
                     let index2 = getIndex(current)
 
                     buffer[index2] = paletteIndex2

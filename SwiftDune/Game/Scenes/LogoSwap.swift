@@ -10,14 +10,14 @@ import AppKit
 
 final class LogoSwap: DuneNode {
     private var contextBuffer = PixelBuffer(width: 320, height: 152)
-    private var currentTime: TimeInterval = 5.32
+    private var currentTime: TimeInterval = 0.0
     private var cryoSprite: Sprite?
 
     private let engine = DuneEngine.shared
     
     // Keyframes
-    let cryoLogo = AnimationTimeRange(start: 5.32, end: 6.60)
-    let virginLogo = AnimationTimeRange(start: 6.67, end: 9.35)
+    let cryoLogo = AnimationTimeRange(start: 0.00, end: 1.28)
+    let virginLogo = AnimationTimeRange(start: 1.35, end: 4.03)
 
     init() {
         super.init("LogoSwap")
@@ -26,7 +26,6 @@ final class LogoSwap: DuneNode {
     
     override func onEnable() {
         cryoSprite = engine.loadSprite("CRYO.HSQ")
-        cryoSprite!.setPalette()
     }
 
     
@@ -61,6 +60,7 @@ final class LogoSwap: DuneNode {
             if contextBuffer.tag != 0x0001 {
                 contextBuffer.clearBuffer()
 
+                cryoSprite.setPalette()
                 cryoSprite.drawFrame(0, x: 113, y: 15, buffer: contextBuffer)
                 cryoSprite.drawFrame(1, x: 113, y: 15, buffer: contextBuffer)
                 cryoSprite.drawFrame(2, x: 113, y: 15, buffer: contextBuffer)
@@ -87,11 +87,13 @@ final class LogoSwap: DuneNode {
 
             if contextBuffer.tag != 0x0002 {
                 contextBuffer.clearBuffer()
-                
+                cryoSprite.setPalette()
                 cryoSprite.drawFrame(5, x: 98, y: 13, buffer: contextBuffer)
                 cryoSprite.drawFrame(6, x: 98, y: 118, buffer: contextBuffer)
 
                 contextBuffer.tag = 0x0002
+
+                engine.palette.stash()
             }
 
             var fx: SpriteEffect {

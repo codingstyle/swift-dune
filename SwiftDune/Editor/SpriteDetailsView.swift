@@ -11,32 +11,16 @@ import SwiftUI
 struct PaletteView: View {
     @Binding var palette: [NSColor]
     
-    let paletteColumns = [
-        GridItem(.fixed(16)),
-        GridItem(.fixed(16)),
-        GridItem(.fixed(16)),
-        GridItem(.fixed(16)),
-        GridItem(.fixed(16)),
-        GridItem(.fixed(16)),
-        GridItem(.fixed(16)),
-        GridItem(.fixed(16)),
-        GridItem(.fixed(16)),
-        GridItem(.fixed(16)),
-        GridItem(.fixed(16)),
-        GridItem(.fixed(16)),
-        GridItem(.fixed(16)),
-        GridItem(.fixed(16)),
-        GridItem(.fixed(16)),
-        GridItem(.fixed(16)),
-    ]
-
+    let paletteColumns: [GridItem] = [GridItem](repeating: GridItem(.fixed(12), spacing: 1), count: 16)
+    
     var body: some View {
         LazyVGrid(columns: paletteColumns, alignment: .leading, spacing: 1) {
             ForEach(0..<256) { i in
                 Rectangle()
                     .fill(Color(nsColor: palette[i]))
-                    .frame(width: 16, height: 16)
-                    .border(.black)
+                    .frame(width: 12, height: 8)
+                    .border(.gray)
+                    .padding(0)
             }
         }
     }

@@ -12,8 +12,6 @@ struct Primitives {
      Bresenham line plotting algorithm
      */
     static func drawLine(_ pt1: DunePoint, _ pt2: DunePoint, _ paletteIndex: Int, _ buffer: PixelBuffer, isOffset: Bool = true) {
-        let engine = DuneEngine.shared
-        
         var x0 = Int(pt1.x)
         var y0 = Int(pt1.y)
         let x1 = Int(pt2.x)
@@ -25,12 +23,11 @@ struct Primitives {
         var err = dx + dy
         var e2: Int
         
-        var color: UInt32 = 0xFF0000FF
-        engine.palette.rgbaColor(at: (isOffset ? 127 : 0) + paletteIndex, to: &color)
+        let paletteIndexWithOffset = UInt8((isOffset ? 127 : 0) + paletteIndex)
 
         while true {
             let destIndex = y0 * buffer.width + x0
-            buffer.rawPointer[destIndex] = color
+            buffer.rawPointer[destIndex] = paletteIndexWithOffset
 
             if x0 == x1 && y0 == y1 {
                 break
@@ -210,21 +207,18 @@ struct Primitives {
     
     
     static func fillRect(_ rect: DuneRect, _ paletteIndex: Int, _ buffer: PixelBuffer, isOffset: Bool = true) {
-        let engine = DuneEngine.shared
-
         var y1 = Int(rect.y)
         let y2 = Int(rect.y) + Int(rect.height)
         let x2 = Int(rect.x) + Int(rect.width)
 
-        var color: UInt32 = 0xFF0000FF
-        engine.palette.rgbaColor(at: (isOffset ? 127 : 0) + paletteIndex, to: &color)
-        
+        let paletteIndexWithOffset = UInt8((isOffset ? 127 : 0) + paletteIndex)
+
         while y1 < y2 {
             var x1 = Int(rect.x)
             
             while x1 < x2 {
                 let destIndex = y1 * buffer.width + x1
-                buffer.rawPointer[destIndex] = color
+                buffer.rawPointer[destIndex] = paletteIndexWithOffset
                 
                 x1 += 1
             }

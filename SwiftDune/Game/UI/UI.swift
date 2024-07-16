@@ -32,6 +32,10 @@ final class UI: DuneNode, DuneEventObserver {
     private let menuRect = DuneRect(92, 159, 136, 40)
     private var menuItemBackgroundRect = DuneRect(93, 159, 134, 7)
     private var menuItemTextRect = DuneRect(97, 159, 120, 8)
+    
+    // Colors for text and background
+    private let lightColorIndex: UInt8 = 250
+    private let darkColorIndex: UInt8 = 243
 
     init() {
         super.init("UI")
@@ -110,10 +114,6 @@ final class UI: DuneNode, DuneEventObserver {
             return
         }
         
-        // Colors for text and background
-        let lightColor = engine.palette.color(at: 250)
-        let darkColor = engine.palette.color(at: 243)
-        
         // Commands list
         Primitives.fillRect(menuRect, 250, buffer, isOffset: false)
         
@@ -141,7 +141,7 @@ final class UI: DuneNode, DuneEventObserver {
 
             if i < menuItems.count {
                 let sentence = commands.sentence(at: menuItems[i])
-                font.color = i == selectedMenuIndex ? darkColor : lightColor
+                font.paletteIndex = i == selectedMenuIndex ? darkColorIndex : lightColorIndex
                 font.render(sentence, rect: menuItemTextRect, buffer: buffer, style: .small)
             }
 

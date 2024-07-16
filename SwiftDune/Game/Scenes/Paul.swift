@@ -22,8 +22,8 @@ final class Paul: DuneNode {
     private var chaniSprite: Sprite?
     private var backgroundSprite: Sprite?
     private var skySprite: Sprite?
-    private var fadeIn: Bool = false
-    private var fadeOut: Bool = false
+    private var transitionIn: TransitionEffect = .none
+    private var transitionOut: TransitionEffect = .none
     private var duration: TimeInterval = 8.0
 
     var background: PaulBackground
@@ -47,8 +47,8 @@ final class Paul: DuneNode {
         chaniSprite = nil
         backgroundSprite = nil
         skySprite = nil
-        fadeIn = false
-        fadeOut = false
+        transitionIn = .none
+        transitionOut = .none
         duration = 8.0
         currentTime = 0.0
         contextBuffer.tag = 0x0
@@ -62,12 +62,12 @@ final class Paul: DuneNode {
             backgroundSprite = engine.loadSprite(background.rawValue)
         }
         
-        if let fadeInParam = params["fadeIn"] {
-            self.fadeIn = fadeInParam as! Bool
+        if let transitionInParam = params["transitionIn"] {
+            self.transitionIn = transitionInParam as! TransitionEffect
         }
 
-        if let fadeOutParam = params["fadeOut"] {
-            self.fadeOut = fadeOutParam as! Bool
+        if let transitionOutParam = params["transitionOut"] {
+            self.transitionOut = transitionOutParam as! TransitionEffect
         }
         
         if let durationParam = params["duration"] {
@@ -101,12 +101,17 @@ final class Paul: DuneNode {
                 
                 contextBuffer.copyPixels(from: buffer)
                 contextBuffer.tag = 0x0001
+
+                engine.palette.stash()
             }
             
             var fx: SpriteEffect {
-                if fadeIn {
+                switch transitionIn {
+                case .fadeIn:
                     return .fadeIn(start: 0.0, duration: 2.0, current: currentTime)
-                } else {
+                case .dissolveIn:
+                    return .dissolveIn(start: 0.0, duration: 1.0, current: currentTime)
+                default:
                     return .none
                 }
             }
@@ -133,12 +138,17 @@ final class Paul: DuneNode {
                 paulSprite.setPalette()
                 paulSprite.drawAnimation(0, buffer: contextBuffer, time: currentTime - 2.0 + (0.016 * 40.0))
                 contextBuffer.tag = 0x0002
+
+                engine.palette.stash()
             }
             
             var fx: SpriteEffect {
-                if fadeOut {
+                switch transitionOut {
+                case .fadeOut:
                     return .fadeOut(end: duration, duration: 2.0, current: currentTime)
-                } else {
+                case .dissolveOut:
+                    return .dissolveOut(end: duration, duration: 1.0, current: currentTime)
+                default:
                     return .none
                 }
             }

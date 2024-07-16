@@ -117,6 +117,8 @@ final class DuneTitle: DuneNode {
                 titleSprite.drawFrame(5, x: 0, y: 48, buffer: contextBuffer)
                 
                 contextBuffer.tag = 0x0012
+
+                engine.palette.stash()
             }
             
             var fxEnd: SpriteEffect {

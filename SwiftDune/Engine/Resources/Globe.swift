@@ -301,8 +301,7 @@ final class Globe {
                 
                 let colorIndex1 = self.mapColor(colorMapIndex1)
                 let bufferIndex1 = Int(centerX - x) + (py * buffer.width)
-                let color1 = engine.palette.rawPointer[Int(colorIndex1)]
-                buffer.rawPointer[bufferIndex1] = color1
+                buffer.rawPointer[bufferIndex1] = colorIndex1
  
                 var colorMapIndex2 = dx - cx
                 
@@ -314,8 +313,7 @@ final class Globe {
                 
                 let colorIndex2 = self.mapColor(colorMapIndex2)
                 let bufferIndex2 = Int(centerX + x + 1) + (py * buffer.width)
-                let color2 = engine.palette.rawPointer[Int(colorIndex2)]
-                buffer.rawPointer[bufferIndex2] = color2
+                buffer.rawPointer[bufferIndex2] = colorIndex2
                 
                 x += 1
             }

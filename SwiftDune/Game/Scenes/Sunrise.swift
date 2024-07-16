@@ -22,6 +22,7 @@ final class Sunrise: DuneNode {
     private var currentPaletteIndex = -1
     private var currentPaletteStart = 3
     private var currentPaletteEnd = 3
+    private var paletteSteps: [Int] = []
     private var paletteAnimation: DuneAnimation<Int>?
     
     private var showFort = false
@@ -31,6 +32,8 @@ final class Sunrise: DuneNode {
     private var mode: DuneLightMode = .sunrise
     private var character: DuneCharacter = .none
     private var duration: TimeInterval = 4.0
+
+    private let chaniZoomRect = DuneRect(48, 48, 80, 38)
 
     init() {
         super.init("Sunrise")
@@ -111,28 +114,47 @@ final class Sunrise: DuneNode {
         }
         
         currentTime += elapsedTime
-        
-        if mode == .day {
-            currentPaletteIndex = 3
-        } else {
-            currentPaletteStart = mode == .sunrise ? 0 : 3
-            
-            let delayTime = fadeIn ? 2.0 : 0.0
-            currentPaletteEnd = mode == .sunrise ? 2 : 6
 
-            let index = currentPaletteStart + Int(floor(currentTime - delayTime))
-            currentPaletteIndex = Math.clamp(index, currentPaletteStart, currentPaletteEnd) % 6
+        let delayTime = fadeIn ? 2.0 : 0.0
+
+        if mode == .day {
+            currentPaletteIndex = 0
+            paletteSteps = [ 2 ]
+        } else {
+            paletteSteps = mode == .sunrise ? [ 0, 1, 2 ] : [ 3, 4, 5, 0 ]
             
-            /*if let paletteAnimation = paletteAnimation {
-                let index = paletteAnimation.interpolate(currentTime)
-                currentPaletteIndex = Math.clamp(index, currentPaletteStart, currentPaletteEnd) % 6
-            }*/
+            let index = Int(floor(currentTime - delayTime))
+            currentPaletteIndex = Math.clamp(index, 0, paletteSteps.count - 1)
+        }
+        
+        // Update palette
+        guard let sunriseSprite = sunriseSprite else {
+            return
+        }
+        
+        if currentPaletteIndex < paletteSteps.count - 1 && currentTime > delayTime {
+            let blendProgress = fmod(currentTime, 1.0)
+            sunriseSprite.setAlternatePalette(paletteSteps[currentPaletteIndex + 1], paletteSteps[currentPaletteIndex], blend: blendProgress)
+        } else {
+            sunriseSprite.setAlternatePalette(paletteSteps[currentPaletteIndex])
+            engine.palette.stash()
         }
     }
     
     
     override func render(_ buffer: PixelBuffer) {
-        drawDesertBackground(buffer: contextBuffer, effect: .none)
+        let intermediateFrameBuffer = engine.intermediateFrameBuffer
+        
+        intermediateFrameBuffer.clearBuffer()
+        
+        if contextBuffer.tag != 0x0001 {
+            drawDesertBackground(buffer: contextBuffer, effect: .none)
+            contextBuffer.tag = 0x0001
+            
+            engine.palette.stash()
+        }
+        
+        contextBuffer.render(to: intermediateFrameBuffer, effect: .none)
 
         if character == .chani {
             guard let chaniSprite = chaniSprite else {
@@ -140,14 +162,15 @@ final class Sunrise: DuneNode {
             }
             
             chaniSprite.setPalette()
+            engine.palette.stash()
 
             if zoomOut && currentTime < 2.0 {
-                chaniSprite.drawAnimation(0, buffer: contextBuffer, time: 0.0)
+                chaniSprite.drawAnimation(0, buffer: intermediateFrameBuffer, time: 0.0)
             } else {
                 if currentTime < 2.0 {
-                    chaniSprite.drawAnimation(1, buffer: contextBuffer, time: currentTime)
+                    chaniSprite.drawAnimation(1, buffer: intermediateFrameBuffer, time: currentTime)
                 } else {
-                    chaniSprite.drawAnimation(2, buffer: contextBuffer, time: currentTime)
+                    chaniSprite.drawAnimation(2, buffer: intermediateFrameBuffer, time: currentTime)
                 }
             }
         }
@@ -159,14 +182,15 @@ final class Sunrise: DuneNode {
             }
             
             villageSprite.setPalette()
-            villageSprite.drawFrame(24, x: 140, y: 3, buffer: contextBuffer)
+            villageSprite.drawFrame(24, x: 140, y: 3, buffer: intermediateFrameBuffer)
             
             lietSprite.setPalette()
-            
+            engine.palette.stash()
+
             if currentTime < 2.0 {
-                lietSprite.drawAnimation(1, buffer: contextBuffer, time: currentTime)
+                lietSprite.drawAnimation(1, buffer: intermediateFrameBuffer, time: currentTime)
             } else {
-                lietSprite.drawAnimation(2, buffer: contextBuffer, time: currentTime)
+                lietSprite.drawAnimation(2, buffer: intermediateFrameBuffer, time: currentTime)
             }
         }
         
@@ -182,17 +206,16 @@ final class Sunrise: DuneNode {
 
             if zoomOut {
                 if currentTime < 2.0 {
-                    return .zoom(start: 0.0, duration: 2.0, current: currentTime, from: DuneRect(48, 48, 80, 38), to: DuneRect(48, 48, 80, 38))
+                    return .zoom(start: 0.0, duration: 2.0, current: currentTime, from: chaniZoomRect, to: chaniZoomRect)
                 } else if currentTime >= 2.0 && currentTime <= 2.25 {
-                    return .zoom(start: 2.0, duration: 0.25, current: currentTime, from: DuneRect(48, 48, 80, 38), to: DuneRect.fullScreen)
+                    return .zoom(start: 2.0, duration: 0.25, current: currentTime, from: chaniZoomRect, to: DuneRect.fullScreen)
                 }
             }
 
             return .none
         }
 
-        contextBuffer.render(to: buffer, effect: fx)
-        contextBuffer.tag = 0x0001
+        intermediateFrameBuffer.render(to: buffer, effect: fx)
     }
     
     
@@ -201,19 +224,6 @@ final class Sunrise: DuneNode {
             return
         }
         
-        if currentPaletteIndex != -1 {
-            let delayTime = fadeIn ? 2.0 : 0.0
-
-            if currentTime - delayTime < CGFloat(currentPaletteEnd - currentPaletteStart + 1) {
-                let blendProgress = fmod(currentTime, 1.0)
-                sunriseSprite.setAlternatePalette(currentPaletteIndex, max(0, currentPaletteIndex - 1), blend: blendProgress)
-            } else {
-                sunriseSprite.setAlternatePalette(currentPaletteIndex)
-            }
-        } else {
-            sunriseSprite.setPalette()
-        }
-
         sunriseSprite.drawFrame(2, x: 0, y: 0, buffer: buffer, effect: effect)
         sunriseSprite.drawFrame(3, x: 0, y: 25, buffer: buffer, effect: effect)
         sunriseSprite.drawFrame(4, x: 0, y: 50, buffer: buffer, effect: effect)

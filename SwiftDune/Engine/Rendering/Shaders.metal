@@ -25,8 +25,9 @@ vertex VertexOut vertex_main(VertexIn in [[stage_in]]) {
     return out;
 }
 
-fragment float4 fragment_main(VertexOut in [[stage_in]],
-                              texture2d<float> texture [[texture(0)]]) {
+// Texture sampling uses nearest neighbor to ensure sharp pixels when upscaled,
+// in order to get a good looking VGA game
+fragment float4 fragment_main(VertexOut in [[stage_in]], texture2d<float> texture [[texture(0)]]) {
     constexpr sampler textureSampler (mag_filter::nearest, min_filter::nearest);
     return texture.sample(textureSampler, in.texCoord);
 }

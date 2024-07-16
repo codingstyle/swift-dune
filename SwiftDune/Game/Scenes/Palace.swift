@@ -116,6 +116,9 @@ final class Palace: DuneNode {
             return
         }
         
+        let intermediateFrameBuffer = engine.intermediateFrameBuffer
+        
+        intermediateFrameBuffer.clearBuffer()
         buffer.clearBuffer()
 
         // TODO: improve this according to day time
@@ -137,20 +140,25 @@ final class Palace: DuneNode {
         // Apply sky gradient with blue palette
         if currentRoom == .porch || currentRoom == .balcony {
             if contextBuffer.tag != 0x0001 {
-                sky.render(buffer, width: 160, at: 160)
+                sky.render(contextBuffer, width: 320, at: 0, type: .narrow)
                 palaceScenery.drawRoom(currentRoom.rawValue, buffer: contextBuffer)
                 contextBuffer.tag = 0x0001
             }
-            
-            contextBuffer.render(to: buffer, effect: fx)
+
+            contextBuffer.render(to: intermediateFrameBuffer, effect: fx)
         } else if currentRoom == .stairs {
-            sky.render(buffer, width: 200, at: 0, type: .large)
-            
-            palaceScenery.drawRoom(currentRoom.rawValue, buffer: buffer)
+            sky.render(intermediateFrameBuffer, width: 200, at: 0, type: .large)
+            palaceScenery.drawRoom(currentRoom.rawValue, buffer: intermediateFrameBuffer)
         }
         
         if let characterSprite = characterSprite {
-            characterSprite.drawAnimation(0, buffer: buffer, time: currentTime)
+            characterSprite.drawAnimation(0, buffer: intermediateFrameBuffer, time: currentTime)
         }
+        
+        if currentTime < 0.1 {
+            engine.palette.stash()
+        }
+
+        intermediateFrameBuffer.render(to: buffer, effect: .none)
     }
 }

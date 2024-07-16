@@ -366,7 +366,7 @@ final class Video {
                 destY = flipY ? 199 - (frameY + j) : (frameY + j)
                 destIndex = destY * 320 + destX
 
-                buffer.rawPointer[destIndex] = engine.palette.rawPointer[Int(paletteIndex)]
+                buffer.rawPointer[destIndex] = paletteIndex
                 
                 i += 1
             }

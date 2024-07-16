@@ -267,6 +267,65 @@ final class Scenery {
                     let drawCommand = resource.stream!.readByte()
 
                     if (drawCommand >> 6) == 2 {
+                        /*
+                        // V2 Polygon code — WIP
+                        let hGradient = resource.stream!.readByte()
+                        let vGradient = resource.stream!.readByte()
+                        
+                        let startX = resource.stream!.readUInt16LE()
+                        let startY = resource.stream!.readUInt16LE()
+
+                        // Part 1
+                        var x: UInt16 = 0
+                        var y: UInt16 = 0
+                        var lastX = startX & 0x3FFF
+                        var lastY = startY
+                        
+                        repeat {
+                            x = resource.stream!.readUInt16LE()
+                            y = resource.stream!.readUInt16LE()
+                            
+                            // add_gradient_section(lastX, lastY, x & 0x3FFF, y, polygonSideDown)
+                            
+                            lastX = x & 0x3FFF
+                            lastY = y
+                        } while (x & 0x4000) == 0
+                        
+                        // Part 2
+                        let finalX = lastX
+                        let finalY = lastY
+                        
+                        lastX = startX
+                        lastY = startY
+                        
+                        if (x & 0x8000) == 0 {
+                            repeat {
+                                x = resource.stream!.readUInt16LE()
+                                y = resource.stream!.readUInt16LE()
+                                
+                                // add_gradient_section(lastX, lastY, x & 0x3FFF, y, polygonSideUp)
+                                
+                                lastX = x & 0x3FFF
+                                lastY = y
+                            } while (x & 0x8000) == 0
+                        }
+
+                        // add_gradient_section(lastX, lastY, finalX, finalY, polygonSideUp)
+                        
+                        y = 0
+                        
+                        while y != finalY - startY {
+                            y += 1
+                            
+                            let w = polygonSideDown[startY + y] - polygonSideUp[startY + y]
+                            
+                            if w {
+                                // drawNoise(polygonSideUp[y], startY + w, (drawCommand & 0xFF) << 8, 0, 0, 2)
+                            }
+                        }
+                        */
+                        
+                        
                         // Polygon
                         let horizontalEffect = resource.stream!.readByte()
                         let verticalEffect = resource.stream!.readByte()

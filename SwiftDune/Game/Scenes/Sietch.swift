@@ -44,6 +44,8 @@ final class Sietch: DuneNode {
     private var waterRadiusAnimation: DuneAnimation<DunePoint>?
     private let waterCenter = DunePoint(175, 95)
     
+    private var fadeIn: Bool = false
+    
     init() {
         super.init("Sietch")
     }
@@ -81,6 +83,7 @@ final class Sietch: DuneNode {
         character = .none
         waterRadiusAnimation = nil
         waterRadius = DunePoint(15, 3)
+        fadeIn = false
     }
     
     
@@ -99,6 +102,10 @@ final class Sietch: DuneNode {
         
         if let character = params["character"] {
             self.character = character as! DuneCharacter
+        }
+
+        if let fadeIn = params["fadeIn"] {
+            self.fadeIn = fadeIn as! Bool
         }
     }
     
@@ -123,7 +130,9 @@ final class Sietch: DuneNode {
             return
         }
         
-        buffer.clearBuffer()
+        let intermediateFrameBuffer = engine.intermediateFrameBuffer
+        
+        intermediateFrameBuffer.clearBuffer()
         
         if currentRoom == .entrance {
             if contextBuffer.tag != 0x0001 {
@@ -140,20 +149,35 @@ final class Sietch: DuneNode {
                 contextBuffer.tag = 0x0001
             }
             
-            contextBuffer.render(to: buffer, effect: .none)
+            contextBuffer.render(to: intermediateFrameBuffer, effect: .none)
         }
         
-        sietchScenery.drawRoom(currentRoom.rawValue, buffer: buffer)
+        sietchScenery.drawRoom(currentRoom.rawValue, buffer: intermediateFrameBuffer)
         
         
         // Water drop animation
         if currentRoom == .water {
-            Primitives.drawEllipse(waterCenter, waterRadius, buffer)
+            Primitives.drawEllipse(waterCenter, waterRadius, intermediateFrameBuffer)
         }
         
         // Character rendering
         if let characterSprite = characterSprite {
-            characterSprite.drawAnimation(0, buffer: buffer, time: currentTime)
+            characterSprite.drawAnimation(0, buffer: intermediateFrameBuffer, time: currentTime)
         }
+        
+        var fx: SpriteEffect {
+            if fadeIn && currentTime < 2.0 {
+                return .fadeIn(start: 0.0, duration: 2.0, current: currentTime)
+            }
+            
+            return .none
+        }
+
+        if currentTime < 0.1 {
+            engine.palette.stash()
+        }
+        
+        buffer.clearBuffer()
+        intermediateFrameBuffer.render(to: buffer, effect: fx)
     }
 }

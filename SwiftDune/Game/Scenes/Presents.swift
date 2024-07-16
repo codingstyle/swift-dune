@@ -70,6 +70,7 @@ final class Presents: DuneNode {
                 introSprite.drawFrame(7, x: 114, y: 90, buffer: contextBuffer)
 
                 contextBuffer.tag = 0x0003
+                engine.palette.stash()
             }
 
             var fx: SpriteEffect {
@@ -90,11 +91,14 @@ final class Presents: DuneNode {
         if animation(is: cryoPresents) {
             if contextBuffer.tag != 0x0004 {
                 contextBuffer.clearBuffer()
+                introSprite.setPalette()
+                
                 introSprite.drawFrame(8, x: 76, y: 43, buffer: contextBuffer)
                 introSprite.drawFrame(9, x: 132, y: 71, buffer: contextBuffer)
                 introSprite.drawFrame(10, x: 14, y: 96, buffer: contextBuffer)
 
                 contextBuffer.tag = 0x0004
+                engine.palette.stash()
             }
             
             var fx: SpriteEffect {

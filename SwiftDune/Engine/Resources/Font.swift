@@ -34,10 +34,9 @@ struct SizedText {
 
 final class GameFont {
     private var resource: Resource
-    
     private var charWidths: [UInt8]
 
-    var color: DuneColor = .white
+    var paletteIndex: UInt8 = 128
     
     init() {
         self.resource = Resource("DUNECHAR.HSQ")
@@ -129,8 +128,6 @@ final class GameFont {
         let currentY = Int(y)
         let charHeight: UInt32 = style == .normal ? 9 : 7
         let offset: UInt32 = style == .normal ? 256 : 1408
-        var argbColor: UInt32 = color.asARGB
-        
         var spaces: [Int] = []
         
         if alignment == .justify {
@@ -189,7 +186,7 @@ final class GameFont {
                         let destOffset = (currentY + charY) * buffer.width + (currentX + charX)
 
                         if charLine & 0x80 > 0 {
-                            memcpy(buffer.rawPointer + destOffset, &argbColor, 4)
+                            buffer.rawPointer[destOffset] = paletteIndex
                         }
 
                         charLine <<= 1

@@ -19,6 +19,7 @@ struct GameFPSData: Identifiable {
 final class GameViewModel: ObservableObject, DuneEngineDelegate {
     @Published var isRunning = false
     @Published var fpsChartData: [GameFPSData] = []
+    @Published var palette: [NSColor] = [NSColor](repeating: NSColor.clear, count: 256)
     
     let engine = DuneEngine.shared
 
@@ -41,6 +42,8 @@ final class GameViewModel: ObservableObject, DuneEngineDelegate {
     
     func renderDidFinish() {
         DispatchQueue.main.sync {
+            palette = engine.palette.allColors()
+            
             fpsChartData = engine.logger.getLastMetrics().map {
                 GameFPSData(time: $0, fps: $1)
             }
