@@ -144,10 +144,10 @@ final class Paul: DuneNode {
             
             var fx: SpriteEffect {
                 switch transitionOut {
-                case .fadeOut:
-                    return .fadeOut(end: duration, duration: 2.0, current: currentTime)
-                case .dissolveOut:
-                    return .dissolveOut(end: duration, duration: 1.0, current: currentTime)
+                case .fadeOut(let fadeDuration):
+                    return .fadeOut(end: duration, duration: fadeDuration, current: currentTime)
+                case .dissolveOut(let dissolveDuration):
+                    return .dissolveOut(end: duration, duration: dissolveDuration, current: currentTime)
                 default:
                     return .none
                 }

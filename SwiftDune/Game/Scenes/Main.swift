@@ -27,7 +27,7 @@ final class Main: DuneNode, DuneEventObserver {
     override func onEnable() {
         engine.addEventObserver(self)
         
-        //queue.enqueue("Logo")
+        queue.enqueue("Logo")
         queue.enqueue("Intro")
         queue.enqueue("Credits")
         queue.enqueue("Prologue")

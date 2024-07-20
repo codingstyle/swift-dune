@@ -26,8 +26,10 @@ final class Sunrise: DuneNode {
     private var paletteAnimation: DuneAnimation<Int>?
     
     private var showFort = false
-    private var fadeIn = false
-    private var fadeOut = false
+    
+    private var transitionIn: TransitionEffect = .none
+    private var transitionOut: TransitionEffect = .none
+    
     private var zoomOut = false
     private var mode: DuneLightMode = .sunrise
     private var character: DuneCharacter = .none
@@ -47,10 +49,17 @@ final class Sunrise: DuneNode {
         sunriseSprite = engine.loadSprite("SUNRS.HSQ")
         sunriseSprite!.setPalette()
         
+        let startTime = switch transitionIn {
+        case .fadeIn(let fadeDuration):
+            fadeDuration
+        default:
+            0.0
+        }
+        
         paletteAnimation = DuneAnimation<Int>(
             from: mode == .sunrise ? 0 : 3,
             to: mode == .sunrise ? 2 : 6,
-            startTime: fadeIn ? 2.0 : 0.0,
+            startTime: startTime,
             endTime: duration
         )
     }
@@ -69,8 +78,8 @@ final class Sunrise: DuneNode {
         duration = 4.0
         showFort = false
         zoomOut = false
-        fadeIn = false
-        fadeOut = false
+        transitionIn = .none
+        transitionOut = .none
         mode = .day
         paletteAnimation = nil
     }
@@ -93,12 +102,13 @@ final class Sunrise: DuneNode {
             self.character = character as! DuneCharacter
         }
 
-        if let fadeIn = params["fadeIn"] {
-            self.fadeIn = fadeIn as! Bool
+        
+        if let transitionInParam = params["transitionIn"] {
+            self.transitionIn = transitionInParam as! TransitionEffect
         }
 
-        if let fadeOut = params["fadeOut"] {
-            self.fadeOut = fadeOut as! Bool
+        if let transitionOutParam = params["transitionOut"] {
+            self.transitionOut = transitionOutParam as! TransitionEffect
         }
 
         if let zoomOut = params["zoomOut"] {
@@ -115,13 +125,18 @@ final class Sunrise: DuneNode {
         
         currentTime += elapsedTime
 
-        let delayTime = fadeIn ? 2.0 : 0.0
+        let delayTime = switch transitionIn {
+        case .fadeIn(let fadeDuration):
+            fadeDuration
+        default:
+            0.0
+        }
 
         if mode == .day {
             currentPaletteIndex = 0
             paletteSteps = [ 2 ]
         } else {
-            paletteSteps = mode == .sunrise ? [ 0, 1, 2 ] : [ 3, 4, 5, 0 ]
+            paletteSteps = mode == .sunrise ? [ 0, 1, 2 ] : [ 3, 4, 5 ]
             
             let index = Int(floor(currentTime - delayTime))
             currentPaletteIndex = Math.clamp(index, 0, paletteSteps.count - 1)
@@ -196,19 +211,29 @@ final class Sunrise: DuneNode {
         
         
         var fx: SpriteEffect {
-            if fadeIn && currentTime < 2.0 {
-                return .fadeIn(start: 0.0, duration: 2.0, current: currentTime)
-            }
-
-            if fadeOut && currentTime > duration - 2.0 {
-                return .fadeOut(end: duration, duration: 2.0, current: currentTime)
-            }
-
             if zoomOut {
                 if currentTime < 2.0 {
                     return .zoom(start: 0.0, duration: 2.0, current: currentTime, from: chaniZoomRect, to: chaniZoomRect)
                 } else if currentTime >= 2.0 && currentTime <= 2.25 {
                     return .zoom(start: 2.0, duration: 0.25, current: currentTime, from: chaniZoomRect, to: DuneRect.fullScreen)
+                }
+            }
+
+            if currentTime < 2.0 {
+                switch transitionIn {
+                case .fadeIn(let fadeDuration):
+                    return .fadeIn(start: 0.0, duration: fadeDuration, current: currentTime)
+                default:
+                    return .none
+                }
+            }
+
+            if currentTime > duration - 2.0 {
+                switch transitionOut {
+                case .fadeOut(let fadeDuration):
+                    return .fadeOut(end: duration, duration: fadeDuration, current: currentTime)
+                default:
+                    return .none
                 }
             }
 

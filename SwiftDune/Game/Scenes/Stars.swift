@@ -27,8 +27,7 @@ final class Stars: DuneNode {
     private var currentTime: TimeInterval = 0.0
     private var duration: TimeInterval = 0.0
     private var mode: StarsMode = .stars
-    private var fadeIn: Bool = false
-    private var fadeInDuration: TimeInterval = 0.0
+    private var transitionIn: TransitionEffect = .none
 
     init() {
         super.init("Stars")
@@ -50,10 +49,9 @@ final class Stars: DuneNode {
         starsSprite = nil
         globe = nil
         currentTime = 0.0
-        fadeIn = false
         mode = .stars
-        fadeInDuration = 0.0
         duration = 0.0
+        transitionIn = .none
     }
     
     
@@ -62,12 +60,8 @@ final class Stars: DuneNode {
             self.mode = modeParam as! StarsMode
         }
 
-        if let fadeInParam = params["fadeIn"] {
-            self.fadeIn = fadeInParam as! Bool
-        }
-
-        if let fadeInDurationParam = params["fadeInDuration"] {
-            self.fadeInDuration = fadeInDurationParam as! TimeInterval
+        if let transitionInParam = params["transitionIn"] {
+            self.transitionIn = transitionInParam as! TransitionEffect
         }
 
         if let durationParam = params["duration"] {
@@ -126,9 +120,10 @@ final class Stars: DuneNode {
         }
         
         var fx: SpriteEffect {
-            if fadeIn {
-                return .fadeIn(start: 0.0, duration: fadeInDuration, current: currentTime)
-            } else {
+            switch transitionIn {
+            case .fadeIn(let fadeDuration):
+                return .fadeIn(start: 0.0, duration: fadeDuration, current: currentTime)
+            default:
                 return .none
             }
         }
@@ -168,9 +163,10 @@ final class Stars: DuneNode {
         }
 
         var fx: SpriteEffect {
-            if fadeIn {
-                return .fadeIn(start: 0.0, duration: fadeInDuration, current: currentTime)
-            } else {
+            switch transitionIn {
+            case .fadeIn(let fadeDuration):
+                return .fadeIn(start: 0.0, duration: fadeDuration, current: currentTime)
+            default:
                 return .none
             }
         }

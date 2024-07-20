@@ -10,12 +10,12 @@ import Foundation
 
 enum TransitionEffect {
     case none
-    case fadeIn
-    case fadeOut
-    case flipIn
-    case flipOut
-    case dissolveIn
-    case dissolveOut
+    case fadeIn(duration: Double)
+    case fadeOut(duration: Double)
+    case flipIn(duration: Double)
+    case flipOut(duration: Double)
+    case dissolveIn(duration: Double)
+    case dissolveOut(duration: Double)
     case pixelate
     case zoom
 }

@@ -42,6 +42,9 @@ final class Palace: DuneNode {
     private var zoomRect: DuneRect?
     private var dayMode: DuneLightMode = .day
     
+    private var transitionIn: TransitionEffect = .none
+    private var transitionOut: TransitionEffect = .none
+
     init() {
         super.init("Palace")
     }
@@ -98,6 +101,14 @@ final class Palace: DuneNode {
         if let dayMode = params["dayMode"] {
             self.dayMode = dayMode as! DuneLightMode
         }
+        
+        if let transitionInParam = params["transitionIn"] {
+            self.transitionIn = transitionInParam as! TransitionEffect
+        }
+
+        if let transitionOutParam = params["transitionOut"] {
+            self.transitionOut = transitionOutParam as! TransitionEffect
+        }
     }
     
     
@@ -122,7 +133,7 @@ final class Palace: DuneNode {
         buffer.clearBuffer()
 
         // TODO: improve this according to day time
-        if currentRoom == .stairs {
+        if currentRoom == .stairs && dayMode == .sunrise {
             let sunriseProgress = Math.clampf((currentTime - 1.0) / 2.0, 0.0, 1.0)
             sky.lightMode = .custom(index: 16, prevIndex: 3, blend: sunriseProgress)
         } else {
@@ -158,7 +169,16 @@ final class Palace: DuneNode {
         if currentTime < 0.1 {
             engine.palette.stash()
         }
+        
+        var fxTransition: SpriteEffect {
+            switch transitionOut {
+            case .dissolveOut:
+                return .dissolveOut(end: duration, duration: 0.3, current: currentTime)
+            default:
+                return .none
+            }
+        }
 
-        intermediateFrameBuffer.render(to: buffer, effect: .none)
+        intermediateFrameBuffer.render(to: buffer, effect: fxTransition)
     }
 }

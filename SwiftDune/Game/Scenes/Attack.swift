@@ -15,6 +15,9 @@ final class Attack: DuneNode {
     private var duration: TimeInterval = 10.0
     private var currentTime: TimeInterval = 0.0
     
+    private var transitionIn: TransitionEffect = .none
+    private var transitionOut: TransitionEffect = .none
+    
     init() {
         super.init("Attack")
     }
@@ -28,6 +31,18 @@ final class Attack: DuneNode {
     override func onDisable() {
         attackSprite = nil
         currentTime = 0.0
+        transitionIn = .none
+        transitionOut = .none
+    }
+    
+    override func onParamsChange() {        
+        if let transitionInParam = params["transitionIn"] {
+            self.transitionIn = transitionInParam as! TransitionEffect
+        }
+
+        if let transitionOutParam = params["transitionOut"] {
+            self.transitionOut = transitionOutParam as! TransitionEffect
+        }
     }
     
     
@@ -48,6 +63,30 @@ final class Attack: DuneNode {
         drawBackground(buffer)
         
         // TODO: render projectiles
+        
+        var fx: SpriteEffect {
+            if currentTime < 2.0 {
+                switch transitionIn {
+                case .dissolveIn(let fxDuration):
+                    return .dissolveIn(start: 0.0, duration: fxDuration, current: currentTime)
+                default:
+                    return .none
+                }
+            }
+            
+            if currentTime > duration - 2.0 {
+                switch transitionOut {
+                case .dissolveOut(let fxDuration):
+                    return .dissolveOut(end: duration, duration: fxDuration, current: currentTime)
+                default:
+                    return .none
+                }
+            }
+            
+            return .none
+        }
+        
+        contextBuffer.render(to: buffer, effect: fx)
     }
     
     
@@ -56,18 +95,17 @@ final class Attack: DuneNode {
             return
         }
         
-        if contextBuffer.tag != 0x01 {
-            contextBuffer.clearBuffer()
-            
-            for x: Int16 in stride(from: 0, to: 320, by: 40) {
-                attackSprite.drawFrame(2, x: x, y: 0, buffer: contextBuffer)
-                attackSprite.drawFrame(3, x: x, y: 81, buffer: contextBuffer)
-            }
-
-            attackSprite.drawFrame(49, x: 0, y: 76, buffer: contextBuffer)
-            attackSprite.drawFrame(1, x: 0, y: 134, buffer: contextBuffer)
-        }
+        contextBuffer.clearBuffer()
         
-        contextBuffer.copyPixels(to: buffer)
+        var x: Int16 = 0
+        
+        while x < 320 {
+            attackSprite.drawFrame(2, x: x, y: 0, buffer: contextBuffer)
+            attackSprite.drawFrame(3, x: x, y: 81, buffer: contextBuffer)
+            x += 40
+        }
+
+        attackSprite.drawFrame(49, x: 0, y: 76, buffer: contextBuffer)
+        attackSprite.drawFrame(1, x: 0, y: 134, buffer: contextBuffer)
     }
 }

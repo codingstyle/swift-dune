@@ -14,6 +14,8 @@ final class Baron: DuneNode {
     private var backgroundSprite: Sprite?
     private var duration: TimeInterval = 3.0
     private var showSardaukar: Bool = false
+    private var transitionIn: TransitionEffect = .none
+    private var transitionOut: TransitionEffect = .none
     
     private var currentTime: TimeInterval = 0.0
     private let engine = DuneEngine.shared
@@ -35,6 +37,8 @@ final class Baron: DuneNode {
         currentTime = 0.0
         duration = 3.0
         showSardaukar = false
+        transitionIn = .none
+        transitionOut = .none
     }
     
     
@@ -46,6 +50,14 @@ final class Baron: DuneNode {
         
         if let sardaukarParam = params["sardaukar"] {
             self.showSardaukar = sardaukarParam as! Bool
+        }
+        
+        if let transitionInParam = params["transitionIn"] {
+            self.transitionIn = transitionInParam as! TransitionEffect
+        }
+
+        if let transitionOutParam = params["transitionOut"] {
+            self.transitionOut = transitionOutParam as! TransitionEffect
         }
     }
     
@@ -64,14 +76,38 @@ final class Baron: DuneNode {
             return
         }
         
-        drawBackground(buffer: buffer)
+        drawBackground(buffer: contextBuffer)
         
         baronSprite.setPalette()
-        baronSprite.drawAnimation(0, buffer: buffer, time: currentTime, offset: DunePoint(83, 0))
+        baronSprite.drawAnimation(0, buffer: contextBuffer, time: currentTime, offset: DunePoint(83, 0))
         
         if showSardaukar {
-            drawAnimatedSardaukars(buffer: buffer, time: currentTime)
+            drawAnimatedSardaukars(buffer: contextBuffer, time: currentTime)
         }
+        
+        var fx: SpriteEffect {
+            if currentTime < 2.0 {
+                switch transitionIn {
+                case .dissolveIn(let fxDuration):
+                    return .dissolveIn(start: 0.0, duration: fxDuration, current: currentTime)
+                default:
+                    return .none
+                }
+            }
+            
+            if currentTime > duration - 2.0 {
+                switch transitionOut {
+                case .dissolveOut(let fxDuration):
+                    return .dissolveOut(end: duration, duration: fxDuration, current: currentTime)
+                default:
+                    return .none
+                }
+            }
+            
+            return .none
+        }
+        
+        contextBuffer.render(to: buffer, effect: fx)
     }
     
     

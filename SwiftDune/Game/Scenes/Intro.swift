@@ -42,21 +42,21 @@ final class Intro: DuneNode, DuneEventObserver {
     }
 
     override func onEnable() {
-        /*queue.enqueue(DuneNodeParams("LogoSwap"))
+        queue.enqueue(DuneNodeParams("LogoSwap"))
         queue.enqueue(DuneNodeParams("Presents"))
-        queue.enqueue(DuneNodeParams("Stars", [ "mode": StarsMode.planets, "fadeIn": true, "fadeInDuration": 7.48, "duration": 9.34 ]))
+        queue.enqueue(DuneNodeParams("Stars", [ "mode": StarsMode.planets, "transitionIn": TransitionEffect.fadeIn(duration: 7.34), "duration": 9.34 ]))
         queue.enqueue(DuneNodeParams("Stars", [ "mode": StarsMode.planetsPan, "duration": 2.55 ]))
         queue.enqueue(DuneNodeParams("Stars", [ "mode": StarsMode.arrakisZoom, "duration": 0.5 ]))
         queue.enqueue(DuneNodeParams("DuneTitle"))
         queue.enqueue(DuneNodeParams("Worm"))
-        queue.enqueue(DuneNodeParams("Paul", [ "background": PaulBackground.red, "transitionIn": TransitionEffect.fadeIn, "transitionOut": TransitionEffect.fadeOut]))
-        queue.enqueue(DuneNodeParams("Sunrise", [ "mode": DuneLightMode.sunrise, "fadeIn": true, "duration" : 8.0 ]))
+        queue.enqueue(DuneNodeParams("Paul", [ "background": PaulBackground.red, "transitionIn": TransitionEffect.fadeIn(duration: 2.0), "transitionOut": TransitionEffect.fadeOut(duration: 2.0) ]))
+        queue.enqueue(DuneNodeParams("Sunrise", [ "mode": DuneLightMode.sunrise, "transitionIn": TransitionEffect.fadeIn(duration: 2.0), "duration" : 8.0 ]))
         queue.enqueue(DuneNodeParams("Sunrise", [ "mode": DuneLightMode.day, "zoomOut": true, "character": DuneCharacter.chani, "duration": 2.5 ]))
         queue.enqueue(DuneNodeParams("Sunrise", [ "mode": DuneLightMode.day, "character": DuneCharacter.chani ]))
         queue.enqueue(DuneNodeParams("Sunrise", [ "mode": DuneLightMode.day, "character": DuneCharacter.liet ]))
         queue.enqueue(DuneNodeParams("Sunrise", [ "mode": DuneLightMode.day, "character": DuneCharacter.chani, "duration": 2.0 ]))
-        queue.enqueue(DuneNodeParams("Paul", [ "background": PaulBackground.desert, "transitionOut": TransitionEffect.fadeOut, "duration": 4.0 ]))
-        queue.enqueue(DuneNodeParams("Sietch", [ "room": SietchRoom.room8, "duration": 4.0, "fadeIn": true, "markers": [
+        queue.enqueue(DuneNodeParams("Paul", [ "background": PaulBackground.desert, "transitionOut": TransitionEffect.fadeOut(duration: 2.0), "duration": 4.0 ]))
+        queue.enqueue(DuneNodeParams("Sietch", [ "room": SietchRoom.room8, "duration": 4.0, "transitionIn": TransitionEffect.fadeIn(duration: 2.0), "markers": [
             6: RoomCharacter.harah,
             9: RoomCharacter.stilgar
         ] ] ))
@@ -65,8 +65,8 @@ final class Intro: DuneNode, DuneEventObserver {
             6: RoomCharacter.harah,
             9: RoomCharacter.stilgar
         ]]))
-        queue.enqueue(DuneNodeParams("Sietch", [ "room": SietchRoom.water, "duration": 4.0, "character": DuneCharacter.stilgar ]))
-        queue.enqueue(DuneNodeParams("DesertWalk", [ "dayMode": DuneLightMode.day, "duration": 2.0 ]))
+        queue.enqueue(DuneNodeParams("Sietch", [ "room": SietchRoom.water, "duration": 4.0, "character": DuneCharacter.stilgar, "transitionOut": TransitionEffect.dissolveOut(duration: 0.3) ]))
+        queue.enqueue(DuneNodeParams("DesertWalk", [ "dayMode": DuneLightMode.day, "duration": 2.0, "transitionIn": TransitionEffect.dissolveIn(duration: 0.3) ]))
         queue.enqueue(DuneNodeParams("Palace", [ "room": PalaceRoom.stairs, "duration": 2.0 ]))
         queue.enqueue(DuneNodeParams("Palace", [ "room": PalaceRoom.balcony, "duration": 2.0, "markers": [
             4: RoomCharacter.gurney,
@@ -76,17 +76,17 @@ final class Intro: DuneNode, DuneEventObserver {
             8: RoomCharacter.leto
         ]]))
         queue.enqueue(DuneNodeParams("Palace", [ "room": PalaceRoom.balcony, "duration": 4.0, "character": DuneCharacter.leto, "zoom": DuneRect(75, 45, 84, 40) ]))
-        queue.enqueue(DuneNodeParams("Palace", [ "room": PalaceRoom.balcony, "duration": 4.0, "character": DuneCharacter.jessica, "zoom": DuneRect(170, 63, 84, 40) ]))*/
-        queue.enqueue(DuneNodeParams("Paul", [ "background": PaulBackground.red, "duration": 4.0, "transitionIn": TransitionEffect.dissolveIn ]))
-        /*queue.enqueue(DuneNodeParams("Sunrise", [ "mode": DuneLightMode.sunset, "fadeOut": true, "fort": true, "duration": 5.0 ]))
-        queue.enqueue(DuneNodeParams("Baron", [ "duration": 2.0 ]))
+        queue.enqueue(DuneNodeParams("Palace", [ "room": PalaceRoom.balcony, "duration": 4.0, "character": DuneCharacter.jessica, "zoom": DuneRect(170, 63, 84, 40), "transitionOut": TransitionEffect.dissolveOut(duration: 0.3) ]))
+        queue.enqueue(DuneNodeParams("Paul", [ "background": PaulBackground.red, "duration": 4.0, "transitionIn": TransitionEffect.dissolveIn(duration: 0.3), "transitionOut": TransitionEffect.dissolveOut(duration: 0.3) ]))
+        queue.enqueue(DuneNodeParams("Sunrise", [ "mode": DuneLightMode.sunset, "fort": true, "duration": 5.0, "transitionIn": TransitionEffect.dissolveIn(duration: 0.3), "transitionOut": TransitionEffect.dissolveOut(duration: 0.3) ]))
+        queue.enqueue(DuneNodeParams("Baron", [ "duration": 2.0, "transitionIn": TransitionEffect.dissolveIn(duration: 0.3) ]))
         queue.enqueue(DuneNodeParams("Feyd", [ "duration": 4.0 ]))
-        queue.enqueue(DuneNodeParams("Baron", [ "duration": 3.0, "sardaukar": true ]))
-        queue.enqueue(DuneNodeParams("Attack"))
-        queue.enqueue(DuneNodeParams("Paul", [ "background": PaulBackground.red ]))
-        queue.enqueue(DuneNodeParams("Kiss", [ "fadeOut": true ]))
-        queue.enqueue(DuneNodeParams("Ornithopter", [ "dayMode": DuneLightMode.night, "scenery": SceneryType.sietch, "fadeOut": true ]))
-        queue.enqueue(DuneNodeParams("Flight", [ "dayMode": DuneLightMode.night ]))*/
+        queue.enqueue(DuneNodeParams("Baron", [ "duration": 3.0, "sardaukar": true, "transitionOut": TransitionEffect.dissolveOut(duration: 0.3) ]))
+        queue.enqueue(DuneNodeParams("Attack", [ "transitionIn": TransitionEffect.dissolveIn(duration: 0.3), "transitionOut": TransitionEffect.dissolveOut(duration: 0.3) ]))
+        queue.enqueue(DuneNodeParams("Paul", [ "background": PaulBackground.red, "transitionIn": TransitionEffect.dissolveIn(duration: 0.3), "transitionOut": TransitionEffect.dissolveOut(duration: 0.3) ]))
+        queue.enqueue(DuneNodeParams("Kiss", [ "transitionIn": TransitionEffect.dissolveIn(duration: 0.3), "transitionOut": TransitionEffect.fadeOut(duration: 2.0) ]))
+        queue.enqueue(DuneNodeParams("Ornithopter", [ "dayMode": DuneLightMode.night, "scenery": SceneryType.sietch, "transitionIn": TransitionEffect.fadeIn(duration: 2.0) ]))
+        queue.enqueue(DuneNodeParams("Flight", [ "dayMode": DuneLightMode.night, "duration": 30.0, "transitionOut": TransitionEffect.fadeOut(duration: 2.0) ]))
         
         engine.addEventObserver(self)
 
