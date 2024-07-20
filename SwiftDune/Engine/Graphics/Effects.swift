@@ -116,8 +116,8 @@ struct Effects {
     
     
     static func pixelate(sourceBuffer: PixelBuffer, destBuffer: PixelBuffer, progress: CGFloat, offset: Int = 0) {
-        let maxPixelation = 8
-        let pixelation = Int(ceil(Math.clampf(progress, 0.0, 1.0) * CGFloat(maxPixelation)))
+        let maxPixelation = 16
+        let pixelation = Int(round(Math.clampf(progress, 0.0, 1.0) * CGFloat(maxPixelation)))
         sourceBuffer.copyPixels(to: destBuffer)
         
         if pixelation <= 1 {

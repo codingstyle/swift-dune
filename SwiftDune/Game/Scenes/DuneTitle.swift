@@ -10,13 +10,15 @@ import Foundation
 final class DuneTitle: DuneNode {
     private var contextBuffer = PixelBuffer(width: 320, height: 152)
 
-    private var skySprite: Sprite?
+    private var sky: Sky?
     private var titleSprite: Sprite?
     
     private var currentTime: TimeInterval = 0.0
     private let engine = DuneEngine.shared
     
     private var scrollAnimation: DuneAnimation<Int16>?
+    private var titlePalette: Array<UInt32>?
+    private var intermediateTitlePalette: Array<UInt32>?
     
     init() {
         super.init("DuneTitle")
@@ -24,8 +26,10 @@ final class DuneTitle: DuneNode {
     
     
     override func onEnable() {
-        self.titleSprite = engine.loadSprite("INTDS.HSQ")
-        self.skySprite = engine.loadSprite("SKY.HSQ")
+        titleSprite = engine.loadSprite("INTDS.HSQ")
+        titlePalette = [UInt32](repeating: 0, count: 16)
+        intermediateTitlePalette = [UInt32](repeating: 0, count: 16)
+        sky = Sky()
         
         scrollAnimation = DuneAnimation<Int16>(from: 0, to: 152, startTime: 2.5, endTime: 6.5)
     }
@@ -33,7 +37,9 @@ final class DuneTitle: DuneNode {
     
     override func onDisable() {
         titleSprite = nil
-        skySprite = nil
+        titlePalette = nil
+        intermediateTitlePalette = nil
+        sky = nil
         currentTime = 0.0
     }
     
@@ -50,7 +56,7 @@ final class DuneTitle: DuneNode {
     
     override func render(_ buffer: PixelBuffer) {
         guard let titleSprite = titleSprite,
-              let skySprite = skySprite,
+              let sky = sky,
               let scrollAnimation = scrollAnimation else {
             return
         }
@@ -62,26 +68,21 @@ final class DuneTitle: DuneNode {
             titleSprite.setPalette()
             
             // Apply sky gradient with blue palette
-            skySprite.setAlternatePalette(1)
-            
-            for x: Int16 in stride(from: 0, to: 320, by: 40) {
-                skySprite.drawFrame(0, x: x, y: 0, buffer: contextBuffer)
-                skySprite.drawFrame(1, x: x, y: 20, buffer: contextBuffer)
-                skySprite.drawFrame(2, x: x, y: 40, buffer: contextBuffer)
-                skySprite.drawFrame(3, x: x, y: 60, buffer: contextBuffer)
-            }
+            sky.lightMode = .day
+            sky.render(contextBuffer)
 
             titleSprite.setPalette()
             titleSprite.drawFrame(1, x: 0, y: 44, buffer: contextBuffer)
             
+            memcpy(&titlePalette!, engine.palette.rawPointer + 224, 16 * MemoryLayout<UInt32>.size)
             contextBuffer.tag = 0x0011
         }
         
         
         if scrollY < 152 && contextBuffer.tag < 0x0012 {
             var fxStart: SpriteEffect {
-                if currentTime < 1.0 {
-                    return .pixelate(end: 1.0, duration: 1.0, current: currentTime)
+                if currentTime < 2.0 {
+                    return .pixelate(end: 2.0, duration: 2.0, current: currentTime)
                 }
                 
                 return .none
@@ -96,13 +97,28 @@ final class DuneTitle: DuneNode {
             titleSprite.drawFrame(2, x: 0, y: skyScrollY, buffer: buffer)
             titleSprite.drawFrame(3, x: 0, y: skyScrollY + 95, buffer: buffer)
             titleSprite.drawFrame(4, x: 0, y: skyScrollY + 123, buffer: buffer)
-        
-            if currentTime >= 7.5 {
-                var fxTitle: SpriteEffect {
-                    return .fadeIn(start: 7.5, duration: 2.0, current: currentTime)
-                }
+            
+            if currentTime > 7.5 {
+                titleSprite.drawFrame(5, x: 0, y: 48, buffer: buffer)
+            }
+
+            // Partial palette fade in for the red title
+            let clampedProgress = Math.clampf((currentTime - 7.5) / 2.0, 0.0, 1.0)
+            var n = 224
+            
+            while n < 240 {
+                let src = titlePalette![n - 224]
                 
-                titleSprite.drawFrame(5, x: 0, y: 48, buffer: buffer, effect: fxTitle)
+                let r = (src & 0xFF)
+                let g = (src & 0xFF00) >> 8
+                let b = (src & 0xFF0000) >> 16
+                
+                let dR = UInt32(CGFloat(r) * clampedProgress)
+                let dG = UInt32(CGFloat(g) * clampedProgress)
+                let dB = UInt32(CGFloat(b) * clampedProgress)
+                
+                engine.palette.rawPointer[n] = (0xFF000000 | (dB << 16) | (dG << 8) | dR)
+                n += 1
             }
         }
         

@@ -1,7 +1,7 @@
 # TODO
 
-- [ ] FIX: Fade in Dune title (palette effect)
-- [ ] FIX: Fade in on Palace stairs
+- [X] FIX: Fade in Dune title (palette effect)
+- [ ] FIX: Fade in on Palace stairs (palette effect)
 
 - [ ] ADD: support gradients on polygons
 - [ ] UPDATE: Sprite rendering issue on DUNES / 4bpp/8bpp sprite rendering ?
