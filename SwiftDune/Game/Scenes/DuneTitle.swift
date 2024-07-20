@@ -17,8 +17,6 @@ final class DuneTitle: DuneNode {
     private let engine = DuneEngine.shared
     
     private var scrollAnimation: DuneAnimation<Int16>?
-    private var titlePalette: Array<UInt32>?
-    private var intermediateTitlePalette: Array<UInt32>?
     
     init() {
         super.init("DuneTitle")
@@ -27,8 +25,6 @@ final class DuneTitle: DuneNode {
     
     override func onEnable() {
         titleSprite = engine.loadSprite("INTDS.HSQ")
-        titlePalette = [UInt32](repeating: 0, count: 16)
-        intermediateTitlePalette = [UInt32](repeating: 0, count: 16)
         sky = Sky()
         
         scrollAnimation = DuneAnimation<Int16>(from: 0, to: 152, startTime: 2.5, endTime: 6.5)
@@ -37,8 +33,6 @@ final class DuneTitle: DuneNode {
     
     override func onDisable() {
         titleSprite = nil
-        titlePalette = nil
-        intermediateTitlePalette = nil
         sky = nil
         currentTime = 0.0
     }
@@ -73,8 +67,9 @@ final class DuneTitle: DuneNode {
 
             titleSprite.setPalette()
             titleSprite.drawFrame(1, x: 0, y: 44, buffer: contextBuffer)
+
+            engine.palette.stash()
             
-            memcpy(&titlePalette!, engine.palette.rawPointer + 224, 16 * MemoryLayout<UInt32>.size)
             contextBuffer.tag = 0x0011
         }
         
@@ -104,22 +99,7 @@ final class DuneTitle: DuneNode {
 
             // Partial palette fade in for the red title
             let clampedProgress = Math.clampf((currentTime - 7.5) / 2.0, 0.0, 1.0)
-            var n = 224
-            
-            while n < 240 {
-                let src = titlePalette![n - 224]
-                
-                let r = (src & 0xFF)
-                let g = (src & 0xFF00) >> 8
-                let b = (src & 0xFF0000) >> 16
-                
-                let dR = UInt32(CGFloat(r) * clampedProgress)
-                let dG = UInt32(CGFloat(g) * clampedProgress)
-                let dB = UInt32(CGFloat(b) * clampedProgress)
-                
-                engine.palette.rawPointer[n] = (0xFF000000 | (dB << 16) | (dG << 8) | dR)
-                n += 1
-            }
+            Effects.fade(progress: clampedProgress, startIndex: 224, endIndex: 239)
         }
         
         // Title fade out

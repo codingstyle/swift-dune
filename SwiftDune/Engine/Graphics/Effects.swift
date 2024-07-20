@@ -36,15 +36,15 @@ enum SpriteEffect {
 
 
 struct Effects {
-    static func fade(progress: CGFloat) {
+    static func fade(progress: CGFloat, startIndex: Int = 0, endIndex: Int = 255) {
         let engine = DuneEngine.shared
         
         engine.palette.unstash()
         
         let clampedProgress = Math.clampf(progress, 0.0, 1.0)
-        var n = 0
+        var n = startIndex
         
-        while n < 256 {
+        while n < endIndex + 1 {
             let src = engine.palette.rawPointer[n]
             
             let r = (src & 0xFF)

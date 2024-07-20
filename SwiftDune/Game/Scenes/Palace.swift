@@ -160,6 +160,14 @@ final class Palace: DuneNode {
         } else if currentRoom == .stairs {
             sky.render(intermediateFrameBuffer, width: 200, at: 0, type: .large)
             palaceScenery.drawRoom(currentRoom.rawValue, buffer: intermediateFrameBuffer)
+            
+            engine.palette.stash()
+            
+            // Fade on palace
+            if dayMode == .sunrise {
+                let sunriseProgress = Math.clampf((currentTime - 1.0) / 2.0, 0.0, 1.0)
+                Effects.fade(progress: sunriseProgress, startIndex: 112, endIndex: 127)
+            }
         }
         
         if let characterSprite = characterSprite {
