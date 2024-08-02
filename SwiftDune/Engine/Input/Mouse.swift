@@ -8,13 +8,20 @@
 import Foundation
 import AppKit
 
+
+struct DuneMouseClickEvent {
+    var point: DunePoint
+}
+
 final class Mouse {
     private var monitorID: Any?
     var coordinates: DunePoint = .zero
     var cursorVisible = false
-    
+
+    var mouseClicks = Queue<DuneMouseClickEvent>()
+
     init() {
-        self.monitorID = NSEvent.addLocalMonitorForEvents(matching: [.mouseEntered, .mouseExited, .mouseMoved]) { event in
+        self.monitorID = NSEvent.addLocalMonitorForEvents(matching: [.mouseEntered, .mouseExited, .mouseMoved, .leftMouseUp]) { event in
             if self.processMouseEvent(event) {
                 return nil
             }
@@ -47,8 +54,6 @@ final class Mouse {
     
     
     private func processMouseEvent(_ event: NSEvent) -> Bool {
-        var processed = false
-
         guard let contentView = event.window?.contentView else {
             coordinates.reset()
             return false
@@ -62,14 +67,18 @@ final class Mouse {
         let renderFrame = renderView.superview!.frame
         let eventLocation = NSPoint(x: event.locationInWindow.x, y: contentView.bounds.size.height - event.locationInWindow.y)
 
-        if renderFrame.contains(eventLocation) {
-            coordinates.x = Int16(eventLocation.x - renderFrame.minX) / 2
-            coordinates.y = Int16(eventLocation.y - renderFrame.minY) / 2
-            processed = true
-        } else {
+        if !renderFrame.contains(eventLocation) {
             coordinates.reset()
+            return false
         }
         
-        return processed
+        coordinates.x = Int16(eventLocation.x - renderFrame.minX) / 2
+        coordinates.y = Int16(eventLocation.y - renderFrame.minY) / 2
+        
+        if event.type == .leftMouseUp {
+            mouseClicks.enqueue(DuneMouseClickEvent(point: coordinates))
+        }
+        
+        return true
     }
 }

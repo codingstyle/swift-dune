@@ -110,11 +110,14 @@ final class DuneEngine {
     
     
     func processInput() {
-        // TODO: Process input (mouse)
+        // Process mouse clicks
+        while let clickEvent = mouse.mouseClicks.dequeueFirst() {
+            rootNode.onClick(clickEvent)
+        }
         
         // Process keyboard input
-        while let key = keyboard.keysPressed.dequeueFirst() {
-            rootNode.onKey(key)
+        while let keyEvent = keyboard.keysPressed.dequeueFirst() {
+            rootNode.onKey(keyEvent)
         }
     }
     

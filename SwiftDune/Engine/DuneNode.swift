@@ -102,9 +102,15 @@ class DuneNode {
         
     }
     
-    func onKey(_ key: DuneKeyEvent) {
+    func onKey(_ event: DuneKeyEvent) {
         activeNodes.forEach { node in
-            node.onKey(key)
+            node.onKey(event)
+        }
+    }
+    
+    func onClick(_ event: DuneMouseClickEvent) {
+        activeNodes.forEach { node in
+            node.onClick(event)
         }
     }
 }
