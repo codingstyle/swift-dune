@@ -8,8 +8,6 @@
 import Foundation
 
 /*
- // TODO: Prologue (sentences 267-274)
- 
  267 - Stars
  268 - Stars with Globe - tilted top and rotated right
  269 - Desert (same bg as Paul)

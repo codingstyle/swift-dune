@@ -28,7 +28,7 @@ final class Sietch: DuneNode {
     private var contextBuffer = PixelBuffer(width: 320, height: 152)
     
     private var sietchScenery: Scenery?
-    private var skySprite: Sprite?
+    private var sky: Sky?
     private var characterSprite: Sprite?
     
     private var currentTime: TimeInterval = 0.0
@@ -53,7 +53,7 @@ final class Sietch: DuneNode {
     
     override func onEnable() {
         sietchScenery = Scenery("SIET.SAL")
-        skySprite = Sprite("SKY.HSQ")
+        sky = Sky()
         
         sietchScenery?.characters = markers
         
@@ -75,7 +75,7 @@ final class Sietch: DuneNode {
     
     override func onDisable() {
         sietchScenery = nil
-        skySprite = nil
+        sky = nil
         characterSprite = nil
         markers = [:]
         currentRoom = .entrance
@@ -126,7 +126,7 @@ final class Sietch: DuneNode {
     
     override func render(_ buffer: PixelBuffer) {
         guard let sietchScenery = sietchScenery,
-              let skySprite = skySprite else {
+              let sky = sky else {
             return
         }
         
@@ -137,14 +137,8 @@ final class Sietch: DuneNode {
         if currentRoom == .entrance {
             if contextBuffer.tag != 0x0001 {
                 // Apply sky gradient with blue palette
-                skySprite.setAlternatePalette(1)
-                
-                for x: Int16 in stride(from: 0, to: 320, by: 40) {
-                    skySprite.drawFrame(0, x: x, y: 0, buffer: contextBuffer)
-                    skySprite.drawFrame(1, x: x, y: 20, buffer: contextBuffer)
-                    skySprite.drawFrame(2, x: x, y: 40, buffer: contextBuffer)
-                    skySprite.drawFrame(3, x: x, y: 60, buffer: contextBuffer)
-                }
+                sky.lightMode = .day
+                sky.render(contextBuffer)
 
                 contextBuffer.tag = 0x0001
             }

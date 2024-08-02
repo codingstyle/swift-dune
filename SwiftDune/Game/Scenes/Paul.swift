@@ -21,7 +21,7 @@ final class Paul: DuneNode {
     private var paulSprite: Sprite?
     private var chaniSprite: Sprite?
     private var backgroundSprite: Sprite?
-    private var skySprite: Sprite?
+    private var sky: Sky?
     private var transitionIn: TransitionEffect = .none
     private var transitionOut: TransitionEffect = .none
     private var duration: TimeInterval = 8.0
@@ -37,7 +37,7 @@ final class Paul: DuneNode {
     override func onEnable() {
         paulSprite = engine.loadSprite("PAUL.HSQ")
         chaniSprite = engine.loadSprite("CHAN.HSQ")
-        skySprite = engine.loadSprite("SKY.HSQ")
+        sky = Sky()
         backgroundSprite = engine.loadSprite(background.rawValue)
     }
     
@@ -46,7 +46,7 @@ final class Paul: DuneNode {
         paulSprite = nil
         chaniSprite = nil
         backgroundSprite = nil
-        skySprite = nil
+        sky = nil
         transitionIn = .none
         transitionOut = .none
         duration = 8.0
@@ -204,19 +204,13 @@ final class Paul: DuneNode {
     
     private func drawDesertBackground(buffer: PixelBuffer) {
         guard let backgroundSprite = backgroundSprite,
-              let skySprite = skySprite else {
+              let sky = sky else {
             return
         }
         
         // Apply sky gradient with blue palette
-        skySprite.setAlternatePalette(1)
-        
-        for x: Int16 in stride(from: 0, to: 320, by: 40) {
-            skySprite.drawFrame(0, x: x, y: 0, buffer: buffer)
-            skySprite.drawFrame(1, x: x, y: 20, buffer: buffer)
-            skySprite.drawFrame(2, x: x, y: 40, buffer: buffer)
-            skySprite.drawFrame(3, x: x, y: 60, buffer: buffer)
-        }
+        sky.lightMode = .day
+        sky.render(buffer)
 
         // Desert background
         backgroundSprite.setPalette()

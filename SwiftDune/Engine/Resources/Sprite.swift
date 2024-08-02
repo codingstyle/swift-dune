@@ -46,15 +46,22 @@ struct SpriteAnimationImage {
 }
 
 
-struct SpriteFrameInfo {
+class SpriteFrameInfo {
     var startOffset: UInt32 = 0
     var isCompressed: Bool = false
-    var realWidth: UInt16 = 0
     var width: UInt16 = 0
     var height: UInt16 = 0
     var bytesPerRow: UInt16 = 0
     var paletteOffset: UInt8 = 0
-    var paletteIndices: ContiguousArray<UInt8> = []
+    var paletteIndices: UnsafeMutablePointer<UInt8>
+    
+    init(_ bufferSize: Int) {
+        paletteIndices = UnsafeMutablePointer<UInt8>.allocate(capacity: bufferSize)
+    }
+    
+    deinit {
+        paletteIndices.deallocate()
+    }
 }
 
 final class Sprite: Equatable {
@@ -103,8 +110,12 @@ final class Sprite: Equatable {
         self.parsePalette()
         self.parseFrames()
         
-        if resource.fileName == "SHAI.HSQ" || resource.fileName == "ATTACK.HSQ" || resource.fileName == "DEATH1.HSQ" {
-            self.parseAlternateAnimations()
+        if resource.fileName == "SHAI.HSQ" {
+            self.parseShaiAnimations()
+        } else if resource.fileName == "DEATH1.HSQ" {
+            self.parseDeathAnimations()
+        } else if resource.fileName == "ATTACK.HSQ" {
+            // TODO: parse animations
         } else {
             /*if !self.parseAnimations() && !resource.stream!.isEOF() {
                 self.parseAlternatePalettes()
@@ -286,11 +297,8 @@ final class Sprite: Equatable {
 
             let frameOffset = UInt32(resource.stream!.readUInt16LE())
             
-            var frameInfo = SpriteFrameInfo()
             let frameStartOffset = frameIndexOffset + frameOffset
-            frameInfo.startOffset = frameStartOffset
-            
-            resource.stream!.seek(frameInfo.startOffset)
+            resource.stream!.seek(frameStartOffset)
 
             // If two first bytes are 0x0000 we are looking at something else than an image part
             if resource.stream!.readUInt16LE(peek: true) == 0x0000 {
@@ -298,21 +306,16 @@ final class Sprite: Equatable {
                 break
             }
             
-            let widthAndCompression = resource.stream!.readUInt16LE()
+            let w0 = resource.stream!.readUInt16LE()
+            let w1 = resource.stream!.readUInt16LE()
 
-            frameInfo.isCompressed = (widthAndCompression & 0x8000) > 0
-            
-            var width = UInt16(widthAndCompression & 0x7FFF)
-            let height = UInt16(resource.stream!.readByte())
-            let paletteOffset = resource.stream!.readByte()
-            
-            let realWidth = width
-            
-            if width > 0 {
-                width += (4 - width % 4) % 4
-            }
+            let flags = UInt8((w0 & 0xFF00) >> 8)
+            let width = UInt16(w0 & 0x7FFF)
+            let height = UInt16(w1 & 0x00FF)
+            let paletteOffset = UInt8((w1 & 0xFF00) >> 8)
+            let isCompressed = (flags & 0x80) > 0
 
-            //print("parseFrames(): frame=\(i), frameOffset=\(frameInfo.startOffset), width=\(width), height=\(height), compressed=\(frameInfo.isCompressed ? "YES" : "NO")")
+            //print("parseFrames(): frame=\(i), frameOffset=\(frameStartOffset), width=\(width), height=\(height), flags=\(String.fromByte(flags)) compressed=\(isCompressed ? "YES" : "NO")")
 
             var bytesPerRow = (width + 1) / 2
 
@@ -321,70 +324,31 @@ final class Sprite: Equatable {
                 bytesPerRow += 1
             }
 
+            let frameInfo = SpriteFrameInfo(2 * Int(width) * Int(height))
+            frameInfo.startOffset = frameStartOffset
+            frameInfo.isCompressed = isCompressed
             frameInfo.bytesPerRow = bytesPerRow
-            frameInfo.realWidth = realWidth
             frameInfo.width = width
             frameInfo.height = height
-            frameInfo.paletteIndices = ContiguousArray<UInt8>(repeating: 0, count: Int(width) * Int(height))
             frameInfo.paletteOffset = paletteOffset
+         
+            // Skip 4 bytes of frame header to access the pixels
+            resource.stream!.seek(frameInfo.startOffset + 4)
             
+            if !frameInfo.isCompressed {
+                compute4bpp(frameInfo)
+            } else {
+                compute4bppRLE(frameInfo)
+            }
+
             frames.append(frameInfo)
         }
         
-        let lastFrameInfo = frames.last!
-        let totalSize = UInt32(lastFrameInfo.bytesPerRow * 2) * UInt32(lastFrameInfo.height)
-
-        resource.stream!.seek(lastFrameInfo.startOffset + 4)
-
-        if !lastFrameInfo.isCompressed {
-            animationOffset = resource.stream!.offset + (totalSize / 2)
-        } else {
-            var current: UInt32 = 0
-            
-            while current < totalSize {
-                let repetition = Int16(resource.stream!.readSByte())
-                
-                let count = Int(abs(repetition) + 1)
-                let _ = repetition < 0 ? resource.stream!.readByte() : 0
-                
-                for _ in 0..<count {
-                    if repetition >= 0 {
-                        let _ = resource.stream!.readByte()
-                    }
-                    
-                    current += 1
-                    
-                    if (current == totalSize) {
-                        break
-                    }
-
-                    current += 1
-                    
-                    if (current == totalSize) {
-                        break
-                    }
-                }
-            }
-            
-            animationOffset = resource.stream!.offset
-        }
+        animationOffset = resource.stream!.offset
                 
         setPalette()
         
-        var i = 0
-        let framesCount = Int(frames.count)
-        
-        while i < framesCount {
-            let frameInfo = frames[i]
-            
-            frames[i].paletteIndices.withUnsafeMutableBytes { ptr in
-                let uint8Ptr = ptr.bindMemory(to: UInt8.self)
-                computeFramePixels(frameInfo, buffer: uint8Ptr.baseAddress!)
-            }
-            i += 1
-        }
-        
-        //print("parseFrames(): finished reading. resource size=\(resource.stream!.size), anim offset=\(animationOffset)")
+        print("parseFrames(): finished reading. resource size=\(resource.stream!.size), anim offset=\(animationOffset)")
     }
     
     
@@ -526,15 +490,10 @@ final class Sprite: Equatable {
     }
     
     
-    func parseAlternateAnimations() {
+    func parseShaiAnimations() {
         resource.stream!.seek(animationOffset)
         
-        engine.logger.log(.debug, "parseAlternateAnimations(): offset=\(animationOffset), size=\(resource.stream!.size)")
-
-        if animationOffset >= resource.stream!.size - 2 {
-            // No animations found
-            return
-        }
+        engine.logger.log(.debug, "parseShaiAnimations(): offset=\(animationOffset), size=\(resource.stream!.size)")
         
         // Find starting position for anims
         resource.stream!.seek(animationOffset)
@@ -546,7 +505,7 @@ final class Sprite: Equatable {
         let header = resource.stream!.readUInt16()
         
         if (header != 0x0000) {
-            engine.logger.log(.error, "parseAlternateAnimations(): ERROR - header=0x0000")
+            engine.logger.log(.error, "parseShaiAnimations(): ERROR - header=0x0000")
             // No animation found
             return
         }
@@ -554,9 +513,132 @@ final class Sprite: Equatable {
         let blockSize = resource.stream!.readUInt16LE() // Block size
         
         if animationOffset + UInt32(blockSize) > resource.stream!.size {
-            engine.logger.log(.error, "parseAlternateAnimations(): ERROR - Offset and size are above the resource size. animationOffset=\(animationOffset), blockSize=\(blockSize), resourceSize=\(resource.stream!.size)")
+            engine.logger.log(.error, "parseShaiAnimations(): ERROR - Offset and size are above the resource size. animationOffset=\(animationOffset), blockSize=\(blockSize), resourceSize=\(resource.stream!.size)")
             return
         }
+
+        var animation = SpriteAnimation()
+        animation.x = 0
+        animation.y = 0
+        animation.width = 320
+        animation.height = 200
+        animation.definitionOffset = animationOffset
+        
+        var maxSpriteIndex: UInt16 = 0
+        var group = SpriteAnimationImageGroup()
+        
+        while !resource.stream!.isEOF() {
+            if resource.stream!.offset < resource.stream!.size - 8 {
+                let x1 = resource.stream!.readUInt16LE()
+                let y1 = resource.stream!.readUInt16LE()
+                let x2 = resource.stream!.readUInt16LE()
+                let y2 = resource.stream!.readUInt16LE()
+
+                // Blit region to clear previous sprite
+                if x1 < x2 && y1 < y2 && x1 != maxSpriteIndex + 1 {
+                    var frame = SpriteAnimationFrame()
+                    frame.groups.append(group)
+                    animation.frames.append(frame)
+
+                    group = SpriteAnimationImageGroup()
+                    continue
+                }
+             
+                resource.stream!.seek(resource.stream!.offset - 8)
+            }
+            
+            let spriteIndex = resource.stream!.readUInt16LE()
+            let x = resource.stream!.readUInt16LE()
+            let y = resource.stream!.readUInt16LE()
+            
+            maxSpriteIndex = spriteIndex
+            
+            let groupImage = SpriteAnimationImage(
+                imageNumber: UInt16(spriteIndex),
+                xOffset: Int16(x),
+                yOffset: Int16(y)
+            )
+            
+            group.images.append(groupImage)
+        }
+
+        var frame = SpriteAnimationFrame()
+        frame.groups.append(group)
+        animation.frames.append(frame)
+
+        animations.append(animation)
+    }
+    
+    
+    func parseDeathAnimations() {
+        resource.stream!.seek(animationOffset)
+        
+        engine.logger.log(.debug, "parseDeathAnimations(): offset=\(animationOffset), size=\(resource.stream!.size)")
+        
+        // Find starting position for anims
+        resource.stream!.seek(animationOffset)
+        
+        // let animationSize = resource.stream!.size - animationOffset
+
+        // Read header (should be 0x0000)
+        // let animationHeaderSize: UInt32 = 14
+        let header = resource.stream!.readUInt16()
+        
+        if (header != 0x0000) {
+            engine.logger.log(.error, "parseDeathAnimations(): ERROR - header=0x0000")
+            // No animation found
+            return
+        }
+        
+        let blockSize = resource.stream!.readUInt16LE() // Block size
+        
+        if animationOffset + UInt32(blockSize) > resource.stream!.size {
+            engine.logger.log(.error, "parseDeathAnimations(): ERROR - Offset and size are above the resource size. animationOffset=\(animationOffset), blockSize=\(blockSize), resourceSize=\(resource.stream!.size)")
+            return
+        }
+
+        var animation = SpriteAnimation()
+        animation.x = 0
+        animation.y = 0
+        animation.width = 320
+        animation.height = 200
+        animation.definitionOffset = animationOffset
+        
+        var group = SpriteAnimationImageGroup()
+        
+        while !resource.stream!.isEOF() {
+            // End of frame
+            if resource.stream!.readUInt16LE(peek: true) == 0xFFFF {
+                var frame = SpriteAnimationFrame()
+                frame.groups.append(group)
+                animation.frames.append(frame)
+
+                group = SpriteAnimationImageGroup()
+                
+                resource.stream!.skip(2)
+                continue
+            }
+            
+            let spriteIndex = resource.stream!.readUInt16LE()
+            let x = resource.stream!.readUInt16LE()
+            let y = resource.stream!.readUInt16LE()
+            
+            let groupImage = SpriteAnimationImage(
+                imageNumber: UInt16(spriteIndex),
+                xOffset: Int16(x),
+                yOffset: Int16(y)
+            )
+            
+            print("parseDeathAnimations(): frame=\(animation.frames.count), index=\(spriteIndex), x=\(x), y=\(y)")
+            
+            group.images.append(groupImage)
+        }
+
+        var frame = SpriteAnimationFrame()
+        frame.groups.append(group)
+        animation.frames.append(frame)
+
+        animations.append(animation)
     }
     
     
@@ -620,32 +702,26 @@ final class Sprite: Equatable {
     
     
     func drawFrame(_ index: UInt16, x: Int16, y: Int16, buffer: PixelBuffer, effects: [SpriteEffect]) {
+        if index == 255 {
+            return
+        }
+        
         let bufferWidth = buffer.width
         let bufferHeight = buffer.height
         
         let frameInfo = frames[Int(index)]
-        var alignedFrameWidth = Int(frameInfo.width)
-        var frameWidth = Int(frameInfo.realWidth)
+        var frameWidth = Int(frameInfo.width)
         var frameHeight = Int(frameInfo.height)
         var roomPaletteOffset: Int = 0
-        let scaledFrameWidth = alignedFrameWidth
+        let scaledFrameWidth = frameWidth
         
         // Effects
-        var opacity = 1.0
         var flipX = false
         var flipY = false
         var scaleRatio = 1.0
         
         for effect in effects {
             switch effect {
-            case .fadeIn(let start, let duration, let current):
-                let progress = (current - start) / duration
-                opacity = Math.clampf(progress, 0.0, 1.0)
-                break
-            case .fadeOut(let end, let duration, let current):
-                let progress = (end - current) / duration
-                opacity = Math.clampf(progress, 0.0, 1.0)
-                break
             case .transform(let offset, let flipHorizontal, let flipVertical, let scaleFactor):
                 flipX = flipHorizontal
                 flipY = flipVertical
@@ -653,7 +729,6 @@ final class Sprite: Equatable {
                 
                 if scaleFactor != 1.0 {
                     scaleRatio = scaleFactor
-                    alignedFrameWidth = Int(Double(alignedFrameWidth) * scaleRatio)
                     frameWidth = Int(Double(frameWidth) * scaleRatio)
                     frameHeight = Int(Double(frameHeight) * scaleRatio)
                 }
@@ -680,7 +755,7 @@ final class Sprite: Equatable {
         let maxX2 = min(x2, bufferWidth)
         let minY1 = max(0, y1)
         let maxY2 = min(y2, bufferHeight)
-
+        
         var j = minY1
 
         while j < maxY2 {
@@ -717,13 +792,50 @@ final class Sprite: Equatable {
     }
     
     
-    private func computeFramePixels(_ frameInfo: SpriteFrameInfo, buffer: UnsafeMutablePointer<UInt8>) {
-        // Skip 4 bytes of frame header to access the pixels
-        resource.stream!.seek(frameInfo.startOffset + 4)
+    private func compute4bpp(_ frameInfo: SpriteFrameInfo) {
+        var pixel: UInt8 = 0
+        let paletteOffset = frameInfo.paletteOffset
+        let width = Int(frameInfo.width)
+        var y = 0
         
+        while y < frameInfo.height {
+            var x = 0
+            var lineRemain = 4 * ((frameInfo.width + 3) / 4)
+            
+            while lineRemain > 0 {
+                pixel = resource.stream!.readByte()
+                
+                let paletteIndex1 = UInt8(pixel & 0xF)
+                let paletteIndex2 = UInt8(pixel >> 4)
+
+                if x < frameInfo.width {
+                    let index1 = width * y + x
+                    frameInfo.paletteIndices[index1] = paletteIndex1 + paletteOffset
+                }
+
+                x += 1
+
+                if x < frameInfo.width {
+                    let index2 = width * y + x
+                    frameInfo.paletteIndices[index2] = paletteIndex2 + paletteOffset
+                }
+
+                x += 1
+                lineRemain -= 2
+            }
+            
+            y += 1
+        }
+    }
+
+    
+    private func compute4bppRLE(_ frameInfo: SpriteFrameInfo) {
+        var pixel: UInt8 = 0
+        var count: Int = 0
         let totalSize = UInt32(frameInfo.bytesPerRow * 2) * UInt32(frameInfo.height)
         var current: UInt32 = 0
-        
+        let paletteOffset = frameInfo.paletteOffset
+
         func getIndex(_ pt: UInt32) -> Int {
             let dx = Int(pt % UInt32(frameInfo.bytesPerRow * 2))
             let dy = Int(pt / UInt32(frameInfo.bytesPerRow * 2))
@@ -731,76 +843,48 @@ final class Sprite: Equatable {
             return (dy * Int(frameInfo.width)) + dx
         }
         
-        
-        var pixel: UInt8 = 0
-        var count: Int = 0
-        let paletteOffset = Int(frameInfo.paletteOffset)
-
-        if !frameInfo.isCompressed {
-            let resourceBuffer = resource.stream!.readBytes(totalSize / 2)
-
-            while current < totalSize {
-                pixel = resourceBuffer[Int(current / 2)]
+        while current < totalSize {
+            let repetition = Int16(resource.stream!.readSByte())
+            let fillSingleValue = repetition < 0
+            
+            count = Int((fillSingleValue ? -repetition : repetition) + 1)
+            pixel = fillSingleValue ? resource.stream!.readByte() : 0
+            
+            var n = 0
+            
+            while n <= count - 1 {
+                if !fillSingleValue {
+                    pixel = resource.stream!.readByte()
+                }
                 
-                let paletteIndex1 = UInt8(Int(pixel & 0xf) + paletteOffset)
+                let paletteIndex1 = UInt8(pixel & 0xf)
                 let index1 = getIndex(current)
+                frameInfo.paletteIndices[index1] = paletteIndex1 + paletteOffset
                 
-                buffer[index1] = paletteIndex1
                 current += 1
                 
                 if current >= totalSize {
                     break
                 }
                 
-                let paletteIndex2 = UInt8(Int(pixel >> 4) + paletteOffset)
+                let paletteIndex2 = UInt8(pixel >> 4)
                 let index2 = getIndex(current)
 
-                buffer[index2] = paletteIndex2
+                frameInfo.paletteIndices[index2] = paletteIndex2 + paletteOffset
                 current += 1
                 
                 if current >= totalSize {
                     break
                 }
-            }
-        } else {
-            while current < totalSize {
-                let repetition = Int16(resource.stream!.readSByte())
-                let fillSingleValue = repetition < 0
                 
-                count = Int((fillSingleValue ? -repetition : repetition) + 1)
-                pixel = fillSingleValue ? resource.stream!.readByte() : 0
-                
-                var n = 0
-                
-                while n <= count - 1 {
-                    if !fillSingleValue {
-                        pixel = resource.stream!.readByte()
-                    }
-                    
-                    let paletteIndex1 = UInt8(Int(pixel & 0xf) + paletteOffset)
-                    let index1 = getIndex(current)
-                    buffer[index1] = paletteIndex1
-                    
-                    current += 1
-                    
-                    if current >= totalSize {
-                        break
-                    }
-                    
-                    let paletteIndex2 = UInt8(Int(pixel >> 4) + paletteOffset)
-                    let index2 = getIndex(current)
-
-                    buffer[index2] = paletteIndex2
-                    current += 1
-                    
-                    if current >= totalSize {
-                        break
-                    }
-                    
-                    n += 1
-                }
+                n += 1
             }
         }
+    }
+    
+    
+    func mergeFrames(with sprite: Sprite) {
+        frames.append(contentsOf: sprite.frames)
     }
     
     

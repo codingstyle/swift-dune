@@ -11,7 +11,7 @@ final class Worm: DuneNode {
     private var contextBuffer = PixelBuffer(width: 320, height: 152)
 
     private var wormSprite: Sprite?
-    private var skySprite: Sprite?
+    private var sky: Sky?
     
     private var currentTime: TimeInterval = 0.0
     private let engine = DuneEngine.shared
@@ -23,13 +23,17 @@ final class Worm: DuneNode {
     
     override func onEnable() {
         wormSprite = engine.loadSprite("SHAI.HSQ")
-        skySprite = engine.loadSprite("SKY.HSQ")
+        
+        let worm2Sprite = engine.loadSprite("SHAI2.HSQ")
+        wormSprite!.mergeFrames(with: worm2Sprite)
+        
+        sky = Sky()
     }
     
     
     override func onDisable() {
         wormSprite = nil
-        skySprite = nil
+        sky = nil
         currentTime = 0.0
     }
     
@@ -45,26 +49,18 @@ final class Worm: DuneNode {
     
     override func render(_ buffer: PixelBuffer) {
         guard let wormSprite = wormSprite,
-              let skySprite = skySprite else {
+              let sky = sky else {
             return
         }
         
         if contextBuffer.tag != 0x0001 {
-            wormSprite.setPalette()
-                        
             // Apply sky gradient with blue palette
-            skySprite.setAlternatePalette(1)
-            
-            for x: Int16 in stride(from: 0, to: 320, by: 40) {
-                skySprite.drawFrame(0, x: x, y: 0, buffer: contextBuffer)
-                skySprite.drawFrame(1, x: x, y: 20, buffer: contextBuffer)
-                skySprite.drawFrame(2, x: x, y: 40, buffer: contextBuffer)
-                skySprite.drawFrame(3, x: x, y: 60, buffer: contextBuffer)
-            }
-
+            sky.lightMode = .day
+            sky.render(contextBuffer)
+ 
             wormSprite.setPalette()
             wormSprite.drawFrame(44, x: 0, y: 74, buffer: contextBuffer)
-            
+ 
             contextBuffer.tag = 0x0001
 
             engine.palette.stash()
@@ -80,6 +76,16 @@ final class Worm: DuneNode {
             return .none
         }
         
-        contextBuffer.render(to: buffer, effect: fx)
+        let intermediateFrameBuffer = engine.intermediateFrameBuffer
+
+        intermediateFrameBuffer.clearBuffer()
+        contextBuffer.render(to: intermediateFrameBuffer, effect: .none)
+        
+        if currentTime > 1.0 && currentTime < 7.0 {
+            wormSprite.setPalette()
+            wormSprite.drawAnimation(0, buffer: intermediateFrameBuffer, time: currentTime - 1.0)
+        }
+        
+        intermediateFrameBuffer.render(to: buffer, effect: fx)
     }
 }
