@@ -7,7 +7,7 @@
 
 import Foundation
 
-final class Worm: DuneNode {
+final class WormCall: DuneNode {
     private var contextBuffer = PixelBuffer(width: 320, height: 152)
 
     private var wormSprite: Sprite?
@@ -17,7 +17,7 @@ final class Worm: DuneNode {
     private let engine = DuneEngine.shared
     
     init() {
-        super.init("Worm")
+        super.init("WormCall")
     }
 
     
@@ -41,7 +41,7 @@ final class Worm: DuneNode {
     override func update(_ elapsedTime: TimeInterval) {
         currentTime += elapsedTime
                 
-        if currentTime > 8.0 {
+        if currentTime > 9.41 {
             DuneEngine.shared.sendEvent(self, .nodeEnded)
         }
     }
@@ -69,8 +69,8 @@ final class Worm: DuneNode {
         var fx: SpriteEffect {
             if currentTime < 1.0 {
                 return .fadeIn(start: 0.0, duration: 1.0, current: currentTime)
-            } else if currentTime > 7.0 {
-                return .fadeOut(end: 8.0, duration: 1.0, current: currentTime)
+            } else if currentTime > 8.41 {
+                return .fadeOut(end: 9.41, duration: 1.0, current: currentTime)
             }
             
             return .none
@@ -81,7 +81,7 @@ final class Worm: DuneNode {
         intermediateFrameBuffer.clearBuffer()
         contextBuffer.render(to: intermediateFrameBuffer, effect: .none)
         
-        if currentTime > 1.0 && currentTime < 7.0 {
+        if currentTime > 1.0 && currentTime < 8.41 {
             wormSprite.setPalette()
             wormSprite.drawAnimation(0, buffer: intermediateFrameBuffer, time: currentTime - 1.0)
         }

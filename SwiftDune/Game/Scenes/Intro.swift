@@ -27,7 +27,7 @@ final class Intro: DuneNode, DuneEventObserver {
         attachNode(Presents())
         attachNode(Stars())
         attachNode(DuneTitle())
-        attachNode(Worm())
+        attachNode(WormCall())
         attachNode(Paul())
         attachNode(Sunrise())
         attachNode(Sietch())
@@ -48,7 +48,7 @@ final class Intro: DuneNode, DuneEventObserver {
         queue.enqueue(DuneNodeParams("Stars", [ "mode": StarsMode.planetsPan, "duration": 2.55 ]))
         queue.enqueue(DuneNodeParams("Stars", [ "mode": StarsMode.arrakisZoom, "duration": 0.5 ]))
         queue.enqueue(DuneNodeParams("DuneTitle"))
-        queue.enqueue(DuneNodeParams("Worm"))
+        queue.enqueue(DuneNodeParams("WormCall"))
         queue.enqueue(DuneNodeParams("Paul", [ "background": PaulBackground.red, "transitionIn": TransitionEffect.fadeIn(duration: 2.0), "transitionOut": TransitionEffect.fadeOut(duration: 2.0) ]))
         queue.enqueue(DuneNodeParams("Sunrise", [ "mode": DuneLightMode.sunrise, "transitionIn": TransitionEffect.fadeIn(duration: 2.0), "duration" : 8.0 ]))
         queue.enqueue(DuneNodeParams("Sunrise", [ "mode": DuneLightMode.day, "zoomOut": true, "character": DuneCharacter.chani, "duration": 2.5 ]))
@@ -87,7 +87,7 @@ final class Intro: DuneNode, DuneEventObserver {
         queue.enqueue(DuneNodeParams("Kiss", [ "transitionIn": TransitionEffect.dissolveIn(duration: 0.3), "transitionOut": TransitionEffect.fadeOut(duration: 2.0) ]))
         queue.enqueue(DuneNodeParams("Ornithopter", [ "dayMode": DuneLightMode.night, "scenery": SceneryType.sietch, "transitionIn": TransitionEffect.fadeIn(duration: 2.0) ]))
         queue.enqueue(DuneNodeParams("Flight", [ "dayMode": DuneLightMode.night, "duration": 30.0, "transitionOut": TransitionEffect.fadeOut(duration: 2.0) ]))
-        
+         
         engine.addEventObserver(self)
 
         guard let item = queue.dequeueFirst() else {

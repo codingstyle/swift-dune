@@ -234,7 +234,6 @@ class EditorViewModel: ObservableObject {
     
     
     func startAnimation(_ index: Int) {
-        self.sprite!.loadAnimation(UInt16(index))
         self.selectedSpriteAnimationIndex = index
         self.isSpriteAnimation = true
     }
