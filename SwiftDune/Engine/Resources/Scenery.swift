@@ -47,7 +47,7 @@ struct RoomLine: RoomCommandProtocol {
 }
 
 
-struct RoomPolygonV2: RoomCommandProtocol {
+struct RoomPolygon: RoomCommandProtocol {
     var command: UInt8
     var drawCommand: UInt8
     var paletteOffset: UInt8
@@ -267,8 +267,8 @@ final class Scenery {
             
             if command is RoomSprite {
                 drawRoomSprite(command as! RoomSprite, sprite, index, buffer)
-            } else if command is RoomPolygonV2 {
-                drawPolygon(command as! RoomPolygonV2, buffer)
+            } else if command is RoomPolygon {
+                drawPolygon(command as! RoomPolygon, buffer)
             } else if command is RoomLine {
                 drawLine(command as! RoomLine, buffer)
             } else if command is RoomMarker {
@@ -321,7 +321,7 @@ final class Scenery {
     }
     
     
-    private func drawPolygon(_ roomPolygon: RoomPolygonV2, _ buffer: PixelBuffer) {
+    private func drawPolygon(_ roomPolygon: RoomPolygon, _ buffer: PixelBuffer) {
         Primitives.fillPolygonV2(roomPolygon, buffer, isOffset: roomPolygon.paletteOffset <= 64)
     }
     
@@ -382,7 +382,7 @@ extension Scenery {
 
         addPolygonSection(lastX, lastY, finalX, finalY, startY, &polygonSideUp)
         
-        let polygon = RoomPolygonV2(
+        let polygon = RoomPolygon(
             command: command,
             drawCommand: drawCommand,
             paletteOffset: paletteIndex,

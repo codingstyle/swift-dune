@@ -231,7 +231,7 @@ struct Primitives {
     }
     
     
-    static func fillPolygonV2(_ polygon: RoomPolygonV2, _ buffer: PixelBuffer, isOffset: Bool = true) {
+    static func fillPolygonV2(_ polygon: RoomPolygon, _ buffer: PixelBuffer, isOffset: Bool = true) {
         let command = (UInt16(polygon.drawCommand) << 8) | (UInt16(polygon.command) & 0xFF)
 
         let bp: UInt16 = (command & 0x3E00) != 0 ? 1 : 0
