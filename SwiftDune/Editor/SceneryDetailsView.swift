@@ -27,7 +27,7 @@ struct SceneryDetailsView: View {
                     .frame(width: imageWidth, height: imageHeight)
                     .aspectRatio(contentMode: .fill)
                     .border(.black)
-                    .background(.blue)
+                    .background(.black)
             }
             
             Spacer()

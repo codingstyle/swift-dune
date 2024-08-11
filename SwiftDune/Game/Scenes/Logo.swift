@@ -50,8 +50,9 @@ final class Logo: DuneNode {
 
     private func interpolateColors(startColor: (UInt8, UInt8, UInt8), endColor: (UInt8, UInt8, UInt8), numSteps: Int) -> [UInt32] {
         var interpolatedColors: [UInt32] = []
-
-        for step in 0..<numSteps {
+        var step = 0
+        
+        while step < numSteps {
             let ratio = Float(step) / Float(numSteps)
 
             let r = UInt32(Float(startColor.0) + ratio * Float(Int(endColor.0) - Int(startColor.0)))
@@ -62,6 +63,7 @@ final class Logo: DuneNode {
             let color: UInt32 = (a << 24) | (b << 16) | (g << 8) | r
 
             interpolatedColors.append(color)
+            step += 1
         }
 
         return interpolatedColors

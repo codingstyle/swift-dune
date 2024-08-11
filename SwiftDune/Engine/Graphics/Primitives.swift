@@ -206,6 +206,70 @@ struct Primitives {
     }
     
     
+    
+    static func drawGradientLineWithNoise(_ pixelBuffer: PixelBuffer, _ x: UInt16, _ y: UInt16, _ w: UInt16, _ bp: UInt16, _ si: UInt16, _ di: Int16, _ color: UInt16) {
+        var offset = 320 * Int(y) + Int(x)
+        var w = w
+        var bp = bp
+        var color = Int(color)
+        
+        repeat {
+            let lsb = (bp & 1) != 0
+            bp >>= 1
+            
+            if lsb {
+                bp ^= si
+            }
+            
+            let v = (bp & 3) + ((UInt16(color) >> 8) & 0xFF) - 1
+            color += Int(di)
+
+            pixelBuffer.rawPointer[offset] = UInt8(truncatingIfNeeded: (v & 0xFF))
+            offset += 1
+            w -= 1
+        } while w > 0
+    }
+    
+    
+    static func fillPolygonV2(_ polygon: RoomPolygonV2, _ buffer: PixelBuffer, isOffset: Bool = true) {
+        let command = (UInt16(polygon.drawCommand) << 8) | (UInt16(polygon.command) & 0xFF)
+
+        let bp: UInt16 = (command & 0x3E00) != 0 ? 1 : 0
+        let ds22df: UInt16 = (command & 0x3E00) | 0x2
+        let color = (command & 0xFF) << 8
+
+        //if (command & 0x0100) == 0 {
+            var y: UInt16 = 0
+            
+            while y < polygon.finalY - polygon.startY {
+                var x0 = polygon.polygonSideUp[Int(y)]
+                var x1 = polygon.polygonSideDown[Int(y)]
+                
+                if x1 < x0 {
+                    swap(&x0, &x1)
+                }
+                
+                let w = x1 - x0 + 1
+                
+                drawGradientLineWithNoise(
+                    buffer,
+                    x0,
+                    y + polygon.startY,
+                    w,
+                    bp,
+                    ds22df,
+                    polygon.hGradient,
+                    color
+                )
+
+                y += 1
+            }
+        /*} else {
+            print("Invalid polygon to draw")
+        }*/
+    }
+    
+    
     static func fillRect(_ rect: DuneRect, _ paletteIndex: Int, _ buffer: PixelBuffer, isOffset: Bool = true) {
         var y1 = Int(rect.y)
         let y2 = Int(rect.y) + Int(rect.height)
@@ -228,7 +292,4 @@ struct Primitives {
             y1 += 1
         }
     }
-    
-    
-    // TODO: GRADIENTS !!
 }

@@ -425,7 +425,7 @@ final class Video {
                     count += readNextBit()
                     
                     let distance = stream.readByte()
-                    offset = Int16(distance) - 256;
+                    offset = Int16(distance) - 256
                 }
 
                 count += 2
@@ -434,8 +434,11 @@ final class Video {
                 let startCopy = Int(currentOffset) + Int(offset)
                 let endCopy = startCopy + Int(count) - 1
                 
-                for i in startCopy...endCopy {
+                var i = startCopy
+                
+                while i <= endCopy {
                     unpackedData.append(unpackedData[i])
+                    i += 1
                 }
             }
         }

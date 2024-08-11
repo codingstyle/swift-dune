@@ -47,52 +47,16 @@ struct RoomLine: RoomCommandProtocol {
 }
 
 
-struct RoomPolygonPoint {
-    var x: Int16
-    var y: Int16
-    var flag: UInt16
-    
-    func angle(from centroid: DunePoint) -> Double {
-        let dx = Double(self.x - centroid.x)
-        let dy = Double(self.y - centroid.y)
-        return atan2(dy, dx)
-    }
-}
-
-
-struct RoomPolygon: RoomCommandProtocol {
+struct RoomPolygonV2: RoomCommandProtocol {
+    var command: UInt8
+    var drawCommand: UInt8
     var paletteOffset: UInt8
-    var horizontalEffect: UInt8
-    var verticalEffect: UInt8
-    var points: [RoomPolygonPoint] = []
-    
-    var isRect: Bool {
-        if points.count != 4 {
-            return false
-        }
-        
-        return points[1].x - points[0].x == points[2].x - points[3].x &&
-               points[0].y == points[1].y && points[2].y == points[3].y
-    }
-    
-    func asRect() -> DuneRect {
-        return DuneRect(points[0].x, points[0].y, UInt16(points[1].x - points[0].x), UInt8(points[3].y - points[0].y))
-    }
-    
-    func asPoints() -> [DunePoint] {
-        return points.map { DunePoint($0.x, $0.y) }
-    }
-    
-    func centroid(of points: [RoomPolygonPoint]) -> DunePoint {
-        let pointsCount = CGFloat(points.count)
-        let xSum = points.reduce(0) { $0 + $1.x }
-        let ySum = points.reduce(0) { $0 + $1.y }
-        
-        let xCenter = Int16(CGFloat(xSum) / pointsCount)
-        let yCenter = Int16(CGFloat(ySum) / pointsCount)
-        
-        return DunePoint(xCenter, yCenter)
-    }
+    var hGradient: Int16
+    var vGradient: Int16
+    var startY: UInt16
+    var finalY: UInt16
+    var polygonSideUp: [UInt16]
+    var polygonSideDown: [UInt16]
 }
 
 
@@ -198,7 +162,6 @@ final class Scenery {
         print("")
         print("rooms=\(firstOffset / 2)")
 
-        // let roomOffset = UInt32(roomOffsets[i]) + padding
         resource.stream!.seek(UInt32(firstOffset))
 
         for i in 0..<roomCount {
@@ -267,101 +230,7 @@ final class Scenery {
                     let drawCommand = resource.stream!.readByte()
 
                     if (drawCommand >> 6) == 2 {
-                        /*
-                        // V2 Polygon code — WIP
-                        let hGradient = resource.stream!.readByte()
-                        let vGradient = resource.stream!.readByte()
-                        
-                        let startX = resource.stream!.readUInt16LE()
-                        let startY = resource.stream!.readUInt16LE()
-
-                        // Part 1
-                        var x: UInt16 = 0
-                        var y: UInt16 = 0
-                        var lastX = startX & 0x3FFF
-                        var lastY = startY
-                        
-                        repeat {
-                            x = resource.stream!.readUInt16LE()
-                            y = resource.stream!.readUInt16LE()
-                            
-                            // add_gradient_section(lastX, lastY, x & 0x3FFF, y, polygonSideDown)
-                            
-                            lastX = x & 0x3FFF
-                            lastY = y
-                        } while (x & 0x4000) == 0
-                        
-                        // Part 2
-                        let finalX = lastX
-                        let finalY = lastY
-                        
-                        lastX = startX
-                        lastY = startY
-                        
-                        if (x & 0x8000) == 0 {
-                            repeat {
-                                x = resource.stream!.readUInt16LE()
-                                y = resource.stream!.readUInt16LE()
-                                
-                                // add_gradient_section(lastX, lastY, x & 0x3FFF, y, polygonSideUp)
-                                
-                                lastX = x & 0x3FFF
-                                lastY = y
-                            } while (x & 0x8000) == 0
-                        }
-
-                        // add_gradient_section(lastX, lastY, finalX, finalY, polygonSideUp)
-                        
-                        y = 0
-                        
-                        while y != finalY - startY {
-                            y += 1
-                            
-                            let w = polygonSideDown[startY + y] - polygonSideUp[startY + y]
-                            
-                            if w {
-                                // drawNoise(polygonSideUp[y], startY + w, (drawCommand & 0xFF) << 8, 0, 0, 2)
-                            }
-                        }
-                        */
-                        
-                        
-                        // Polygon
-                        let horizontalEffect = resource.stream!.readByte()
-                        let verticalEffect = resource.stream!.readByte()
-
-                        var polygon = RoomPolygon(paletteOffset: paletteIndex, horizontalEffect: horizontalEffect, verticalEffect: verticalEffect)
-                        var cpt: UInt16 = 0
-                        var points: [RoomPolygonPoint] = []
-                        
-                        while cpt < 0xC {
-                            var x = resource.stream!.readUInt16LE()
-                            let y = resource.stream!.readUInt16LE()
-                            let flag = (x & 0xC000) >> 12
-                            
-                            cpt += flag
-                            x = x & 0x0FFF
-                            
-                            points.append(RoomPolygonPoint(x: Int16(x), y: Int16(y), flag: flag))
-                        }
-                        
-                        // Calculate centroid
-                        let center = polygon.centroid(of: points)
-                        
-                        // Sort points based on angle
-                        points = points.sorted { pt1, pt2 in
-                            pt1.angle(from: center) < pt2.angle(from: center)
-                        }
-                        
-                        polygon.points = points
-                        
-                        room.commands.append(polygon)
-                         
-                        engine.logger.log(.debug, " - Polygon: baseColorIndex=\(paletteIndex), horizontalEffect=\(horizontalEffect), verticalEffect=\(verticalEffect)")
-                        
-                        polygon.points.forEach { pt in
-                            engine.logger.log(.debug, "   -> x=\(pt.x), y=\(pt.y), flag=\(pt.flag)")
-                        }
+                        parsePolygon(&room, command, drawCommand, paletteIndex)
                     } else if (drawCommand >> 6) == 3 {
                         // Line
                         let x1 = Int16(resource.stream!.readUInt16LE())
@@ -398,8 +267,8 @@ final class Scenery {
             
             if command is RoomSprite {
                 drawRoomSprite(command as! RoomSprite, sprite, index, buffer)
-            } else if command is RoomPolygon {
-                drawPolygon(command as! RoomPolygon, buffer)
+            } else if command is RoomPolygonV2 {
+                drawPolygon(command as! RoomPolygonV2, buffer)
             } else if command is RoomLine {
                 drawLine(command as! RoomLine, buffer)
             } else if command is RoomMarker {
@@ -417,7 +286,7 @@ final class Scenery {
         }
         
         let frameInfo = characterSprite.frame(at: Int(character.rawValue))
-        let scale = CGFloat((frameInfo.realWidth << 8) / marker.scale) / CGFloat(frameInfo.realWidth)
+        let scale = CGFloat((frameInfo.width << 8) / marker.scale) / CGFloat(frameInfo.width)
         
         var fx: SpriteEffect {
             return .transform(offset: marker.paletteOffset, flipX: marker.flipX, flipY: marker.flipY, scale: scale)
@@ -430,7 +299,7 @@ final class Scenery {
     
     private func drawRoomSprite(_ roomSprite: RoomSprite, _ sprite: Sprite, _ roomIndex: Int, _ buffer: PixelBuffer) {
         let frameInfo = sprite.frame(at: Int(roomSprite.spriteID))
-        let scale = CGFloat((frameInfo.realWidth << 8) / roomSprite.scale) / CGFloat(frameInfo.realWidth)
+        let scale = CGFloat((frameInfo.width << 8) / roomSprite.scale) / CGFloat(frameInfo.width)
 
         var fx: SpriteEffect {
             return .transform(offset: roomSprite.paletteOffset, flipX: roomSprite.flipX, flipY: roomSprite.flipY, scale: scale)
@@ -452,16 +321,187 @@ final class Scenery {
     }
     
     
-    private func drawPolygon(_ roomPolygon: RoomPolygon, _ buffer: PixelBuffer) {
-        if roomPolygon.isRect {
-            Primitives.fillRect(roomPolygon.asRect(), Int(roomPolygon.paletteOffset), buffer, isOffset: roomPolygon.paletteOffset <= 64)
-        } else {
-            Primitives.fillPolygon(roomPolygon.asPoints(), Int(roomPolygon.paletteOffset), buffer, isOffset: roomPolygon.paletteOffset <= 64)
-        }
+    private func drawPolygon(_ roomPolygon: RoomPolygonV2, _ buffer: PixelBuffer) {
+        Primitives.fillPolygonV2(roomPolygon, buffer, isOffset: roomPolygon.paletteOffset <= 64)
     }
     
     
     private func drawLine(_ roomLine: RoomLine, _ buffer: PixelBuffer) {
         Primitives.drawLine(roomLine.pt1, roomLine.pt2, Int(roomLine.paletteOffset), buffer)
+    }
+}
+
+
+extension Scenery {
+    private func parsePolygon(_ room: inout Room, _ command: UInt8, _ drawCommand: UInt8, _ paletteIndex: UInt8) {
+        engine.logger.log(.debug, " - Polygon:")
+        
+        var polygonSideDown = [UInt16]()
+        var polygonSideUp = [UInt16]()
+        
+        let hGradient = 16 * Int16(resource.stream!.readSByte())
+        let vGradient = 16 * Int16(resource.stream!.readSByte())
+        
+        let startX = resource.stream!.readUInt16LE()
+        let startY = resource.stream!.readUInt16LE()
+
+        // Part 1
+        var x: UInt16
+        var y: UInt16
+        var lastX = startX & 0x3FFF
+        var lastY = startY
+        
+        repeat {
+            x = resource.stream!.readUInt16LE()
+            y = resource.stream!.readUInt16LE()
+            
+            addPolygonSection(lastX, lastY, x & 0x3FFF, y, startY, &polygonSideDown)
+            
+            lastX = x & 0x3FFF
+            lastY = y
+        } while (x & 0x4000) == 0
+        
+        let finalX = lastX
+        let finalY = lastY
+        
+        // Part 2
+        lastX = startX
+        lastY = startY
+        
+        if (x & 0x8000) == 0 {
+            repeat {
+                x = resource.stream!.readUInt16LE()
+                y = resource.stream!.readUInt16LE()
+                
+                addPolygonSection(lastX, lastY, x & 0x3FFF, y, startY, &polygonSideUp)
+                
+                lastX = x & 0x3FFF
+                lastY = y
+            } while (x & 0x8000) == 0
+        }
+
+        addPolygonSection(lastX, lastY, finalX, finalY, startY, &polygonSideUp)
+        
+        let polygon = RoomPolygonV2(
+            command: command,
+            drawCommand: drawCommand,
+            paletteOffset: paletteIndex,
+            hGradient: hGradient,
+            vGradient: vGradient,
+            startY: startY,
+            finalY: finalY,
+            polygonSideUp: polygonSideUp,
+            polygonSideDown: polygonSideDown
+        )
+        
+        room.commands.append(polygon)
+    }
+    
+    
+    private func addPolygonSectionHorizontal(_ x0: UInt16, _ x1: UInt16, _ polygonSide: inout [UInt16]) {
+        polygonSide.append(min(x0, x1))
+    }
+    
+    
+    private func addPolygonSectionVertical(_ x0: UInt16, _ y0: UInt16, _ deltaY: Int, _ signY: Int, _ polygonSide: inout [UInt16]) {
+        var y0 = Int(y0)
+        
+        if signY < 0 {
+            y0 -= deltaY
+        } else {
+            y0 += deltaY
+        }
+        
+        var n = deltaY + 1
+        
+        repeat {
+            polygonSide.append(x0)
+            n -= 1
+        } while n > 0
+    }
+    
+    
+    private func addPolygonSection(_ x0: UInt16, _ y0: UInt16, _ x1: UInt16, _ y1: UInt16, _ startY: UInt16, _ polygonSide: inout [UInt16]) {
+        engine.logger.log(.debug, "   - Section: x0=\(x0), y0=\(y0), x1=\(x1), y1=\(y1), startY=\(startY)")
+        
+        var deltaX = -(Int(x0) - Int(x1))
+        var deltaY = -(Int(y0) - Int(y1))
+        
+        if deltaX == 0 && deltaY == 0 {
+            return
+        }
+        
+        if deltaY == 0 {
+            addPolygonSectionHorizontal(x0, x1, &polygonSide)
+            return
+        }
+        
+        var signY = 1
+        
+        if deltaY < 0 {
+            deltaY = -deltaY
+            signY = -signY
+        }
+        
+        if deltaX == 0 {
+            addPolygonSectionVertical(x0, y0, deltaY, signY, &polygonSide)
+            return
+        }
+        
+        var signX = 1
+        
+        if deltaX < 0 {
+            signX = -signX
+            deltaX = -deltaX
+        }
+        
+        let bp6 = Int16(signY)
+        let bp4 = Int16(signX)
+        var bp2 = Int16(signY)
+        var bp0 = Int16(signX)
+        
+        var minorDelta = deltaY
+        var majorDelta = deltaX
+        
+        if deltaX > deltaY {
+            bp2 = 0
+        } else {
+            if deltaY == 0 {
+                return
+            }
+            
+            swap(&minorDelta, &majorDelta)
+            bp0 = 0
+        }
+        
+        var ax = Int16(truncatingIfNeeded: majorDelta / 2)
+        var cx = Int16(truncatingIfNeeded: majorDelta)
+        var x0 = x0
+
+        repeat {
+            ax += Int16(truncatingIfNeeded: minorDelta)
+            
+            var dx: Int16
+            var bx: Int16
+            
+            if ax >= majorDelta {
+                ax -= Int16(truncatingIfNeeded: majorDelta)
+                dx = bp4
+                bx = bp6
+            } else {
+                dx = bp0
+                bx = bp2
+            }
+            
+            dx += Int16(x0)
+            
+            if bx == 1 {
+                polygonSide.append(x0)
+            }
+            
+            x0 = UInt16(bitPattern: dx)
+            
+            cx -= 1
+        } while cx > 0
     }
 }
