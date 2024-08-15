@@ -21,6 +21,8 @@ final class Renderer: NSObject, ObservableObject, MTKViewDelegate {
     private var vertexBuffer: MTLBuffer
     private var pipelineState: MTLRenderPipelineState
     private var rawBufferPointer: UnsafeMutablePointer<UInt8>
+    private var shouldTakeScreenshot = false
+    private var screenshotScale = 3
 
     var metalView: MTKView
 
@@ -115,6 +117,12 @@ final class Renderer: NSObject, ObservableObject, MTKViewDelegate {
             n += 1
         }
         
+        // Screenshots are taken one rendering to framebuffer is done
+        if shouldTakeScreenshot {
+            captureToPNG(screenshotScale)
+            shouldTakeScreenshot = false
+        }
+        
         // Fill the texture with RGBA pixel buffer data
         texture.replace(region: region, mipmapLevel: 0, withBytes: rawBufferPointer, bytesPerRow: 320 * 4)
     }
@@ -153,6 +161,64 @@ final class Renderer: NSObject, ObservableObject, MTKViewDelegate {
         commandBuffer.commit()
         
         tick += 1
+    }
+    
+    
+    func requestScreenshot(_ scale: Int = 1) {
+        self.screenshotScale = scale
+        self.shouldTakeScreenshot = true
+    }
+    
+    
+    private func captureToPNG(_ scale: Int) {
+        let bytesPerPixel = 4 // ABGR has 4 bytes per pixel
+        let bitsPerComponent = 8
+        let bytesPerRow = self.region.size.width * bytesPerPixel
+        
+        // Create a data provider from the components array
+        guard let dataProvider = CGDataProvider(data: NSData(bytes: self.rawBufferPointer, length: self.frameSize)) else {
+            DuneEngine.shared.logger.log(.error, "Error creating data provider")
+            return
+        }
+        
+        // Create a CGImage from the data
+        let bitmapInfo: CGBitmapInfo = [ CGBitmapInfo(rawValue: CGImageAlphaInfo.noneSkipLast.rawValue), .byteOrder32Big ]
+        
+        guard let cgImage = CGImage(width: self.region.size.width, height: self.region.size.height, bitsPerComponent: bitsPerComponent, bitsPerPixel: bytesPerPixel * bitsPerComponent, bytesPerRow: bytesPerRow, space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: bitmapInfo, provider: dataProvider, decode: nil, shouldInterpolate: false, intent: .defaultIntent) else {
+            DuneEngine.shared.logger.log(.error, "Error creating CGImage")
+            return
+        }
+        
+        // Resize the image
+        let scaledSize = CGSize(width: self.region.size.width * scale, height: self.region.size.height * scale)
+        
+        guard let resizedImage = cgImage.resize(to: scaledSize) else {
+            DuneEngine.shared.logger.log(.error, "Error resizing image")
+            return
+        }
+        
+        // Create a destination URL
+        let date = NSDate()
+        let fileName = "DuneCapture_\(date.timeIntervalSince1970)@\(scale)x.png"
+        let downloadsDirectory = FileManager.default.urls(for: .downloadsDirectory, in: .userDomainMask).first!
+        let fileURL = downloadsDirectory.appendingPathComponent(fileName)
+        
+        // Create a CGImageDestination
+        guard let destination = CGImageDestinationCreateWithURL(fileURL as NSURL, kUTTypePNG, 1, nil) else {
+            DuneEngine.shared.logger.log(.error, "Error creating image destination")
+            return
+        }
+        
+        // Add the CGImage to the destination
+        CGImageDestinationAddImage(destination, resizedImage, nil)
+        
+        // Finalize the destination to write the image to disk
+        guard CGImageDestinationFinalize(destination) else {
+            DuneEngine.shared.logger.log(.error, "Error finalizing image destination")
+            return
+        }
+        
+        DuneEngine.shared.logger.log(.info, "Image saved successfully")
     }
 }
 

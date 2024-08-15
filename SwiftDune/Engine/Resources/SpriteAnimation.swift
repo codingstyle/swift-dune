@@ -39,6 +39,11 @@ struct SpriteAnimation {
     static func parseAnimations(_ resource: Resource, animationOffset: UInt32) -> [SpriteAnimation] {
         let engine = DuneEngine.shared
 
+        if resource.fileName == "VER.HSQ" {
+            let animationResource = Resource("VERBIN.HSQ")
+            return parseWormRideAnimations(animationResource)
+        }
+        
         if animationOffset >= resource.stream!.size - 2 {
             // No animations found
             return []
@@ -325,6 +330,57 @@ struct SpriteAnimation {
         }
 
         animations.append(animation)
+        return animations
+    }
+    
+    
+    static func parseWormRideAnimations(_ resource: Resource) -> [SpriteAnimation] {
+        resource.stream!.skip(88) // Skip first header part
+        
+        var animations: [SpriteAnimation] = []
+        
+        var imageGroups: [SpriteAnimationImageGroup] = []
+        var imageGroup = SpriteAnimationImageGroup()
+        
+        while resource.stream!.offset < 577 {
+            if resource.stream!.readByte(peek: true) == 0x00 {
+                imageGroups.append(imageGroup)
+                imageGroup = SpriteAnimationImageGroup()
+                
+                resource.stream!.skip(1)
+            }
+            
+            let spriteIndex = UInt16(resource.stream!.readByte() - 1)
+            let x = Int16(resource.stream!.readByte())
+            let y = Int16(resource.stream!.readByte())
+            
+            let spriteImage = SpriteAnimationImage(imageNumber: spriteIndex, xOffset: x, yOffset: y)
+            imageGroup.images.append(spriteImage)
+        }
+        
+        imageGroups.append(imageGroup)
+
+        // Animations
+        var animation = SpriteAnimation(x: 0, y: 12, width: 320, height: 152)
+        
+        while !resource.stream!.isEOF() {
+            if resource.stream!.readByte(peek: true) == 0xFF {
+                animations.append(animation)
+                animation = SpriteAnimation(x: 0, y: 12, width: 320, height: 152)
+                resource.stream!.skip(1)
+            }
+            
+            if resource.stream!.isEOF() {
+                break
+            }
+            
+            let groupIndex = Int(resource.stream!.readUInt16LE() - 2)
+            
+            var frame = SpriteAnimationFrame()
+            frame.groups.append(imageGroups[groupIndex])
+            animation.frames.append(frame)
+        }
+        
         return animations
     }
 }

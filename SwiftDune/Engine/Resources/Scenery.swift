@@ -322,7 +322,7 @@ final class Scenery {
     
     
     private func drawPolygon(_ roomPolygon: RoomPolygon, _ buffer: PixelBuffer) {
-        Primitives.fillPolygonV2(roomPolygon, buffer, isOffset: roomPolygon.paletteOffset <= 64)
+        Primitives.fillPolygon(roomPolygon, buffer, isOffset: roomPolygon.paletteOffset <= 64)
     }
     
     

@@ -101,6 +101,8 @@ final class Video {
     
     private func parseHeader() {
         let headerSize = resource.stream!.readUInt16LE()
+
+        // Initial palette block
         let paletteBlock = parsePaletteBlock()
         
         // Zero or more 0xFF bytes of padding
@@ -112,12 +114,14 @@ final class Video {
         //print("Frame count: \(frameCount)")
 
         // Offsets for superchunks
-        let chunkOffsets: [UInt32] = []
+        var chunkOffsets: [UInt32] = []
 
-        /*while resource.stream!.offset < headerSize {
+        while resource.stream!.offset < headerSize {
             let offset = resource.stream!.readUInt32()
             chunkOffsets.append(offset)
-        }*/
+            
+            engine.logger.log(.debug, "parseHeader(): chunkOffset=\(String.fromDWord(offset))")
+        }
         
         videoHeader = VideoHeader(headerSize: headerSize, palette: paletteBlock.paletteChunks, chunkOffsets: chunkOffsets)
         videoHeader?.dumpInfo()
@@ -144,7 +148,9 @@ final class Video {
             
             while resource.stream!.offset < endSuperchunkOffset {
                 let chunkTag = resource.stream!.readUInt16LE(peek: true)
-                
+
+                engine.logger.log(.debug, "Chunk tag: \(String.fromWord(chunkTag))")
+
                 if chunkTag == VideoTwoCC.pl.rawValue {
                     engine.logger.log(.debug, "PL ->")
                     let paletteBlock = parsePaletteBlock()
@@ -249,13 +255,19 @@ final class Video {
         }
 
         // Verify checksum
+        let videoHeaderBytes = resource.stream!.readBytes(6, peek: true)
+        let checksum = UInt8(videoHeaderBytes.reduce(0, { Int($0) + Int($1) }) & 0xFF)
+        engine.logger.log(.debug, "parseVideoBlock(): checksum=\(checksum)")
+        
+        if checksum != 0xAB {
+            return nil
+        }
+        
         let uncompressedSize = resource.stream!.readUInt16LE()
         let _ = resource.stream!.readByte() // Should be zero
         let compressedSize = resource.stream!.readUInt16LE()
-        let salt = resource.stream!.readByte()
-        let sum = ((uncompressedSize >> 8) + (uncompressedSize & 0xFF) + (compressedSize >> 8) + (compressedSize & 0xFF) + UInt16(salt)) & 0xFF
+        let _ = resource.stream!.readByte() // Salt
 
-        engine.logger.log(.debug, "Checksum = \(sum)")
         engine.logger.log(.debug, "uncompressedSize = \(uncompressedSize)")
         engine.logger.log(.debug, "computedSize = \(61669 - resource.stream!.offset)")
 
@@ -279,7 +291,7 @@ final class Video {
             height: height,
             flags: flags,
             mode: mode,
-            sum: UInt8(sum),
+            sum: checksum,
             uncompressedBytesCount: uncompressedBytes.count,
             uncompressedBytesPointer: UnsafeMutableRawPointer.allocate(byteCount: uncompressedBytes.count, alignment: 1)
         )

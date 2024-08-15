@@ -3,13 +3,15 @@
 - [X] FIX: Fade in Dune title (palette effect)
 - [X] FIX: Fade in on Palace stairs (palette effect)
 - [X] ADD: call a worm animation
-- [X] Reverse engineer animations for SHAI
-- [X] Reverse engineer animation for DEATH
+- [X] ADD: Reverse engineer animations for SHAI
+- [X] ADD: Reverse engineer animation for DEATH
 - [X] ADD: Handle mouse click events
-- [ ] Reverse engineer animation for ATTACK
-- [ ] Reverse engineer animation for VER
 
+- [ ] ADD: Reverse engineer animation for ATTACK
+- [ ] ADD: Reverse engineer animation for VER
+- [ ] BUG: Globe/Stars palette on prologue
 - [ ] ADD: support gradients on polygons
+
 - [ ] UPDATE: Sprite rendering issue on DUNES / 4bpp/8bpp sprite rendering ?
 
 - [ ] UPDATE: rewrite editor to use node system

@@ -69,8 +69,6 @@ final class GameViewModel: ObservableObject, DuneEngineDelegate {
     
     
     func screenshot() {
-        let date = NSDate()
-        let fileName = "DuneCapture_\(date.timeIntervalSince1970).png"
-        engine.saveBufferToPNG(as: fileName, scale: 3)
+        engine.renderer.requestScreenshot(3)
     }
 }

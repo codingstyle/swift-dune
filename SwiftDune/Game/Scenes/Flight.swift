@@ -86,10 +86,10 @@ final class Flight: DuneNode {
         // 1. Randomize a sprite in 0-12 range
         // 2. Choose a path
         
-        if (frameCount % 20) == 0 {
+        if (frameCount % 10) == 0 {
             var i = 0
             
-            while i < 3 {
+            while i < 4 {
                 let index = Math.random(0, 12)
                 let pathIndex = Math.random(0, flightPaths.count - 1)
                 let path = flightPaths[pathIndex]
@@ -104,22 +104,23 @@ final class Flight: DuneNode {
                 
                 i += 1
             }
-        }
-        
-        for var sprite in flightSprites {
-            let x = sprite.xAnimation.interpolate(currentTime)
-            let y = sprite.yAnimation.interpolate(currentTime)
-            let scale = 2.0 * Double(y - sprite.yAnimation.startValue) / Double(sprite.yAnimation.endValue - sprite.yAnimation.startValue)
-            
-            if y < 152 || x > -80 {
-                sprite.position = DunePoint(x, y)
-                sprite.scale = scale
-            } else {
-                sprite.markForRemoval = true
+
+            for var sprite in flightSprites {
+                let x = sprite.xAnimation.interpolate(currentTime)
+                let y = sprite.yAnimation.interpolate(currentTime)
+                let scale = 2.0 * Double(y - sprite.yAnimation.startValue) / Double(sprite.yAnimation.endValue - sprite.yAnimation.startValue)
+                
+                if y < 152 || x > -80 {
+                    sprite.position = DunePoint(x, y)
+                    sprite.scale = scale
+                } else {
+                    sprite.markForRemoval = true
+                }
             }
+            
+            flightSprites.removeAll { $0.markForRemoval == true }
         }
         
-        flightSprites.removeAll { $0.markForRemoval == true }
         frameCount += 1
     }
     

@@ -228,12 +228,6 @@ final class DuneEngine {
         let sentence = Sentence(fileName)
         return sentence
     }
-    
-    
-    func saveBufferToPNG(as fileName: String, scale: Int = 1) {
-        let currentOffscreenBuffer = screenBuffers[offscreenBufferIndex]
-        currentOffscreenBuffer.saveToPNG(as: fileName, scale: scale)
-    }
 }
 
 
