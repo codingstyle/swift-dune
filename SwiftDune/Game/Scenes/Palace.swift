@@ -134,7 +134,7 @@ final class Palace: DuneNode {
 
         // TODO: improve this according to day time
         if currentRoom == .stairs && dayMode == .sunrise {
-            let sunriseProgress = Math.clampf((currentTime - 1.0) / 2.0, 0.0, 1.0)
+            let sunriseProgress = Math.clampf((currentTime - 2.0) / 3.0, 0.0, 1.0)
             sky.lightMode = .custom(index: 16, prevIndex: 3, blend: sunriseProgress)
         } else {
             sky.lightMode = .day
@@ -160,22 +160,25 @@ final class Palace: DuneNode {
         } else if currentRoom == .stairs {
             sky.render(intermediateFrameBuffer, width: 200, at: 0, type: .large)
             palaceScenery.drawRoom(currentRoom.rawValue, buffer: intermediateFrameBuffer)
-            
-            engine.palette.stash()
-            
+
             // Fade on palace
             if dayMode == .sunrise {
-                let sunriseProgress = Math.clampf((currentTime - 1.0) / 2.0, 0.0, 1.0)
+                if currentTime > 1.0 {
+                    palaceScenery.setPalette(currentRoom.rawValue)
+                    engine.palette.stash()
+                }
+
+                let sunriseProgress = Math.clampf((currentTime - 2.0) / 3.0, 0.0, 1.0)
                 Effects.fade(progress: sunriseProgress, startIndex: 112, endIndex: 127)
+
+                if currentTime == 0.0 {
+                    engine.palette.stash()
+                }
             }
         }
         
         if let characterSprite = characterSprite {
             characterSprite.drawAnimation(0, buffer: intermediateFrameBuffer, time: currentTime)
-        }
-        
-        if currentTime < 0.1 {
-            engine.palette.stash()
         }
         
         var fxTransition: SpriteEffect {

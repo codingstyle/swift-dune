@@ -12,6 +12,8 @@ final class Baron: DuneNode {
     
     private var baronSprite: Sprite?
     private var backgroundSprite: Sprite?
+    private var sardaukarAnimation: DuneAnimation<Int16>?
+    
     private var duration: TimeInterval = 3.0
     private var showSardaukar: Bool = false
     private var transitionIn: TransitionEffect = .none
@@ -28,12 +30,19 @@ final class Baron: DuneNode {
     override func onEnable() {
         baronSprite = engine.loadSprite("BARO.HSQ")
         backgroundSprite = engine.loadSprite("BACK.HSQ")
+        sardaukarAnimation = DuneAnimation(
+            from: Int16(-150),
+            to: Int16(0),
+            startTime: 2.0,
+            endTime: 2.2
+        )
     }
     
     
     override func onDisable() {
         baronSprite = nil
         backgroundSprite = nil
+        sardaukarAnimation = nil
         currentTime = 0.0
         duration = 3.0
         showSardaukar = false
@@ -43,7 +52,6 @@ final class Baron: DuneNode {
     
     
     override func onParamsChange() {
-        
         if let durationParam = params["duration"] {
             self.duration = durationParam as! TimeInterval
         }
@@ -124,12 +132,12 @@ final class Baron: DuneNode {
     
     
     private func drawAnimatedSardaukars(buffer: PixelBuffer, time: Double) {
-        guard let backgroundSprite = backgroundSprite else {
+        guard let backgroundSprite = backgroundSprite,
+              let sardaukarAnimation = sardaukarAnimation else {
             return
         }
         
-        let progress: Double = (time - 2.0) / 0.2
-        let x: Int16 = -150 + Int16(Math.clampf(progress, 0.0, 1.0) * 150.0)
+        let x = sardaukarAnimation.interpolate(time)
         
         backgroundSprite.drawFrame(5, x: x, y: 13, buffer: buffer)
         backgroundSprite.drawFrame(6, x: x, y: 13, buffer: buffer)

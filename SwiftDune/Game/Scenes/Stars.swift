@@ -52,6 +52,9 @@ final class Stars: DuneNode {
         mode = .stars
         duration = 0.0
         transitionIn = .none
+        
+        contextBuffer.clearBuffer()
+        contextBuffer.tag = 0x0
     }
     
     
@@ -154,7 +157,7 @@ final class Stars: DuneNode {
             starsSprite.drawFrame(1, x: 302, y: 0, buffer: contextBuffer)
             starsSprite.drawFrame(2, x: 604, y: 0, buffer: contextBuffer)
             starsSprite.drawFrame(36, x: 45, y: 60, buffer: contextBuffer)
-            starsSprite.drawFrame(3, x: 124, y: 74, buffer: contextBuffer)
+            starsSprite.drawFrame(3, x: 124, y: 72, buffer: contextBuffer)
             starsSprite.drawFrame(37, x: 235, y: 106, buffer: contextBuffer)
 
             contextBuffer.tag = 0x0005
@@ -193,7 +196,7 @@ final class Stars: DuneNode {
 
         // Arrakis rotation = frames 3 to 35
         let arrakisIndex = 3 + UInt16(32.0 * ratio)
-        let firstArrakisFrameInfo = starsSprite.frame(at: 3) // 124 x 98
+        let firstArrakisFrameInfo = starsSprite.frame(at: 3) // 124 x 72
         let firstDelta = (Int16(320 - firstArrakisFrameInfo.width) / 2) - 124
         
         let arrakisFrameInfo = starsSprite.frame(at: Int(arrakisIndex))
@@ -201,6 +204,8 @@ final class Stars: DuneNode {
         let ay = Int16(152 - arrakisFrameInfo.height) / 2
         starsSprite.drawFrame(arrakisIndex, x: ax, y: ay, buffer: buffer)
 
+        //print("ARRAKIS -> frameIndex: \(arrakisIndex), x=\(ax), y=\(ay)")
+       
         // Red planet shift: frames 37 to 44
         let redPlanetIndex = 37 + UInt16(7.0 * ratio)
         let redPlanetFrameInfo = starsSprite.frame(at: Int(redPlanetIndex))

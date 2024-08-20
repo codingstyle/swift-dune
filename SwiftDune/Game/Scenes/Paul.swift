@@ -79,7 +79,7 @@ final class Paul: DuneNode {
     override func update(_ elapsedTime: TimeInterval) {
         currentTime += elapsedTime
         
-        if currentTime > 8.0 {
+        if currentTime > duration {
             DuneEngine.shared.sendEvent(self, .nodeEnded)
         }
     }
@@ -126,7 +126,6 @@ final class Paul: DuneNode {
             paulSprite.setPalette()
             paulSprite.drawAnimation(0, buffer: buffer, time: currentTime - 2.0 + (0.016 * 40.0))
         }
-        
         
         if currentTime > duration - 2.0 {
             if contextBuffer.tag != 0x0002 {

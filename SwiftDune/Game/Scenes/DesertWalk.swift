@@ -89,6 +89,8 @@ final class DesertWalk: DuneNode {
             return
         }
 
+        engine.palette.unstash()
+
         drawBackground(buffer)
 
         // Dunes background

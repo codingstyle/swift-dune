@@ -69,7 +69,7 @@ struct SpriteAnimation {
         } else if resource.fileName == "DEATH1.HSQ" {
             return parseDeathAnimations(resource, animationOffset: animationOffset)
         } else if resource.fileName == "ATTACK.HSQ" {
-            // TODO: parse animations
+            return parseAttackAnimations(resource, animationOffset: animationOffset)
         }
         
         return parseCharacterAnimations(resource, animationOffset: animationOffset)
@@ -378,6 +378,57 @@ struct SpriteAnimation {
             
             var frame = SpriteAnimationFrame()
             frame.groups.append(imageGroups[groupIndex])
+            animation.frames.append(frame)
+        }
+        
+        return animations
+    }
+    
+    
+    static func parseAttackAnimations(_ resource: Resource, animationOffset: UInt32) -> [SpriteAnimation] {
+        var animations: [SpriteAnimation] = []
+        
+        //return animations
+
+        resource.stream!.seek(animationOffset)
+        resource.stream!.skip(1) // 0x00
+
+        let animHeight = resource.stream!.readUInt16()
+        let animWidth = resource.stream!.readUInt16()
+        var frameCount = resource.stream!.readByte()
+        resource.stream!.skip(1)
+
+        var animation = SpriteAnimation(x: 0, y: 0, width: animWidth, height: animHeight)
+
+        while true {
+            if animation.frames.count == frameCount {
+                animations.append(animation)
+
+                if animations.count == 3 {
+                    break
+                }
+                
+                let animHeight = resource.stream!.readUInt16()
+                let animWidth = resource.stream!.readUInt16()
+                frameCount = resource.stream!.readByte()
+                resource.stream!.skip(1)
+                
+                animation = SpriteAnimation(x: 0, y: 0, width: animWidth, height: animHeight)
+                continue
+            }
+            
+            let spriteIndex = UInt16(resource.stream!.readByte())
+            let x = Int16(resource.stream!.readByte())
+            let y = resource.stream!.isEOF() ? Int16(63) : Int16(resource.stream!.readByte())
+
+            let spriteImage = SpriteAnimationImage(imageNumber: spriteIndex, xOffset: x, yOffset: y)
+
+            var group = SpriteAnimationImageGroup()
+            group.images.append(spriteImage)
+
+            var frame = SpriteAnimationFrame()
+            frame.groups.append(group)
+
             animation.frames.append(frame)
         }
         

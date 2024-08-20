@@ -33,6 +33,8 @@
 		065AEE8B2B93B2B000547487 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 065AEE8A2B93B2B000547487 /* Logger.swift */; };
 		066D9D3B2B4A9EC40003ADD3 /* LogoSwap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 066D9D3A2B4A9EC40003ADD3 /* LogoSwap.swift */; };
 		066D9D3D2B4AA0510003ADD3 /* Stars.swift in Sources */ = {isa = PBXBuildFile; fileRef = 066D9D3C2B4AA0510003ADD3 /* Stars.swift */; };
+		067791222C728CE0008CB4A7 /* StatsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 067791212C728CE0008CB4A7 /* StatsView.swift */; };
+		067791242C728CEF008CB4A7 /* StatsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 067791232C728CEF008CB4A7 /* StatsViewModel.swift */; };
 		06799CBB2B3600B000A196A3 /* WormCall.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06799CBA2B3600AF00A196A3 /* WormCall.swift */; };
 		0682820C2B3DA208009C9FF7 /* Paul.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0682820B2B3DA208009C9FF7 /* Paul.swift */; };
 		0682820E2B3E06C5009C9FF7 /* Sunrise.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0682820D2B3E06C5009C9FF7 /* Sunrise.swift */; };
@@ -106,6 +108,8 @@
 		065AEE8A2B93B2B000547487 /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
 		066D9D3A2B4A9EC40003ADD3 /* LogoSwap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogoSwap.swift; sourceTree = "<group>"; };
 		066D9D3C2B4AA0510003ADD3 /* Stars.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Stars.swift; sourceTree = "<group>"; };
+		067791212C728CE0008CB4A7 /* StatsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatsView.swift; sourceTree = "<group>"; };
+		067791232C728CEF008CB4A7 /* StatsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatsViewModel.swift; sourceTree = "<group>"; };
 		06799CBA2B3600AF00A196A3 /* WormCall.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WormCall.swift; sourceTree = "<group>"; };
 		0682820B2B3DA208009C9FF7 /* Paul.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Paul.swift; sourceTree = "<group>"; };
 		0682820D2B3E06C5009C9FF7 /* Sunrise.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sunrise.swift; sourceTree = "<group>"; };
@@ -283,6 +287,8 @@
 				06A7E8672AD41B5F0042D878 /* GameViewModel.swift */,
 				06A7E8812AD6FA400042D878 /* EditorView.swift */,
 				06A7E8832AD6FBA80042D878 /* EditorViewModel.swift */,
+				067791212C728CE0008CB4A7 /* StatsView.swift */,
+				067791232C728CEF008CB4A7 /* StatsViewModel.swift */,
 				0699D2682A93C685006287E0 /* Assets.xcassets */,
 				0699D26D2A93C685006287E0 /* SwiftDune.entitlements */,
 			);
@@ -424,6 +430,7 @@
 				0638C2532AD1FD2E006B00CF /* Logo.swift in Sources */,
 				0682820C2B3DA208009C9FF7 /* Paul.swift in Sources */,
 				068300842A9D080800414896 /* Sound.swift in Sources */,
+				067791222C728CE0008CB4A7 /* StatsView.swift in Sources */,
 				061725ED2B7968DA00254635 /* Palace.swift in Sources */,
 				0682820E2B3E06C5009C9FF7 /* Sunrise.swift in Sources */,
 				06C16E3E2B57B64F00E54A38 /* Feyd.swift in Sources */,
@@ -451,6 +458,7 @@
 				062779682B9AEED00046E068 /* Main.swift in Sources */,
 				06A7E8872AD700910042D878 /* SpriteListView.swift in Sources */,
 				06AB96D72BEE013300482823 /* Animation.swift in Sources */,
+				067791242C728CEF008CB4A7 /* StatsViewModel.swift in Sources */,
 				06566A692ADEA3A800AF5734 /* Font.swift in Sources */,
 				06799CBB2B3600B000A196A3 /* WormCall.swift in Sources */,
 				06D16B682C5D557300C85A78 /* Death.swift in Sources */,

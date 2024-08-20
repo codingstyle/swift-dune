@@ -251,6 +251,15 @@ final class Scenery {
     }
     
     
+    func setPalette(_ roomIndex: Int) {
+        guard let sprite = sprite(at: roomIndex) else {
+            return
+        }
+        
+        sprite.setPalette()
+    }
+    
+    
     func drawRoom(_ index: Int, buffer: PixelBuffer) {
         let room = rooms[index]
         

@@ -14,7 +14,7 @@ struct PaletteView: View {
     let paletteColumns: [GridItem] = [GridItem](repeating: GridItem(.fixed(12), spacing: 1), count: 16)
     
     var body: some View {
-        LazyVGrid(columns: paletteColumns, alignment: .leading, spacing: 1) {
+        LazyVGrid(columns: paletteColumns, alignment: .center, spacing: 1) {
             ForEach(0..<256) { i in
                 Rectangle()
                     .fill(Color(nsColor: palette[i]))

@@ -8,6 +8,8 @@
 import Foundation
 
 final class DesertBackground: DuneNode {
+    private let engine = DuneEngine.shared
+    
     private var desertSprite: Sprite?
     private var sky: Sky?
     
@@ -34,7 +36,7 @@ final class DesertBackground: DuneNode {
               let sky = sky else {
             return
         }
-        
+
         // Apply sky gradient with blue palette
         sky.lightMode = .day
         sky.render(buffer)

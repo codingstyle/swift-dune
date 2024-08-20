@@ -13,6 +13,7 @@ enum DuneViewMode {
 }
 
 struct DuneMenus: Commands {
+    @Environment(\.openWindow) private var openWindow
     @Binding var viewMode: DuneViewMode
     
     var body: some Commands {
@@ -21,11 +22,16 @@ struct DuneMenus: Commands {
                 viewMode = .game
             }
             .keyboardShortcut("G", modifiers: .command)
-            
+
             Button("Editor View") {
                 viewMode = .editor
             }
             .keyboardShortcut("E", modifiers: .command)
+
+            Button("Show stats") {
+                openWindow(id: "StatsWindow")
+            }
+            .keyboardShortcut("S", modifiers: .option)
         })
     }
 }
@@ -45,5 +51,11 @@ struct SwiftDuneApp: App {
         .commands {
             DuneMenus(viewMode: $viewMode)
         }
+        
+        WindowGroup(id: "StatsWindow") {
+            StatsView()
+        }
+        .windowResizability(.contentMinSize)
+        .defaultPosition(.trailing)
     }
 }

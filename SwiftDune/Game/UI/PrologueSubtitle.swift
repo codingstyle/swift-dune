@@ -29,6 +29,7 @@ final class PrologueSubtitle: DuneNode {
     override func onDisable() {
         gameFont = nil
         sentences = nil
+        sentenceNumber = 0
     }
     
     
@@ -42,6 +43,10 @@ final class PrologueSubtitle: DuneNode {
     override func render(_ buffer: PixelBuffer) {
         guard let gameFont = gameFont,
               let sentences = sentences else {
+            return
+        }
+        
+        if sentenceNumber == 0 {
             return
         }
         

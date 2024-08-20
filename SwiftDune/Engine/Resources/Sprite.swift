@@ -83,9 +83,6 @@ final class Sprite: Equatable {
         
         if resource.fileName == "SUNRS.HSQ" || resource.fileName == "BALCON.HSQ" || resource.fileName == "SKY.HSQ" {
             self.parseAlternatePalettes()
-        } else if resource.fileName == "VER.HSQ" {
-            let verAnimResource = Resource("VERBIN.HSQ")
-            animations = SpriteAnimation.parseAnimations(resource, animationOffset: 0)
         } else {
             animations = SpriteAnimation.parseAnimations(resource, animationOffset: animationOffset)
         }
@@ -197,7 +194,7 @@ final class Sprite: Equatable {
             let header = resource.stream!.readUInt16LE(peek: true)
             
             if header != 0x0000 {
-                print("parseAlternatePalettes(): ERROR - header should be 0x0000")
+                engine.logger.log(.error, "parseAlternatePalettes(): ERROR - header should be 0x0000")
                 break
             }
             
@@ -206,7 +203,7 @@ final class Sprite: Equatable {
             let chunkSize = resource.stream!.readUInt16LE()
 
             if chunkSize <= 2 {
-                print("parseAlternatePalettes(): ERROR - invalid chunk size")
+                engine.logger.log(.error, "parseAlternatePalettes(): ERROR - invalid chunk size")
                 break
             }
 
@@ -214,7 +211,7 @@ final class Sprite: Equatable {
             let paletteCount = UInt16(resource.stream!.readByte())
             
             if chunkSize - 2 != paletteCount * 3 {
-                print("parseAlternatePalettes(): not a palette part")
+                engine.logger.log(.error, "parseAlternatePalettes(): not a palette part")
                 resource.stream!.seek(resource.stream!.offset - 6)
                 break
             }
@@ -238,8 +235,6 @@ final class Sprite: Equatable {
         
             alternatePalettes.append(SpritePalette(chunk: paletteChunk, start: paletteStart, count: paletteCount))
         }
-        
-        engine.logger.log(.debug, "parseAlternatePalettes(): END OF PARSING \(resource.fileName) -> \(resource.stream!.offset) = \(resource.stream!.size)")
     }
     
     

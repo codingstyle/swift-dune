@@ -253,6 +253,7 @@ class EditorViewModel: ObservableObject {
             return
         }
 
+        self.clearBuffer()
         sprite.drawAnimation(UInt16(self.selectedSpriteAnimationIndex), buffer: buffer, time: currentTime)
         self.blitBuffer()
     }

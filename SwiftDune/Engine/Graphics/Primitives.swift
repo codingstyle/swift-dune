@@ -152,10 +152,9 @@ struct Primitives {
     }
     
     
-    static func drawGradientLineWithNoise(_ pixelBuffer: PixelBuffer, _ x: UInt16, _ y: UInt16, _ w: UInt16, _ bp: UInt16, _ si: UInt16, _ di: Int16, _ color: UInt16) {
+    static func drawGradientLineWithNoise(_ pixelBuffer: PixelBuffer, _ x: UInt16, _ y: UInt16, _ w: UInt16, _ bp: inout UInt16, _ si: UInt16, _ di: Int16, _ color: UInt16) {
         var offset = 320 * Int(y) + Int(x)
         var w = w
-        var bp = bp
         var color = Int(color)
         
         repeat {
@@ -165,7 +164,7 @@ struct Primitives {
             if lsb {
                 bp ^= si
             }
-            
+
             let v = (bp & 3) + ((UInt16(color) >> 8) & 0xFF) - 1
             color += Int(di)
 
@@ -179,9 +178,9 @@ struct Primitives {
     static func fillPolygon(_ polygon: RoomPolygon, _ buffer: PixelBuffer, isOffset: Bool = true) {
         let command = (UInt16(polygon.drawCommand) << 8) | (UInt16(polygon.command) & 0xFF)
 
-        let bp: UInt16 = (command & 0x3E00) != 0 ? 1 : 0
+        var bp: UInt16 = (command & 0x3E00) != 0 ? 1 : 0
         let ds22df: UInt16 = (command & 0x3E00) | 0x2
-        let color = (command & 0xFF) << 8
+        var color = (command & 0xFF) << 8
 
         //if (command & 0x0100) == 0 {
             var y: UInt16 = 0
@@ -201,13 +200,14 @@ struct Primitives {
                     x0,
                     y + polygon.startY,
                     w,
-                    bp,
+                    &bp,
                     ds22df,
                     polygon.hGradient,
                     color
                 )
 
                 y += 1
+                color = UInt16(bitPattern: Int16(truncatingIfNeeded: Int(color) + Int(polygon.vGradient)))
             }
         /*} else {
             print("Invalid polygon to draw")

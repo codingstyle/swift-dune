@@ -62,13 +62,11 @@ struct VideoFrame {
 struct VideoHeader {
     var headerSize: UInt16
     var palette: [VideoPalette]
-    var chunkOffsets: [UInt32]
     
     func dumpInfo() {
         print("Video header:")
         print("- Header size=\(headerSize)")
         //print("- Palette=\(palette)")
-        print("- Chunk offsets=\(chunkOffsets)")
     }
 }
 
@@ -103,27 +101,14 @@ final class Video {
         let headerSize = resource.stream!.readUInt16LE()
 
         // Initial palette block
-        let paletteBlock = parsePaletteBlock()
+        let paletteBlock = parsePaletteBlock(UInt32(headerSize))
         
-        // Zero or more 0xFF bytes of padding
+        // Skip bytes of padding (0xFF)
         while resource.stream!.readByte(peek: true) == 0xFF {
             resource.stream!.skip(1)
         }
-
-        //let frameCount = ((UInt32(headerSize) - resource.stream!.offset) / 4)
-        //print("Frame count: \(frameCount)")
-
-        // Offsets for superchunks
-        var chunkOffsets: [UInt32] = []
-
-        while resource.stream!.offset < headerSize {
-            let offset = resource.stream!.readUInt32()
-            chunkOffsets.append(offset)
-            
-            engine.logger.log(.debug, "parseHeader(): chunkOffset=\(String.fromDWord(offset))")
-        }
         
-        videoHeader = VideoHeader(headerSize: headerSize, palette: paletteBlock.paletteChunks, chunkOffsets: chunkOffsets)
+        videoHeader = VideoHeader(headerSize: headerSize, palette: paletteBlock.paletteChunks)
         videoHeader?.dumpInfo()
 
         resource.stream!.seek(UInt32(headerSize))
@@ -149,27 +134,19 @@ final class Video {
             while resource.stream!.offset < endSuperchunkOffset {
                 let chunkTag = resource.stream!.readUInt16LE(peek: true)
 
-                engine.logger.log(.debug, "Chunk tag: \(String.fromWord(chunkTag))")
+                engine.logger.log(.debug, "-----------------")
 
                 if chunkTag == VideoTwoCC.pl.rawValue {
                     engine.logger.log(.debug, "PL ->")
-                    let paletteBlock = parsePaletteBlock()
+                    let paletteBlock = parsePaletteBlock(resource.stream!.size)
                     videoFrame.paletteBlock = paletteBlock
                 } else if chunkTag == VideoTwoCC.sd.rawValue {
                     engine.logger.log(.debug, "SD ->")
                     parseSoundBlock()
                 } else if chunkTag == VideoTwoCC.mm.rawValue {
                     engine.logger.log(.debug, "MM ->")
-                    let size = resource.stream!.readUInt16LE()
-                    resource.stream!.skip(UInt32(size) - 4)
-                } else if chunkTag == VideoTwoCC.kl.rawValue {
-                    engine.logger.log(.debug, "KL ->")
-                    let size = resource.stream!.readUInt16LE()
-                    resource.stream!.skip(UInt32(size) - 4)
-                } else if chunkTag == VideoTwoCC.pt.rawValue {
-                    engine.logger.log(.debug, "PT ->")
-                    let size = resource.stream!.readUInt16LE()
-                    resource.stream!.skip(UInt32(size) - 4)
+                    let size = UInt32(resource.stream!.readUInt16LE())
+                    resource.stream!.skip(size - 4)
                 } else {
                     let videoBlock = parseVideoBlock(superchunkSize)
                     videoFrame.videoBlock = videoBlock
@@ -181,23 +158,25 @@ final class Video {
     }
     
     
-    private func parsePaletteBlock() -> PaletteBlock {
+    private func parsePaletteBlock(_ limitOffset: UInt32) -> PaletteBlock {
         var paletteChunks: [VideoPalette] = []
 
-        while true {
-            let paletteStart = UInt16(resource.stream!.readByte())
-            var paletteCount = UInt16(resource.stream!.readByte())
+        while resource.stream!.offset < limitOffset {
+            let h = resource.stream!.readUInt16LE()
             
             // 0x0100 marks a 3 byte leap
-            if paletteStart == 0x00 && paletteCount == 0x01 {
+            if h == 0x0100 {
                 resource.stream!.skip(3)
                 continue
             }
             
             // 0xFFFF marks the end of palette block
-            if paletteStart == 0xFF && paletteCount == 0xFF {
+            if h == 0xFFFF {
                 break
             }
+            
+            var paletteCount = (h >> 8)
+            let paletteStart = (h & 0xFF)
             
             if paletteCount == 0x00 {
                 paletteCount = 256
@@ -257,19 +236,17 @@ final class Video {
         // Verify checksum
         let videoHeaderBytes = resource.stream!.readBytes(6, peek: true)
         let checksum = UInt8(videoHeaderBytes.reduce(0, { Int($0) + Int($1) }) & 0xFF)
-        engine.logger.log(.debug, "parseVideoBlock(): checksum=\(checksum)")
         
-        if checksum != 0xAB {
+        if checksum != 0xAB && checksum != 0xAC && checksum != 0xAD {
             return nil
         }
-        
+
+        engine.logger.log(.debug, "parseVideoBlock(): checksum=\(checksum), mode=\(mode)")
+
         let uncompressedSize = resource.stream!.readUInt16LE()
         let _ = resource.stream!.readByte() // Should be zero
         let compressedSize = resource.stream!.readUInt16LE()
         let _ = resource.stream!.readByte() // Salt
-
-        engine.logger.log(.debug, "uncompressedSize = \(uncompressedSize)")
-        engine.logger.log(.debug, "computedSize = \(61669 - resource.stream!.offset)")
 
         let compressedBytes = resource.stream!.readBytes(UInt32(compressedSize) - 6)
         let frameStream = ResourceStream(compressedBytes)
