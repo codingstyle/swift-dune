@@ -43,10 +43,10 @@ final class Sunrise: DuneNode {
     
     
     override func onEnable() {
-        chaniSprite = engine.loadSprite("CHAN.HSQ")
-        lietSprite = engine.loadSprite("KYNE.HSQ")
-        villageSprite = engine.loadSprite("VILG.HSQ")
-        sunriseSprite = engine.loadSprite("SUNRS.HSQ")
+        chaniSprite = Sprite("CHAN.HSQ")
+        lietSprite = Sprite("KYNE.HSQ")
+        villageSprite = Sprite("VILG.HSQ")
+        sunriseSprite = Sprite("SUNRS.HSQ")
         sunriseSprite!.setPalette()
         
         let startTime = switch transitionIn {

@@ -101,7 +101,8 @@ struct Room {
 
 
 final class Scenery {
-    private var engine: DuneEngine
+    private let engine = DuneEngine.shared
+ 
     private var resource: Resource
     private var spriteIndices: [RoomSpriteIndices] = []
     private var characterSprite: Sprite
@@ -117,8 +118,7 @@ final class Scenery {
     
     var characters: Dictionary<Int, RoomCharacter> = [:]
 
-    init(_ fileName: String, engine: DuneEngine = DuneEngine.shared) {
-        self.engine = engine
+    init(_ fileName: String) {
         self.resource = Resource(fileName)
         self.characterSprite = Sprite("PERS.HSQ")
         

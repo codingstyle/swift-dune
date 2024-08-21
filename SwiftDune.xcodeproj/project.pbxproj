@@ -21,7 +21,7 @@
 		062779662B9AEB940046E068 /* Sky.swift in Sources */ = {isa = PBXBuildFile; fileRef = 062779652B9AEB940046E068 /* Sky.swift */; };
 		062779682B9AEED00046E068 /* Main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 062779672B9AEED00046E068 /* Main.swift */; };
 		0627796E2BA043280046E068 /* GlobeDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0627796D2BA043280046E068 /* GlobeDetailsView.swift */; };
-		062A77682B53FE9C001CA514 /* EngineTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 062A77672B53FE9C001CA514 /* EngineTypes.swift */; };
+		062A77682B53FE9C001CA514 /* Types.swift in Sources */ = {isa = PBXBuildFile; fileRef = 062A77672B53FE9C001CA514 /* Types.swift */; };
 		062A776A2B53FEB8001CA514 /* DuneNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 062A77692B53FEB8001CA514 /* DuneNode.swift */; };
 		062A776C2B53FF27001CA514 /* Queue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 062A776B2B53FF27001CA514 /* Queue.swift */; };
 		0638C2532AD1FD2E006B00CF /* Logo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0638C2522AD1FD2E006B00CF /* Logo.swift */; };
@@ -96,7 +96,7 @@
 		062779652B9AEB940046E068 /* Sky.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sky.swift; sourceTree = "<group>"; };
 		062779672B9AEED00046E068 /* Main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Main.swift; sourceTree = "<group>"; };
 		0627796D2BA043280046E068 /* GlobeDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobeDetailsView.swift; sourceTree = "<group>"; };
-		062A77672B53FE9C001CA514 /* EngineTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EngineTypes.swift; sourceTree = "<group>"; };
+		062A77672B53FE9C001CA514 /* Types.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Types.swift; sourceTree = "<group>"; };
 		062A77692B53FEB8001CA514 /* DuneNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuneNode.swift; sourceTree = "<group>"; };
 		062A776B2B53FF27001CA514 /* Queue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Queue.swift; sourceTree = "<group>"; };
 		0638C2522AD1FD2E006B00CF /* Logo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logo.swift; sourceTree = "<group>"; };
@@ -304,7 +304,7 @@
 				062779692B9AF9290046E068 /* Graphics */,
 				063549442B1D04E200885655 /* Resources */,
 				0699D27D2A93D245006287E0 /* DuneEngine.swift */,
-				062A77672B53FE9C001CA514 /* EngineTypes.swift */,
+				062A77672B53FE9C001CA514 /* Types.swift */,
 				062A77692B53FEB8001CA514 /* DuneNode.swift */,
 				061351B32B43647D00A46F67 /* Math.swift */,
 				062A776B2B53FF27001CA514 /* Queue.swift */,
@@ -435,7 +435,7 @@
 				0682820E2B3E06C5009C9FF7 /* Sunrise.swift in Sources */,
 				06C16E3E2B57B64F00E54A38 /* Feyd.swift in Sources */,
 				061725EB2B77AA8400254635 /* Kiss.swift in Sources */,
-				062A77682B53FE9C001CA514 /* EngineTypes.swift in Sources */,
+				062A77682B53FE9C001CA514 /* Types.swift in Sources */,
 				066D9D3D2B4AA0510003ADD3 /* Stars.swift in Sources */,
 				065AEE8B2B93B2B000547487 /* Logger.swift in Sources */,
 				062A776A2B53FEB8001CA514 /* DuneNode.swift in Sources */,

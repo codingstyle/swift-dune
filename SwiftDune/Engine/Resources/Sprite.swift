@@ -86,6 +86,8 @@ final class Sprite: Equatable {
         } else {
             animations = SpriteAnimation.parseAnimations(resource, animationOffset: animationOffset)
         }
+        
+        self.setPalette()
     }
 
     

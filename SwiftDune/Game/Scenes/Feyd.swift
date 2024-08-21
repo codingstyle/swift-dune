@@ -22,8 +22,8 @@ final class Feyd: DuneNode {
     
     
     override func onEnable() {
-        feydSprite = engine.loadSprite("FEYD.HSQ")
-        backgroundSprite = engine.loadSprite("BACK.HSQ")
+        feydSprite = Sprite("FEYD.HSQ")
+        backgroundSprite = Sprite("BACK.HSQ")
     }
     
     

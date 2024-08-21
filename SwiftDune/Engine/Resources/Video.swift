@@ -71,7 +71,8 @@ struct VideoHeader {
 }
 
 final class Video {
-    private var engine: DuneEngine
+    private let engine = DuneEngine.shared
+
     private var resource: Resource
     private var videoHeader: VideoHeader?
     private var frames: [VideoFrame] = []
@@ -79,8 +80,7 @@ final class Video {
 
     private let frameRate = 15.0
 
-    init(_ fileName: String, engine: DuneEngine) {
-        self.engine = engine
+    init(_ fileName: String) {
         self.resource = Resource(fileName, uncompressed: true)
 
         parseHeader()

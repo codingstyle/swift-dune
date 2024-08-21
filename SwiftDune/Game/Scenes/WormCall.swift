@@ -22,9 +22,9 @@ final class WormCall: DuneNode {
 
     
     override func onEnable() {
-        wormSprite = engine.loadSprite("SHAI.HSQ")
+        wormSprite = Sprite("SHAI.HSQ")
         
-        let worm2Sprite = engine.loadSprite("SHAI2.HSQ")
+        let worm2Sprite = Sprite("SHAI2.HSQ")
         wormSprite!.mergeFrames(with: worm2Sprite)
         
         sky = Sky()

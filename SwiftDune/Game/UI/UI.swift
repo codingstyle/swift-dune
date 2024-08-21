@@ -43,8 +43,8 @@ final class UI: DuneNode, DuneEventObserver {
     
     override func onEnable() {
         engine.addEventObserver(self)
-        uiSprite = engine.loadSprite("ICONES.HSQ")
-        paletteSprite = engine.loadSprite("FRESK.HSQ")
+        uiSprite = Sprite("ICONES.HSQ")
+        paletteSprite = Sprite("FRESK.HSQ")
         commands = Sentence(.command)
         font = GameFont()
     }

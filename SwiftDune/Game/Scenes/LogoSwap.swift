@@ -25,7 +25,7 @@ final class LogoSwap: DuneNode {
     
     
     override func onEnable() {
-        cryoSprite = engine.loadSprite("CRYO.HSQ")
+        cryoSprite = Sprite("CRYO.HSQ")
     }
 
     

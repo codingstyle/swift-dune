@@ -8,6 +8,34 @@
 import Foundation
 
 
+@propertyWrapper
+struct DuneNodeParam<T> {
+    private var initialValue: T
+    private var currentValue: T
+    var name: String
+    
+    var wrappedValue: T {
+        get {
+            return currentValue
+        }
+        
+        set {
+            currentValue = newValue
+        }
+    }
+    
+    init(_ name: String, _ initialValue: T) {
+        self.initialValue = initialValue
+        self.currentValue = initialValue
+        self.name = name
+    }
+    
+    mutating func reset() {
+        currentValue = initialValue
+    }
+}
+
+
 struct DuneNodeParams {
     var name: String
     var params: Dictionary<String, Any>

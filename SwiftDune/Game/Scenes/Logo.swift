@@ -23,7 +23,7 @@ final class Logo: DuneNode {
 
     
     override func onEnable() {
-        video = engine.loadVideo("LOGO.HNM")
+        video = Video("LOGO.HNM")
         initCirclePalette()
     }
 

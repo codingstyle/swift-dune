@@ -212,7 +212,7 @@ final class LargeFont {
     private let spaceWidth = 16
     private let fontOffset = 32
     
-    init(engine: DuneEngine) {
+    init() {
         self.sprite = Sprite("GENERIC.HSQ")
     }
     

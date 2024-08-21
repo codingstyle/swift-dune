@@ -35,7 +35,7 @@ final class Stars: DuneNode {
     
     
     override func onEnable() {
-        starsSprite = engine.loadSprite("STARS.HSQ")
+        starsSprite = Sprite("STARS.HSQ")
         starsSprite!.setPalette()
         
         if mode == .globe {

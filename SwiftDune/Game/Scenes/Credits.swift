@@ -79,10 +79,10 @@ final class Credits: DuneNode {
 
 
     override func onEnable() {
-        creditsSprite = engine.loadSprite("CREDITS.HSQ")
-        duneSprite = engine.loadSprite("INTDS.HSQ", updatePalette: false)
-        skySprite = engine.loadSprite("SKY.HSQ", updatePalette: false)
-        
+        duneSprite = Sprite("INTDS.HSQ")
+        skySprite = Sprite("SKY.HSQ")
+        creditsSprite = Sprite("CREDITS.HSQ")
+
         scrollAnimation = DuneAnimation<Int16>(from: 0, to: 1936, startTime: 2.0, endTime: 54.0)
     }
     

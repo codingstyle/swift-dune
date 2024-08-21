@@ -145,6 +145,7 @@ final class DuneEngine {
         let renderingTime = ProcessInfo.processInfo.systemUptime - currentTime
         lastTime = currentTime
         
+        // Pause until next frame
         let sleepTime = (1.0 / frameRate) - renderingTime
         
         if sleepTime > 0.0 {
@@ -173,79 +174,5 @@ final class DuneEngine {
         if let index = eventObservers.firstIndex(where: { $0 === observer }) {
             eventObservers.remove(at: index)
         }
-    }
-
-    
-    func loadSound(_ fileName: String) -> Sound? {
-        do {
-            let sound = Sound(fileName, engine: self)
-            try sound.load()
-            return sound
-        } catch {
-            logger.log(.error, "Error loading sound: \(fileName) = \(error)")
-        }
-        
-        return nil
-    }
-    
-    
-    func loadVideo(_ fileName: String) -> Video? {
-        let video = Video(fileName, engine: self)
-        return video
-    }
-    
-    
-    func loadScenery(_ fileName: String) -> Scenery? {
-        let scenery = Scenery(fileName, engine: self)
-        return scenery
-    }
-    
-    
-    func loadSprite(_ fileName: String, updatePalette: Bool = true) -> Sprite {
-        let sprite = Sprite(fileName)
-        
-        if updatePalette {
-            sprite.setPalette()
-        }
-
-        return sprite
-    }
-    
-    
-    func loadGameFont() -> GameFont {
-        let font = GameFont()
-        return font
-    }
-
-    
-    func loadLargeFont() -> LargeFont {
-        let font = LargeFont(engine: self)
-        return font
-    }
-
-
-    func loadSentence(_ fileName: String) -> Sentence? {
-        let sentence = Sentence(fileName)
-        return sentence
-    }
-}
-
-
-extension CGImage {
-    func resize(to size: CGSize) -> CGImage? {
-        let width: Int = Int(size.width)
-        let height: Int = Int(size.height)
-
-        let bytesPerPixel = self.bitsPerPixel / self.bitsPerComponent
-        let destBytesPerRow = width * bytesPerPixel
-
-
-        guard let colorSpace = self.colorSpace else { return nil }
-        guard let context = CGContext(data: nil, width: width, height: height, bitsPerComponent: self.bitsPerComponent, bytesPerRow: destBytesPerRow, space: colorSpace, bitmapInfo: self.alphaInfo.rawValue) else { return nil }
-
-        context.interpolationQuality = .none
-        context.draw(self, in: CGRect(x: 0, y: 0, width: width, height: height))
-
-        return context.makeImage()
     }
 }

@@ -28,8 +28,8 @@ final class Baron: DuneNode {
     
     
     override func onEnable() {
-        baronSprite = engine.loadSprite("BARO.HSQ")
-        backgroundSprite = engine.loadSprite("BACK.HSQ")
+        baronSprite = Sprite("BARO.HSQ")
+        backgroundSprite = Sprite("BACK.HSQ")
         sardaukarAnimation = DuneAnimation(
             from: Int16(-150),
             to: Int16(0),

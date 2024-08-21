@@ -24,7 +24,7 @@ final class DuneTitle: DuneNode {
     
     
     override func onEnable() {
-        titleSprite = engine.loadSprite("INTDS.HSQ")
+        titleSprite = Sprite("INTDS.HSQ")
         sky = Sky()
         
         scrollAnimation = DuneAnimation<Int16>(from: 0, to: 152, startTime: 2.5, endTime: 6.5)

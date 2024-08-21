@@ -35,10 +35,10 @@ final class Paul: DuneNode {
     
     
     override func onEnable() {
-        paulSprite = engine.loadSprite("PAUL.HSQ")
-        chaniSprite = engine.loadSprite("CHAN.HSQ")
+        paulSprite = Sprite("PAUL.HSQ")
+        chaniSprite = Sprite("CHAN.HSQ")
         sky = Sky()
-        backgroundSprite = engine.loadSprite(background.rawValue)
+        backgroundSprite = Sprite(background.rawValue)
     }
     
     
@@ -59,7 +59,7 @@ final class Paul: DuneNode {
     override func onParamsChange() {
         if let backgroundParam = params["background"] {
             self.background = backgroundParam as! PaulBackground
-            backgroundSprite = engine.loadSprite(background.rawValue)
+            backgroundSprite = Sprite(background.rawValue)
         }
         
         if let transitionInParam = params["transitionIn"] {

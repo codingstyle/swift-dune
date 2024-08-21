@@ -31,7 +31,7 @@ final class Presents: DuneNode {
     
     
     override func onEnable() {
-        introSprite = engine.loadSprite("INTDS.HSQ")
+        introSprite = Sprite("INTDS.HSQ")
     }
 
     

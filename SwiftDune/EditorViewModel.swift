@@ -87,7 +87,7 @@ class EditorViewModel: ObservableObject {
         self.stopVideo()
         
         if selection.resourceType == .sprite || selection.resourceType == .spriteWithoutPalette {
-            sprite = engine.loadSprite(selection.resourceName)
+            sprite = Sprite(selection.resourceName)
             selectedPaletteIndex = -1
             selectedSpriteFrameIndex = 0
 
@@ -100,15 +100,15 @@ class EditorViewModel: ObservableObject {
             
             // sprite!.saveAs(selection.resourceName + ".DEC")
         } else if selection.resourceType == .sentence {
-            dialogue = engine.loadSentence(selection.resourceName)
+            dialogue = Sentence(selection.resourceName)
         } else if selection.resourceType == .sound {
-            sound = engine.loadSound(selection.resourceName)
-            sound!.dumpInfo()            
+            sound = Sound(selection.resourceName)
+            sound!.dumpInfo()
             engine.audioPlayer.play(sound!)
         } else if selection.resourceType == .scene {
-            scenery = engine.loadScenery(selection.resourceName)
+            scenery = Scenery(selection.resourceName)
         } else if selection.resourceType == .video {
-            video = engine.loadVideo(selection.resourceName)
+            video = Video(selection.resourceName)
             video!.setPalette()
             palette = engine.palette.allColors()
             self.startVideo()
@@ -125,7 +125,7 @@ class EditorViewModel: ObservableObject {
             clearBuffer()
 
             if selection.resourceName == "DUNECHAR.HSQ" {
-                gameFont = engine.loadGameFont()
+                gameFont = GameFont()
                 gameFont!.paletteIndex = 1
                 
                 var s = String()
@@ -148,7 +148,7 @@ class EditorViewModel: ObservableObject {
 
                 //gameFont!.render("I am Duke Leto Atreides, your father.", x: 10, y: 10, buffer: buffer)
             } else if selection.resourceName == "GENERIC.HSQ" {
-                largeFont = engine.loadLargeFont()
+                largeFont = LargeFont()
                 largeFont!.setPalette()
                 
                 largeFont!.render("ABCDEFGHIJKLMNOP", x: 10, y: 10, buffer: buffer)

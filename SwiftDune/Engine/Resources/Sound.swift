@@ -182,16 +182,16 @@ enum VOCDataBlock {
 
 
 final class Sound {
-    private var engine: DuneEngine
+    private let engine = DuneEngine.shared
     var resource: Resource
     var dataBlocks: [VOCDataBlock] = []
     
     private var signature: String?
     private var version: UInt16 = 0
     
-    init(_ fileName: String, engine: DuneEngine) {
+    init(_ fileName: String) {
         self.resource = Resource(fileName, uncompressed: fileName == "SD5.HSQ")
-        self.engine = engine
+        self.parseVOC()
     }
     
     
@@ -216,27 +216,28 @@ final class Sound {
     }
     
     
-    func load() throws {
+    private func parseVOC() {
         resource.stream!.seek(0)
 
         let signatureBytes = resource.stream!.readBytes(20)
         signature = String(bytes: signatureBytes, encoding: .ascii)!
 
         if signature != "Creative Voice File\u{1a}" {
-            throw SoundError.invalidSignature
+            engine.logger.log(.error, "parseVOC(): Invalid signature")
+            return
         }
 
         // Header size
         let headerSize = resource.stream!.readUInt16LE()
         
         if headerSize != 26 {
-            throw SoundError.wrongHeaderSize
+            engine.logger.log(.error, "parseVOC(): Wrong header size")
         }
         
         version = resource.stream!.readUInt16LE()
 
         if version != 0x10A && version != 0x114 {
-            throw SoundError.unknownVersion
+            engine.logger.log(.error, "parseVOC(): Unknown VOC version: \(String.fromWord(version))")
         }
 
         
@@ -244,7 +245,7 @@ final class Sound {
         let computedChecksum = (UInt(~version) + 0x1234) & 0x0000FFFF
 
         if checksum != computedChecksum {
-            throw SoundError.invalidChecksum
+            engine.logger.log(.error, "parseVOC(): Invalid checksum: \(checksum)")
         }
          
         // Read data blocks
