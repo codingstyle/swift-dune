@@ -21,7 +21,6 @@ final class UI: DuneNode, DuneEventObserver {
     private var engine = DuneEngine.shared
     
     private var uiSprite: Sprite?
-    private var paletteSprite: Sprite?
     
     private var flags: UInt16 = UIFlags.leftPanelGlobe.rawValue
     private var menuItems: [UInt16] = []
@@ -44,7 +43,6 @@ final class UI: DuneNode, DuneEventObserver {
     override func onEnable() {
         engine.addEventObserver(self)
         uiSprite = Sprite("ICONES.HSQ")
-        paletteSprite = Sprite("FRESK.HSQ")
         commands = Sentence(.command)
         font = GameFont()
     }
@@ -52,24 +50,20 @@ final class UI: DuneNode, DuneEventObserver {
     
     override func onDisable() {
         uiSprite = nil
-        paletteSprite = nil
         engine.removeEventObserver(self)
     }
     
     
     override func render(_ buffer: PixelBuffer) {
-        guard let uiSprite = uiSprite,
-              let paletteSprite = paletteSprite else {
+        guard let uiSprite = uiSprite else {
             return
         }
-        
-        paletteSprite.setPalette()
                 
         // Left part
         if flags & UIFlags.leftPanelBookClosed.rawValue != 0x0 {
-            uiSprite.drawFrame(9, x: 0, y: 152, buffer: buffer)
-        } else if flags & UIFlags.leftPanelBookOpen.rawValue != 0x0 {
             uiSprite.drawFrame(0, x: 0, y: 152, buffer: buffer)
+        } else if flags & UIFlags.leftPanelBookOpen.rawValue != 0x0 {
+            uiSprite.drawFrame(9, x: 0, y: 152, buffer: buffer)
         } else if flags & UIFlags.leftPanelGlobe.rawValue != 0x0 {
             uiSprite.drawFrame(6, x: 0, y: 152, buffer: buffer)
             
@@ -153,7 +147,9 @@ final class UI: DuneNode, DuneEventObserver {
     func onEvent(_ source: String, _ e: DuneEvent) {
         switch e {
         case .uiMenuChanged(let items):
-            menuItems = items
+            self.menuItems = items
+        case .uiFlagsChanged(let flags):
+            self.flags = flags
         default:
             break
         }

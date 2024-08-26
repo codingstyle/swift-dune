@@ -42,7 +42,7 @@ final class Intro: DuneNode, DuneEventObserver {
     }
 
     override func onEnable() {
-        queue.enqueue(DuneNodeParams("LogoSwap"))
+        /*queue.enqueue(DuneNodeParams("LogoSwap"))
         queue.enqueue(DuneNodeParams("Presents"))
         queue.enqueue(DuneNodeParams("Stars", [ "mode": StarsMode.planets, "transitionIn": TransitionEffect.fadeIn(duration: 7.34), "duration": 9.34 ]))
         queue.enqueue(DuneNodeParams("Stars", [ "mode": StarsMode.planetsPan, "duration": 2.55 ]))
@@ -85,8 +85,8 @@ final class Intro: DuneNode, DuneEventObserver {
         queue.enqueue(DuneNodeParams("Attack", [ "transitionIn": TransitionEffect.dissolveIn(duration: 0.3), "transitionOut": TransitionEffect.dissolveOut(duration: 0.3) ]))
         queue.enqueue(DuneNodeParams("Paul", [ "background": PaulBackground.red, "transitionIn": TransitionEffect.dissolveIn(duration: 0.3), "transitionOut": TransitionEffect.dissolveOut(duration: 0.3) ]))
         queue.enqueue(DuneNodeParams("Kiss", [ "transitionIn": TransitionEffect.dissolveIn(duration: 0.3), "transitionOut": TransitionEffect.fadeOut(duration: 2.0) ]))
-        queue.enqueue(DuneNodeParams("Ornithopter", [ "dayMode": DuneLightMode.night, "scenery": SceneryType.sietch, "transitionIn": TransitionEffect.fadeIn(duration: 2.0) ]))
-        queue.enqueue(DuneNodeParams("Flight", [ "dayMode": DuneLightMode.night, "duration": 30.0, "transitionOut": TransitionEffect.fadeOut(duration: 2.0) ]))
+        queue.enqueue(DuneNodeParams("Ornithopter", [ "dayMode": DuneLightMode.night, "scenery": SceneryType.sietch, "transitionIn": TransitionEffect.fadeIn(duration: 2.0) ]))*/
+        queue.enqueue(DuneNodeParams("Flight", [ "dayMode": DuneLightMode.night, "duration": 60.0, "transitionOut": TransitionEffect.fadeOut(duration: 2.0) ]))
          
         engine.addEventObserver(self)
 

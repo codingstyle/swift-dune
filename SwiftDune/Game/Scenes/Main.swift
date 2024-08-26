@@ -20,18 +20,20 @@ final class Main: DuneNode, DuneEventObserver {
         attachNode(Prologue())
 
         // TODO: Copy protection
-        // TODO: Main game phase
+
+        attachNode(Game())
     }
     
     
     override func onEnable() {
         engine.addEventObserver(self)
         
-        queue.enqueue("Logo")
+        //queue.enqueue("Logo")
         queue.enqueue("Intro")
         queue.enqueue("Credits")
         queue.enqueue("Prologue")
-        
+        queue.enqueue("Game")
+
         guard let itemName = queue.dequeueFirst() else {
             return
         }

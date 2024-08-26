@@ -15,8 +15,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "0699D2602A93C682006287E0"
-               BuildableName = "SwiftDune.app"
-               BlueprintName = "SwiftDune"
+               BuildableName = "Dune.app"
+               BlueprintName = "Dune"
                ReferencedContainer = "container:SwiftDune.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -44,8 +44,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "0699D2602A93C682006287E0"
-            BuildableName = "SwiftDune.app"
-            BlueprintName = "SwiftDune"
+            BuildableName = "Dune.app"
+            BlueprintName = "Dune"
             ReferencedContainer = "container:SwiftDune.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
@@ -61,8 +61,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "0699D2602A93C682006287E0"
-            BuildableName = "SwiftDune.app"
-            BlueprintName = "SwiftDune"
+            BuildableName = "Dune.app"
+            BlueprintName = "Dune"
             ReferencedContainer = "container:SwiftDune.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>

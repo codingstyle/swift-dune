@@ -12,20 +12,20 @@
 - [X] ADD: Reverse engineer animation for VER
 - [X] UPDATE: fade in/out on prologue (Palace stairs)
 - [X] UPDATE: new animation system on Baron sardaukar
+- [X] UPDATE: implement sky as node everywhere
 
 ## Scenes
 
 - [ ] ADD: intro night attack scene
-- [ ] ADD: copy protection screen
+- [ ] ADD: copy protection screen (requires separate nodes for characters/bacground)
 - [ ] ADD: Ornithopter flight animated dunes
+- [ ] ADD: flat planet map with interpolation
 
 ## Engine
 
 - [ ] UPDATE: node params as property wrappers
 - [ ] UPDATE: rewrite editor to use node system
-
-- [ ] UPDATE: Separate foreground/background nodes on Intro
-- [ ] UPDATE: implement sky as node everywhere
+- [ ] UPDATE: Separate foreground/background nodes (characters vs. layout)
 
 ## Sprites
 
@@ -60,8 +60,9 @@
 
 ## Game logic
 
-- [ ] ADD: sietch positions
+- [ ] ADD: dialogue panels
 - [ ] ADD: implement day timer 
+- [ ] ADD: sietch positions on map
 - [ ] ADD: implement global game variables
 - [ ] ADD: implement save file format
 - [ ] ADD: support string formatting in sentences

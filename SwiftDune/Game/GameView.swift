@@ -16,13 +16,18 @@ struct GameView: View {
         VStack {
             MetalRenderView()
                 .tag(MetalRenderView.tagID)
-                .frame(width: 640, height: 400)
-                .aspectRatio(contentMode: .fill)
-                .border(.gray)
+                .frame(minWidth: 640, minHeight: 400)
+                .aspectRatio(contentMode: .fit)
+        }
+        .onAppear {
+            NSApplication.shared.keyWindow?.contentAspectRatio = NSSize(width: 320, height: 200)
+            viewModel.engine.run()
         }
         .onDisappear {
             viewModel.engine.stop()
         }
+        .safeAreaPadding(.all, 0)
         .navigationTitle("Dune")
+        .preferredColorScheme(.dark)
     }
 }

@@ -36,15 +36,13 @@ final class Flight: DuneNode {
     
     private var flightSprites: [FlightSprite] = []
     private let flightPaths: [FlightPath] = [
-        FlightPath(start: DunePoint(110, 80), end: DunePoint(-640, 200)),
-        FlightPath(start: DunePoint(120, 80), end: DunePoint(-480, 200)),
-        FlightPath(start: DunePoint(130, 80), end: DunePoint(-320, 200)),
-        FlightPath(start: DunePoint(140, 80), end: DunePoint(-160, 200)),
-        FlightPath(start: DunePoint(150, 80), end: DunePoint(0, 200)),
-        FlightPath(start: DunePoint(160, 80), end: DunePoint(160, 200)),
-        FlightPath(start: DunePoint(170, 80), end: DunePoint(320, 200)),
-        FlightPath(start: DunePoint(180, 80), end: DunePoint(480, 200)),
-        FlightPath(start: DunePoint(190, 80), end: DunePoint(640, 200))
+        FlightPath(start: DunePoint(130, 80), end: DunePoint(40, 250)),
+        FlightPath(start: DunePoint(140, 80), end: DunePoint(80, 250)),
+        FlightPath(start: DunePoint(150, 80), end: DunePoint(120, 250)),
+        FlightPath(start: DunePoint(160, 80), end: DunePoint(160, 250)),
+        FlightPath(start: DunePoint(170, 80), end: DunePoint(200, 250)),
+        FlightPath(start: DunePoint(180, 80), end: DunePoint(240, 250)),
+        FlightPath(start: DunePoint(190, 80), end: DunePoint(280, 250)),
     ]
     
     init() {
@@ -86,7 +84,7 @@ final class Flight: DuneNode {
         // 1. Randomize a sprite in 0-12 range
         // 2. Choose a path
         
-        if (frameCount % 10) == 0 {
+        if (frameCount % 20) == 0 {
             var i = 0
             
             while i < 4 {

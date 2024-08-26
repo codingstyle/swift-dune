@@ -1,8 +1,8 @@
 //
-//  GameViewModel.swift
+//  StatsViewModel.swift
 //  SwiftDune
 //
-//  Created by Christophe Buguet on 09/10/2023.
+//  Created by Christophe Buguet on 18/08/2024.
 //
 
 import Foundation
@@ -10,8 +10,13 @@ import AppKit
 import CoreGraphics
 import SwiftUI
 
+struct GameFPSData: Identifiable {
+    var id = UUID()
+    var time: Double
+    var fps: Double
+}
 
-final class GameViewModel: ObservableObject {
+final class StatsViewModel: ObservableObject, DuneEngineDelegate {
     @Published var isRunning = false
     @Published var fpsChartData: [GameFPSData] = []
     @Published var palette: [NSColor] = [NSColor](repeating: NSColor.clear, count: 256)
@@ -19,15 +24,26 @@ final class GameViewModel: ObservableObject {
     let engine = DuneEngine.shared
 
     init() {
-        engine.rootNode.attachNode(Main())
-        engine.rootNode.setNodeActive("Main", true)
-
-        /*engine.rootNode.attachNode(Fresk())
-        engine.rootNode.attachNode(UI())
-        engine.rootNode.setNodeActive("Fresk", true)
-        engine.rootNode.setNodeActive("UI", true)*/
+        engine.delegate = self
+        isRunning = engine.isRunning
     }
     
+    
+    deinit {
+        engine.delegate = nil
+    }
+    
+    
+    func renderDidFinish() {
+        DispatchQueue.main.sync {
+            palette = engine.palette.allColors()
+            
+            fpsChartData = engine.logger.getLastMetrics().map {
+                GameFPSData(time: $0, fps: $1)
+            }
+        }
+    }
+
     
     func togglePlayPause() {
         if engine.isRunning {

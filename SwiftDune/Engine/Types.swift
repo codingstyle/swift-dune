@@ -139,6 +139,7 @@ struct DuneColor {
 enum DuneEvent {
     case nodeEnded
     case uiMenuChanged(items: [UInt16])
+    case uiFlagsChanged(flags: UInt16)
 }
 
 protocol DuneEventObserver: AnyObject {

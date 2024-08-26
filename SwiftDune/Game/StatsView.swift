@@ -32,6 +32,26 @@ struct IconButton: View {
 }
 
 
+struct PaletteView: View {
+    @Binding var palette: [NSColor]
+    
+    let paletteColumns: [GridItem] = [GridItem](repeating: GridItem(.fixed(12), spacing: 1), count: 16)
+    
+    var body: some View {
+        LazyVGrid(columns: paletteColumns, alignment: .center, spacing: 1) {
+            ForEach(0..<256) { i in
+                Rectangle()
+                    .fill(Color(nsColor: palette[i]))
+                    .frame(width: 12, height: 12)
+                    .border(.gray)
+                    .padding(0)
+                    .help("Index: \(i)\rColor: \(palette[i].asHexString)")
+            }
+        }
+    }
+}
+
+
 struct FPSChartView: View {
     var fpsChartData: [GameFPSData]
     
@@ -114,7 +134,9 @@ struct StatsView: View {
                 PaletteView(palette: $viewModel.palette)
             }
         }
-        .frame(minHeight: 300)
+        .frame(width: 250, height: 400)
+        .preferredColorScheme(.dark)
+        .navigationTitle("Tools")
         .padding()
     }
 }

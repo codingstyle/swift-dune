@@ -15,8 +15,8 @@ final class Credits: DuneNode {
     private var contextBuffer = PixelBuffer(width: 320, height: 152)
     
     private var creditsSprite: Sprite?
-    private var skySprite: Sprite?
     private var duneSprite: Sprite?
+    private var sky: Sky?
 
     private var currentTime: TimeInterval = 0.0
     private var scrollY: Int16 = 152
@@ -80,7 +80,7 @@ final class Credits: DuneNode {
 
     override func onEnable() {
         duneSprite = Sprite("INTDS.HSQ")
-        skySprite = Sprite("SKY.HSQ")
+        sky = Sky()
         creditsSprite = Sprite("CREDITS.HSQ")
 
         scrollAnimation = DuneAnimation<Int16>(from: 0, to: 1936, startTime: 2.0, endTime: 54.0)
@@ -90,7 +90,7 @@ final class Credits: DuneNode {
     override func onDisable() {
         creditsSprite = nil
         duneSprite = nil
-        skySprite = nil
+        sky = nil
         scrollAnimation = nil
         scrollY = 152
         currentTime = 0
@@ -111,21 +111,14 @@ final class Credits: DuneNode {
     override func render(_ buffer: PixelBuffer) {
         guard let creditsSprite = creditsSprite,
               let duneSprite = duneSprite,
-              let skySprite = skySprite else {
+              let sky = sky else {
             return
         }
        
         if backgroundBuffer.tag != 0x0001 {
+            sky.render(backgroundBuffer, type: .narrow)
+
             creditsSprite.setPalette()
-
-            // Apply color gradient from the palette
-            for x: Int16 in stride(from: 0, to: 320, by: 40) {
-                skySprite.drawFrame(0, x: x, y: 0, buffer: backgroundBuffer)
-                skySprite.drawFrame(1, x: x, y: 20, buffer: backgroundBuffer)
-                skySprite.drawFrame(2, x: x, y: 40, buffer: backgroundBuffer)
-                skySprite.drawFrame(3, x: x, y: 60, buffer: backgroundBuffer)
-            }
-
             duneSprite.drawFrame(0, x: 0, y: 60, buffer: backgroundBuffer)
             backgroundBuffer.tag = 0x0001
 

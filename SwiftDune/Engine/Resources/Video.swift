@@ -104,9 +104,9 @@ final class Video {
         let paletteBlock = parsePaletteBlock(UInt32(headerSize))
         
         // Skip bytes of padding (0xFF)
-        while resource.stream!.readByte(peek: true) == 0xFF {
+        /*while resource.stream!.readByte(peek: true) == 0xFF {
             resource.stream!.skip(1)
-        }
+        }*/
         
         videoHeader = VideoHeader(headerSize: headerSize, palette: paletteBlock.paletteChunks)
         videoHeader?.dumpInfo()
@@ -158,10 +158,10 @@ final class Video {
     }
     
     
-    private func parsePaletteBlock(_ limitOffset: UInt32) -> PaletteBlock {
+    private func parsePaletteBlock(_ headerSize: UInt32) -> PaletteBlock {
         var paletteChunks: [VideoPalette] = []
 
-        while resource.stream!.offset < limitOffset {
+        while true {
             let h = resource.stream!.readUInt16LE()
             
             // 0x0100 marks a 3 byte leap
@@ -183,8 +183,9 @@ final class Video {
             }
             
             var paletteChunk = Array<UInt32>(repeating: 0, count: Int(paletteCount))
+            var i: UInt16 = 0
             
-            for i: UInt16 in 0..<paletteCount {
+            while i < paletteCount {
                 if i + paletteStart > 256 {
                     break
                 }
@@ -195,11 +196,16 @@ final class Video {
                 let a = UInt32(0xFF)
                 
                 paletteChunk[Int(i)] = (a << 24) | (b << 16) | (g << 8) | r
+                i += 1
             }
-        
+
+            engine.logger.log(.debug, "Video::parsePaletteBlock() -> Initial palette: start=\(paletteStart), count=\(paletteCount), actualCount=\(i)")
+
             paletteChunks.append(VideoPalette(chunk: paletteChunk, start: paletteStart, count: paletteCount))
         }
-        
+
+        engine.logger.log(.debug, "Video::parsePaletteBlock() -> finalOffset=\(resource.stream!.offset), expected=\(headerSize)")
+
         let paletteBlock = PaletteBlock(paletteChunks: paletteChunks)
         return paletteBlock
     }
@@ -229,7 +235,7 @@ final class Video {
 
         // Width or height at zero means we repeat previous frame
         if width == 0 || height == 0 {
-            engine.logger.log(.debug, "VIDEO -> Repeat previous frame")
+            engine.logger.log(.debug, "Video::parseVideoBlock() -> Repeat previous frame")
             return nil
         }
 
@@ -238,10 +244,11 @@ final class Video {
         let checksum = UInt8(videoHeaderBytes.reduce(0, { Int($0) + Int($1) }) & 0xFF)
         
         if checksum != 0xAB && checksum != 0xAC && checksum != 0xAD {
+            engine.logger.log(.debug, "Video::parseVideoBlock(): invalid checksum=\(checksum)")
             return nil
         }
 
-        engine.logger.log(.debug, "parseVideoBlock(): checksum=\(checksum), mode=\(mode)")
+        engine.logger.log(.debug, "Video::parseVideoBlock(): checksum=\(checksum), mode=\(mode)")
 
         let uncompressedSize = resource.stream!.readUInt16LE()
         let _ = resource.stream!.readByte() // Should be zero

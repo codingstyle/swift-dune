@@ -51,7 +51,7 @@ final class PixelBuffer {
     }
     
     
-    func render(to buffer: PixelBuffer, effect: SpriteEffect, x: Int = 0, y: Int = 0) {
+    func render(to buffer: PixelBuffer, effect: SpriteEffect = .none, x: Int = 0, y: Int = 0) {
         switch effect {
         case .fadeIn(let start, let duration, let current):
             let progress = (current - start) / duration

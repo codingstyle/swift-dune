@@ -95,3 +95,17 @@ final class Palette {
         return colors
     }
 }
+
+
+extension NSColor {
+    var asHexString: String {
+        return "#000000"
+        /*
+        let r = String.fromByte(UInt8(255.0 * self.redComponent))
+        let g = String.fromByte(UInt8(255.0 * self.blueComponent))
+        let b = String.fromByte(UInt8(255.0 * self.greenComponent))
+        
+        return "#\(r)\(g)\(b)"
+        */
+    }
+}
