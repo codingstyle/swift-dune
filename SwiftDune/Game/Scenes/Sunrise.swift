@@ -14,7 +14,6 @@ final class Sunrise: DuneNode {
     private var sunriseSprite: Sprite?
     private var chaniSprite: Sprite?
     private var lietSprite: Sprite?
-    private var villageSprite: Sprite?
 
     private var currentTime: TimeInterval = 0.0
     private let engine = DuneEngine.shared
@@ -45,7 +44,6 @@ final class Sunrise: DuneNode {
     override func onEnable() {
         chaniSprite = Sprite("CHAN.HSQ")
         lietSprite = Sprite("KYNE.HSQ")
-        villageSprite = Sprite("VILG.HSQ")
         sunriseSprite = Sprite("SUNRS.HSQ")
         sunriseSprite!.setPalette()
         
@@ -68,7 +66,6 @@ final class Sunrise: DuneNode {
     override func onDisable() {
         sunriseSprite = nil
         chaniSprite = nil
-        villageSprite = nil
         currentPaletteIndex = -1
         currentPaletteStart = 3
         currentPaletteEnd = 3
@@ -192,12 +189,11 @@ final class Sunrise: DuneNode {
 
         if character == .liet {
             guard let lietSprite = lietSprite,
-                  let villageSprite = villageSprite else {
+                  let sunriseSprite = sunriseSprite else {
                 return
             }
             
-            villageSprite.setPalette()
-            villageSprite.drawFrame(24, x: 140, y: 3, buffer: intermediateFrameBuffer)
+            sunriseSprite.drawFrame(1, x: 84, y: 11, buffer: intermediateFrameBuffer)
             
             lietSprite.setPalette()
             engine.palette.stash()

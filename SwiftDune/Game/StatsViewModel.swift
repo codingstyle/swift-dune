@@ -25,7 +25,6 @@ final class StatsViewModel: ObservableObject, DuneEngineDelegate {
 
     init() {
         engine.delegate = self
-        isRunning = engine.isRunning
     }
     
     
@@ -36,6 +35,7 @@ final class StatsViewModel: ObservableObject, DuneEngineDelegate {
     
     func renderDidFinish() {
         DispatchQueue.main.sync {
+            isRunning = engine.isRunning
             palette = engine.palette.allColors()
             
             fpsChartData = engine.logger.getLastMetrics().map {

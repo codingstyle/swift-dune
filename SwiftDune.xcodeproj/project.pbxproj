@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0600C9E02C82EEE600E552DD /* VideoListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0600C9DF2C82EEE600E552DD /* VideoListView.swift */; };
+		0600C9E22C834BF700E552DD /* CopyProtection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0600C9E12C834BF700E552DD /* CopyProtection.swift */; };
 		0603BFC02B30BA630022CA3B /* Intro.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0603BFBF2B30BA630022CA3B /* Intro.swift */; };
 		061351B42B43647D00A46F67 /* Math.swift in Sources */ = {isa = PBXBuildFile; fileRef = 061351B32B43647D00A46F67 /* Math.swift */; };
 		061725EB2B77AA8400254635 /* Kiss.swift in Sources */ = {isa = PBXBuildFile; fileRef = 061725EA2B77AA8400254635 /* Kiss.swift */; };
@@ -111,6 +113,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		0600C9DF2C82EEE600E552DD /* VideoListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoListView.swift; sourceTree = "<group>"; };
+		0600C9E12C834BF700E552DD /* CopyProtection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CopyProtection.swift; sourceTree = "<group>"; };
 		0603BFBF2B30BA630022CA3B /* Intro.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Intro.swift; sourceTree = "<group>"; };
 		0604932C2AEC552300A6A46E /* TextDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextDetailsView.swift; sourceTree = "<group>"; };
 		0604932E2AEE6F7D00A6A46E /* VideoDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoDetailsView.swift; sourceTree = "<group>"; };
@@ -237,6 +241,7 @@
 				062779672B9AEED00046E068 /* Main.swift */,
 				0638C2522AD1FD2E006B00CF /* Logo.swift */,
 				0603BFBF2B30BA630022CA3B /* Intro.swift */,
+				0600C9E12C834BF700E552DD /* CopyProtection.swift */,
 				06B812CA2BB0CF3D0048C8AC /* Prologue.swift */,
 				06CA2B8A2C7A7D8700B47D13 /* Game.swift */,
 				066D9D3A2B4A9EC40003ADD3 /* LogoSwap.swift */,
@@ -386,6 +391,7 @@
 				06A7E8882AD700AD0042D878 /* SpriteDetailsView.swift */,
 				06566A6A2ADEFDD500AF5734 /* FontDetailsView.swift */,
 				0604932C2AEC552300A6A46E /* TextDetailsView.swift */,
+				0600C9DF2C82EEE600E552DD /* VideoListView.swift */,
 				0604932E2AEE6F7D00A6A46E /* VideoDetailsView.swift */,
 				06D372D62B529939006BDDF3 /* SceneryListView.swift */,
 				06D372D82B529946006BDDF3 /* SceneryDetailsView.swift */,
@@ -526,6 +532,7 @@
 				06AB96DA2BEE160B00482823 /* Keyboard.swift in Sources */,
 				06AB96DC2BEFC4FD00482823 /* Flight.swift in Sources */,
 				061725EF2B8542A400254635 /* Ornithopter.swift in Sources */,
+				0600C9E22C834BF700E552DD /* CopyProtection.swift in Sources */,
 				06B812CD2BB559B90048C8AC /* PrologueSubtitle.swift in Sources */,
 				06B812CB2BB0CF3D0048C8AC /* Prologue.swift in Sources */,
 				06D16B6A2C5FEC2300C85A78 /* SpriteAnimation.swift in Sources */,
@@ -581,6 +588,7 @@
 				06CA2BA92C7B350F00B47D13 /* GlobeDetailsView.swift in Sources */,
 				06CA2BAA2C7B350F00B47D13 /* EditorView.swift in Sources */,
 				06CA2BAB2C7B350F00B47D13 /* EditorViewModel.swift in Sources */,
+				0600C9E02C82EEE600E552DD /* VideoListView.swift in Sources */,
 				06CA2BAC2C7B350F00B47D13 /* DuneEditorApp.swift in Sources */,
 				06CA2BAD2C7B350F00B47D13 /* Renderer.swift in Sources */,
 				06CA2BAE2C7B350F00B47D13 /* Shaders.metal in Sources */,

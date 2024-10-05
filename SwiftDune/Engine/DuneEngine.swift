@@ -175,4 +175,28 @@ final class DuneEngine {
             eventObservers.remove(at: index)
         }
     }
+    
+    
+    func exitProgram(_ message: String?) {
+        stop()
+        
+        if let message = message {
+            DispatchQueue.main.sync {
+                // Close all open windows
+                for window in NSApplication.shared.windows {
+                    window.close()
+                }
+                
+                // Show the alert
+                let alert = NSAlert()
+                alert.messageText = "Dune"
+                alert.informativeText = message
+                alert.alertStyle = .informational
+                alert.addButton(withTitle: "OK")
+                alert.runModal()
+            }
+        }
+        
+        exit(1)
+    }
 }

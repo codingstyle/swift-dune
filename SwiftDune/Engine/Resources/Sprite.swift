@@ -87,7 +87,9 @@ final class Sprite: Equatable {
             animations = SpriteAnimation.parseAnimations(resource, animationOffset: animationOffset)
         }
         
-        self.setPalette()
+        if palette.count > 0 {
+            self.setPalette()
+        }
     }
 
     
@@ -261,20 +263,20 @@ final class Sprite: Equatable {
 
             // If two first bytes are 0x0000 we are looking at something else than an image part
             if resource.stream!.readUInt16LE(peek: true) == 0x0000 {
-                //print("parseFrames(): skipping frame=\(i), frameOffset=\(frameInfo.startOffset)")
+                //engine.logger.log(.debug, "parseFrames(): skipping frame=\(i), frameOffset=\(frameInfo.startOffset)")
                 break
             }
             
             let w0 = resource.stream!.readUInt16LE()
             let w1 = resource.stream!.readUInt16LE()
 
-            let flags = UInt8((w0 & 0xFF00) >> 8)
-            let width = UInt16(w0 & 0x7FFF)
+            let flags = UInt8((w0 & 0xFE00) >> 8)
+            let width = UInt16(w0 & 0x01FF)
             let height = UInt16(w1 & 0x00FF)
             let paletteOffset = UInt8((w1 & 0xFF00) >> 8)
             let isCompressed = (flags & 0x80) > 0
 
-            //print("parseFrames(): frame=\(i), frameOffset=\(frameStartOffset), width=\(width), height=\(height), flags=\(String.fromByte(flags)) compressed=\(isCompressed ? "YES" : "NO")")
+            //engine.logger.log(.debug, "parseFrames(): frame=\(i), frameOffset=\(frameStartOffset), width=\(width), height=\(height), flags=\(String.fromByte(flags)) compressed=\(isCompressed ? "YES" : "NO")")
 
             var bytesPerRow = (width + 1) / 2
 
@@ -284,7 +286,7 @@ final class Sprite: Equatable {
             }
 
             let frameInfo = SpriteFrameInfo(2 * Int(width) * Int(height))
-            frameInfo.startOffset = frameStartOffset
+            frameInfo.startOffset = frameStartOffset + 4
             frameInfo.isCompressed = isCompressed
             frameInfo.bytesPerRow = bytesPerRow
             frameInfo.width = width
@@ -292,7 +294,12 @@ final class Sprite: Equatable {
             frameInfo.paletteOffset = paletteOffset
          
             // Skip 4 bytes of frame header to access the pixels
-            resource.stream!.seek(frameInfo.startOffset + 4)
+            resource.stream!.seek(frameInfo.startOffset)
+            
+            // FIXME: sprites without palette seems to have an extra 2-byte value to read?
+            if fileName.starts(with: "DUNES") {
+                resource.stream!.skip(2)
+            }
             
             if !frameInfo.isCompressed {
                 compute4bpp(frameInfo)
@@ -307,7 +314,7 @@ final class Sprite: Equatable {
                 
         setPalette()
         
-        print("parseFrames(): finished reading. resource size=\(resource.stream!.size), anim offset=\(animationOffset)")
+      engine.logger.log(.debug, "parseFrames(): finished reading. resource size=\(resource.stream!.size), anim offset=\(animationOffset)")
     }
     
     
@@ -468,7 +475,7 @@ final class Sprite: Equatable {
             var x = 0
             var lineRemain = 4 * ((frameInfo.width + 3) / 4)
             
-            while lineRemain > 0 {
+            repeat {
                 pixel = resource.stream!.readByte()
                 
                 let paletteIndex1 = UInt8(pixel & 0xF)
@@ -488,7 +495,7 @@ final class Sprite: Equatable {
 
                 x += 1
                 lineRemain -= 2
-            }
+            } while lineRemain > 0
             
             y += 1
         }

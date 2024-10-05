@@ -204,7 +204,7 @@ final class Stars: DuneNode {
         let ay = Int16(152 - arrakisFrameInfo.height) / 2
         starsSprite.drawFrame(arrakisIndex, x: ax, y: ay, buffer: buffer)
 
-        //print("ARRAKIS -> frameIndex: \(arrakisIndex), x=\(ax), y=\(ay)")
+        //engine.logger.log(.debug, "ARRAKIS -> frameIndex: \(arrakisIndex), x=\(ax), y=\(ay)")
        
         // Red planet shift: frames 37 to 44
         let redPlanetIndex = 37 + UInt16(7.0 * ratio)

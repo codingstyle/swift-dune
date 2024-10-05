@@ -159,9 +159,6 @@ final class Scenery {
         let firstOffset = resource.stream!.readUInt16LE(peek: true)
         let roomCount = firstOffset / 2
 
-        print("")
-        print("rooms=\(firstOffset / 2)")
-
         resource.stream!.seek(UInt32(firstOffset))
 
         for i in 0..<roomCount {

@@ -7,7 +7,7 @@
 
 import Foundation
 
-// Original Rust code by Thomas Fach-Pedersen
+// Based on original Rust code by Thomas Fach-Pedersen
 // @see https://github.com/madmoose/dune-rust/blob/main/globe_renderer/src/globe_renderer.rs
 
 

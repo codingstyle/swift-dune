@@ -13,13 +13,16 @@
 - [X] UPDATE: fade in/out on prologue (Palace stairs)
 - [X] UPDATE: new animation system on Baron sardaukar
 - [X] UPDATE: implement sky as node everywhere
+- [X] ADD: copy protection screen
+- [X] FIX: video PRT.HNM cannot be read
+- [X] UPDATE: Sprite rendering issue on DUNES
 
 ## Scenes
 
-- [ ] ADD: intro night attack scene
-- [ ] ADD: copy protection screen (requires separate nodes for characters/bacground)
+- [ ] ADD: intro night attack scene w/ flash
 - [ ] ADD: Ornithopter flight animated dunes
 - [ ] ADD: flat planet map with interpolation
+- [ ] UPDATE: improve sun rise animation
 
 ## Engine
 
@@ -27,16 +30,12 @@
 - [ ] UPDATE: rewrite editor to use node system
 - [ ] UPDATE: Separate foreground/background nodes (characters vs. layout)
 
-## Sprites
-
-- [ ] UPDATE: Sprite rendering issue on DUNES?
-
 ## Animations
 
 - [ ] ADD: Reverse engineer animation for ATTACK
 
 - [ ] UPDATE: new animation system on Stars planet pan
-- [ ] ADD: define character animations as a sequence`
+- [ ] ADD: define character animations as a sequence
 
 - [ ] ADD: Page flip transition on frame buffer
 - [ ] ADD: Move up transition on frame buffer
@@ -45,7 +44,6 @@
 ## Video
 
 - [ ] FIX: overlay circles and logo in last frames
-- [ ] FIX: video PRT.HNM cannot be read
 
 ## Music
 
@@ -53,6 +51,8 @@
 
 ## UI 
 
+- [ ] UPDATE: menu states (selected, disabled)
+- [ ] ADD: implement UI sun/moon and day number
 - [ ] ADD: implement UI bar characters going with Paul
 - [ ] ADD: globe settings
 - [ ] ADD: interpolated flat map

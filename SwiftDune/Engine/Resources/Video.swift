@@ -39,6 +39,7 @@ struct VideoBlock {
     var flags: UInt8
     var mode: UInt8
     var sum: UInt8
+    var paletteBlock: PaletteBlock?
     var uncompressedBytesCount: Int
     var uncompressedBytesPointer: UnsafeMutableRawPointer?
     
@@ -79,12 +80,20 @@ final class Video {
     private var currentFrameIndex = 0
 
     private let frameRate = 15.0
+    
+    var frameCount: Int {
+        return frames.count
+    }
 
     init(_ fileName: String) {
         self.resource = Resource(fileName, uncompressed: true)
 
-        parseHeader()
-        parseSuperchunks()
+        if resource.fileName == "PRT.HNM" {
+            parseCopyProtectVideo()
+        } else {
+            parseHeader()
+            parseSuperchunks()
+        }
     }
     
     deinit {
@@ -97,16 +106,16 @@ final class Video {
     }
     
     
+    func frame(at index: Int) -> VideoFrame {
+        return frames[index]
+    }
+    
+    
     private func parseHeader() {
         let headerSize = resource.stream!.readUInt16LE()
 
         // Initial palette block
-        let paletteBlock = parsePaletteBlock(UInt32(headerSize))
-        
-        // Skip bytes of padding (0xFF)
-        /*while resource.stream!.readByte(peek: true) == 0xFF {
-            resource.stream!.skip(1)
-        }*/
+        let paletteBlock = parsePaletteBlock(resource.stream!)
         
         videoHeader = VideoHeader(headerSize: headerSize, palette: paletteBlock.paletteChunks)
         videoHeader?.dumpInfo()
@@ -116,7 +125,11 @@ final class Video {
 
     
     func setPalette() {
-        for var paletteChunk in videoHeader!.palette {
+        guard let palette = videoHeader?.palette else {
+            return
+        }
+        
+        for var paletteChunk in palette {
             engine.palette.update(&paletteChunk.chunk, start: paletteChunk.start, count: paletteChunk.count)
         }
     }
@@ -138,7 +151,7 @@ final class Video {
 
                 if chunkTag == VideoTwoCC.pl.rawValue {
                     engine.logger.log(.debug, "PL ->")
-                    let paletteBlock = parsePaletteBlock(resource.stream!.size)
+                    let paletteBlock = parsePaletteBlock(resource.stream!)
                     videoFrame.paletteBlock = paletteBlock
                 } else if chunkTag == VideoTwoCC.sd.rawValue {
                     engine.logger.log(.debug, "SD ->")
@@ -148,7 +161,7 @@ final class Video {
                     let size = UInt32(resource.stream!.readUInt16LE())
                     resource.stream!.skip(size - 4)
                 } else {
-                    let videoBlock = parseVideoBlock(superchunkSize)
+                    let videoBlock = parseVideoBlock()
                     videoFrame.videoBlock = videoBlock
                 }
             }
@@ -158,15 +171,15 @@ final class Video {
     }
     
     
-    private func parsePaletteBlock(_ headerSize: UInt32) -> PaletteBlock {
+    private func parsePaletteBlock(_ stream: ResourceStream) -> PaletteBlock {
         var paletteChunks: [VideoPalette] = []
 
         while true {
-            let h = resource.stream!.readUInt16LE()
+            let h = stream.readUInt16LE()
             
             // 0x0100 marks a 3 byte leap
             if h == 0x0100 {
-                resource.stream!.skip(3)
+                stream.skip(3)
                 continue
             }
             
@@ -190,22 +203,23 @@ final class Video {
                     break
                 }
                 
-                let r = UInt32(resource.stream!.readByte() << 2)
-                let g = UInt32(resource.stream!.readByte() << 2)
-                let b = UInt32(resource.stream!.readByte() << 2)
+                let r = UInt32(stream.readByte() << 2)
+                let g = UInt32(stream.readByte() << 2)
+                let b = UInt32(stream.readByte() << 2)
                 let a = UInt32(0xFF)
                 
                 paletteChunk[Int(i)] = (a << 24) | (b << 16) | (g << 8) | r
                 i += 1
             }
 
-            engine.logger.log(.debug, "Video::parsePaletteBlock() -> Initial palette: start=\(paletteStart), count=\(paletteCount), actualCount=\(i)")
-
             paletteChunks.append(VideoPalette(chunk: paletteChunk, start: paletteStart, count: paletteCount))
         }
 
-        engine.logger.log(.debug, "Video::parsePaletteBlock() -> finalOffset=\(resource.stream!.offset), expected=\(headerSize)")
-
+        // Skip bytes of padding (0xFF)
+        while stream.readByte(peek: true) == 0xFF {
+            stream.skip(1)
+        }
+        
         let paletteBlock = PaletteBlock(paletteChunks: paletteChunks)
         return paletteBlock
     }
@@ -219,7 +233,69 @@ final class Video {
     }
     
     
-    private func parseVideoBlock(_ superchunkSize: UInt32) -> VideoBlock? {
+    
+    private func parseCopyProtectVideo() {
+        resource.stream!.skip(58)
+        
+        while !resource.stream!.isEOF() {
+            let videoBlock = parseCopyProtectVideoBlock()
+            var videoFrame = VideoFrame()
+            videoFrame.videoBlock = videoBlock
+            frames.append(videoFrame)
+        }
+    }
+    
+    
+    private func parseCopyProtectVideoBlock() -> VideoBlock? {
+        // Verify checksum
+        let videoHeaderBytes = resource.stream!.readBytes(6, peek: true)
+        let checksum = UInt8(videoHeaderBytes.reduce(0, { Int($0) + Int($1) }) & 0xFF)
+        
+        if checksum != 0xAB {
+            engine.logger.log(.debug, "Video::parseCopyProtectVideoBlock(): invalid checksum=\(checksum)")
+            return nil
+        }
+
+        let _ = resource.stream!.readUInt16LE()
+        let _ = resource.stream!.readByte()
+        let compressedSize = resource.stream!.readUInt16LE()
+        let _ = resource.stream!.readByte()
+
+        let compressedBytes = resource.stream!.readBytes(UInt32(compressedSize) - 6)
+        let frameStream = ResourceStream(compressedBytes)
+        let uncompressedBytes = unpackHSQ(frameStream)
+
+        let uncompressedFrameStream = ResourceStream(uncompressedBytes)
+        uncompressedFrameStream.skip(2)
+        
+        let paletteBlock = parsePaletteBlock(uncompressedFrameStream)
+        let bytes = uncompressedFrameStream.readBytes(4)
+        var frameBytes = uncompressedFrameStream.readBytes(UInt32(uncompressedFrameStream.size - uncompressedFrameStream.offset))
+
+        let width = ((0x1 & bytes[1]) << 8) | bytes[0]
+        let flags = (bytes[1] & 0xFE)
+        let height = bytes[2]
+        let mode = bytes[3]
+
+        let videoBlock = VideoBlock(
+            x: 0,
+            y: 0,
+            width: UInt16(width),
+            height: height,
+            flags: flags,
+            mode: mode,
+            sum: checksum,
+            paletteBlock: paletteBlock,
+            uncompressedBytesCount: frameBytes.count,
+            uncompressedBytesPointer: UnsafeMutableRawPointer.allocate(byteCount: frameBytes.count, alignment: 1)
+        )
+        
+        let _ = memcpy(videoBlock.uncompressedBytesPointer!, &frameBytes, frameBytes.count)
+        return videoBlock
+    }
+    
+    
+    private func parseVideoBlock() -> VideoBlock? {
         //let chunkTag = resource.stream!.readUInt16LE(peek: true)
         
         // Video
@@ -229,9 +305,6 @@ final class Video {
         let flags = (bytes[1] & 0xFE)
         let height = bytes[2]
         let mode = bytes[3]
-        //let bufferSize = superchunkSize - 6
-        
-        // Check hexa 82 00 00 82 00 FF?
 
         // Width or height at zero means we repeat previous frame
         if width == 0 || height == 0 {
@@ -299,6 +372,9 @@ final class Video {
         return currentFrame.videoBlock == nil
     }
     
+    public func reset() {
+        currentFrameIndex = 0
+    }
 
     public func moveToNextFrame() {
         currentFrameIndex += 1
@@ -307,14 +383,19 @@ final class Video {
     public func setTime(_ time: Double) {
         currentFrameIndex = Int(time / (1.0 / frameRate))
     }
+    
+    public func setFrameIndex(_ index: Int) {
+        currentFrameIndex = index
+    }
         
-    public func renderFrame(_ buffer: PixelBuffer, flipX: Bool = false, flipY: Bool = false) {
+    public func renderFrame(_ buffer: PixelBuffer, pt: DunePoint = .zero, flipX: Bool = false, flipY: Bool = false) {
         if !hasFrames() {
             return
         }
         
         let currentFrame = frames[currentFrameIndex]
         
+        // Global video palette (LOGO.HNM)
         if let paletteBlock = currentFrame.paletteBlock {
             for var paletteChunk in paletteBlock.paletteChunks {
                 engine.palette.update(&paletteChunk.chunk, start: paletteChunk.start, count: paletteChunk.count)
@@ -326,10 +407,21 @@ final class Video {
             return
         }
         
+        /*if videoBlock.mode == 0xFE {
+            buffer.clearBuffer()
+        }*/
+
+        // Per-frame palette (PRT.HNM)
+        if let paletteBlock = videoBlock.paletteBlock {
+            for var paletteChunk in paletteBlock.paletteChunks {
+                engine.palette.update(&paletteChunk.chunk, start: paletteChunk.start, count: paletteChunk.count)
+            }
+        }
+
         let frameWidth = Int(videoBlock.width)
         let frameHeight = Int(videoBlock.height)
-        let frameX = Int(videoBlock.x)
-        let frameY = Int(videoBlock.y)
+        let frameX = Int(videoBlock.x) + Int(pt.x)
+        let frameY = Int(videoBlock.y) + Int(pt.y)
         
         var srcIndex = 0
         var destX = 0

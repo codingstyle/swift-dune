@@ -126,7 +126,7 @@ class EditorViewModel: ObservableObject {
 
             if selection.resourceName == "DUNECHAR.HSQ" {
                 gameFont = GameFont()
-                gameFont!.paletteIndex = 1
+                gameFont!.paletteIndex = 32
                 
                 var s = String()
 
@@ -158,7 +158,7 @@ class EditorViewModel: ObservableObject {
             }
             
             blitBuffer()
-            saveBufferAsPNG(to: "BUFFER.PNG")
+            //saveBufferAsPNG(to: "BUFFER.PNG")
         }
     }
     
@@ -315,18 +315,33 @@ class EditorViewModel: ObservableObject {
     }
     
     
-    func updateVideoFrame() {
-        if !self.video!.hasFrames() {
-            print("Video is finished")
-            self.stopVideo()
-            return
-        }
-        
+    func moveToNextVideoFrame() {
         if !self.video!.isFrameEmpty() {
             self.video!.renderFrame(buffer)
         }
-        
-        self.video?.moveToNextFrame()
+    }
+    
+    
+    func updateVideoFrame(_ index: Int = -1) {
+        if index != -1 {
+            self.video!.setFrameIndex(index)
+            self.video!.renderFrame(buffer)
+            palette = engine.palette.allColors()
+        } else {
+            if !self.video!.hasFrames() {
+                print("Video is finished")
+                self.stopVideo()
+                return
+            }
+
+            if !self.video!.isFrameEmpty() {
+                self.video!.renderFrame(buffer)
+                palette = engine.palette.allColors()
+            }
+            
+            self.video?.moveToNextFrame()
+        }
+
         self.blitBuffer()
     }
     

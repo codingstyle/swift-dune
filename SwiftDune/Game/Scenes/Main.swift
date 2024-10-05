@@ -18,9 +18,7 @@ final class Main: DuneNode, DuneEventObserver {
         attachNode(Intro())
         attachNode(Credits())
         attachNode(Prologue())
-
-        // TODO: Copy protection
-
+        attachNode(CopyProtection())
         attachNode(Game())
     }
     
@@ -28,10 +26,11 @@ final class Main: DuneNode, DuneEventObserver {
     override func onEnable() {
         engine.addEventObserver(self)
         
-        //queue.enqueue("Logo")
+        queue.enqueue("Logo")
         queue.enqueue("Intro")
         queue.enqueue("Credits")
         queue.enqueue("Prologue")
+        queue.enqueue("CopyProtection")
         queue.enqueue("Game")
 
         guard let itemName = queue.dequeueFirst() else {
@@ -93,7 +92,7 @@ final class Main: DuneNode, DuneEventObserver {
         }
         
         // Prologue iterates screen by screen
-        if activeNode.name == "Prologue" {
+        if activeNode.name == "Prologue" || activeNode.name == "CopyProtection" {
             super.onKey(key)
         } else {
             moveToNextNode()

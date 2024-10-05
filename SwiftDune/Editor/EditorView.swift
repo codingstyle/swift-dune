@@ -73,6 +73,8 @@ struct EditorView: View {
                 SpriteListView(viewModel: viewModel)
             } else if selection?.resourceType == .scene {
                 SceneryListView(viewModel: viewModel)
+            } else if selection?.resourceType == .video {
+                VideoListView(viewModel: viewModel)
             } else {
                 Text("No content selected")
             }

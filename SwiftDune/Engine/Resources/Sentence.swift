@@ -20,6 +20,7 @@ enum SentenceLanguage: Int {
 }
 
 
+
 final class Sentence {
     private let engine = DuneEngine.shared
     private var resource: Resource
