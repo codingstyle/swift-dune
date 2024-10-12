@@ -158,17 +158,18 @@ final class Scenery {
     func parseRooms() {
         let firstOffset = resource.stream!.readUInt16LE(peek: true)
         let roomCount = firstOffset / 2
+        var i = 0
 
         resource.stream!.seek(UInt32(firstOffset))
 
-        for i in 0..<roomCount {
+        while i < roomCount {
             var room = Room(offset: resource.stream!.offset)
             let markerCount = resource.stream!.readByte() // Room marker count
             var markerIndex = 0
             
-            engine.logger.log(.debug, "--------------------------------------------------------------------------------------")
+            /*engine.logger.log(.debug, "--------------------------------------------------------------------------------------")
             engine.logger.log(.debug, "")
-            engine.logger.log(.debug, "ROOM #\(i): markers=\(markerCount), offset=\(room.offset)")
+            engine.logger.log(.debug, "ROOM #\(i): markers=\(markerCount), offset=\(room.offset)")*/
             
             // Processes room blocks
             while !resource.stream!.isEOF() && resource.stream!.readUInt16LE(peek: true) != 0xFFFF {
@@ -176,7 +177,7 @@ final class Scenery {
                 
                 if command == 0x00 {
                     // Invalid command
-                    engine.logger.log(.error, " - Invalid command")
+                    // engine.logger.log(.error, " - Invalid command")
                 } else if command <= 0x3F {
                     // Command = 0x01 => Marker
                     // Command <= 0x3F => Sprite blit
@@ -208,7 +209,7 @@ final class Scenery {
                         room.commands.append(roomMarker)
                         markerIndex += 1
 
-                        engine.logger.log(.debug, " - Marker: x=\(x), y=\(y), flipX=\(flipX), flipY=\(flipY), scaleFlag=\(scaleFactor), modificator=\(String.fromByte(modificator))")
+                        //engine.logger.log(.debug, " - Marker: x=\(x), y=\(y), flipX=\(flipX), flipY=\(flipY), scaleFlag=\(scaleFactor), modificator=\(String.fromByte(modificator))")
                     } else {
                         let roomSprite = RoomSprite(
                             spriteID: command - 1,
@@ -220,7 +221,7 @@ final class Scenery {
                         )
                         room.commands.append(roomSprite)
                         
-                        engine.logger.log(.debug, " - Sprite: id=\(command), x=\(x), y=\(y), flipX=\(flipX), flipY=\(flipY), scaleFlag=\(scaleFactor), paletteOffset=\(paletteOffset), modificator=\(String.fromByte(modificator))")
+                        //engine.logger.log(.debug, " - Sprite: id=\(command), x=\(x), y=\(y), flipX=\(flipX), flipY=\(flipY), scaleFlag=\(scaleFactor), paletteOffset=\(paletteOffset), modificator=\(String.fromByte(modificator))")
                     }
                 } else {
                     let paletteIndex = command & 0x7F
@@ -235,7 +236,7 @@ final class Scenery {
                         let x2 = Int16(resource.stream!.readUInt16LE())
                         let y2 = Int16(resource.stream!.readUInt16LE())
 
-                        engine.logger.log(.debug, " - Line: x1=\(x1), y1=\(y1), x2=\(x2), y2=\(y2)")
+                        //engine.logger.log(.debug, " - Line: x1=\(x1), y1=\(y1), x2=\(x2), y2=\(y2)")
                         
                         let line = RoomLine(pt1: DunePoint(x1, y1), pt2: DunePoint(x2, y2), paletteOffset: paletteIndex)
                         room.commands.append(line)
@@ -244,6 +245,8 @@ final class Scenery {
             }
             
             rooms.append(room)
+          
+            i += 1
         }
     }
     
@@ -340,7 +343,7 @@ final class Scenery {
 
 extension Scenery {
     private func parsePolygon(_ room: inout Room, _ command: UInt8, _ drawCommand: UInt8, _ paletteIndex: UInt8) {
-        engine.logger.log(.debug, " - Polygon:")
+        // engine.logger.log(.debug, " - Polygon:")
         
         var polygonSideDown = [UInt16]()
         var polygonSideUp = [UInt16]()
@@ -428,7 +431,7 @@ extension Scenery {
     
     
     private func addPolygonSection(_ x0: UInt16, _ y0: UInt16, _ x1: UInt16, _ y1: UInt16, _ startY: UInt16, _ polygonSide: inout [UInt16]) {
-        engine.logger.log(.debug, "   - Section: x0=\(x0), y0=\(y0), x1=\(x1), y1=\(y1), startY=\(startY)")
+        // engine.logger.log(.debug, "   - Section: x0=\(x0), y0=\(y0), x1=\(x1), y1=\(y1), startY=\(startY)")
         
         var deltaX = -(Int(x0) - Int(x1))
         var deltaY = -(Int(y0) - Int(y1))

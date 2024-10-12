@@ -24,7 +24,7 @@ class Logger {
     
     
     func log(_ level: LogLevel, _ s: String) {
-        loggingQueue.sync {
+        loggingQueue.async {
             print(s)
         }
     }

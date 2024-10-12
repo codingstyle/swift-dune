@@ -83,10 +83,15 @@ final class Baron: DuneNode {
         guard let baronSprite = baronSprite else {
             return
         }
+      
+        let intermediateFrameBuffer = engine.intermediateFrameBuffer
+      
+        if intermediateFrameBuffer.tag != 0x01 {
+            drawBackground(buffer: intermediateFrameBuffer)
+            baronSprite.setPalette()
+        }
         
-        drawBackground(buffer: contextBuffer)
-        
-        baronSprite.setPalette()
+        intermediateFrameBuffer.render(to: contextBuffer)
         baronSprite.drawAnimation(0, buffer: contextBuffer, time: currentTime, offset: DunePoint(83, 0))
         
         if showSardaukar {

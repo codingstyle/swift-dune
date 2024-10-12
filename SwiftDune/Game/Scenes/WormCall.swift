@@ -82,7 +82,6 @@ final class WormCall: DuneNode {
         contextBuffer.render(to: intermediateFrameBuffer, effect: .none)
         
         if currentTime > 1.0 && currentTime < 8.41 {
-            wormSprite.setPalette()
             wormSprite.drawAnimation(0, buffer: intermediateFrameBuffer, time: currentTime - 1.0)
         }
         

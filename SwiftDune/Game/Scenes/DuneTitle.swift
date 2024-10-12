@@ -33,6 +33,7 @@ final class DuneTitle: DuneNode {
     
     override func onDisable() {
         titleSprite = nil
+        scrollAnimation = nil
         sky = nil
         currentTime = 0.0
     }
@@ -73,7 +74,7 @@ final class DuneTitle: DuneNode {
             contextBuffer.tag = 0x0011
         }
         
-        
+        // Pixelate intro
         if scrollY < 152 && contextBuffer.tag < 0x0012 {
             var fxStart: SpriteEffect {
                 if currentTime < 2.0 {
@@ -86,24 +87,16 @@ final class DuneTitle: DuneNode {
             contextBuffer.render(to: buffer, effect: fxStart, y: Int(scrollY))
         }
         
-        // Gradient sky and title fade
-        if scrollY > 0 && contextBuffer.tag < 0x0012 && currentTime <= 9.5 {
+        // Gradient sky and scroll
+        if scrollY > 0 && contextBuffer.tag < 0x0012 && currentTime <= 7.5 {
             let skyScrollY = scrollY - 152
             titleSprite.drawFrame(2, x: 0, y: skyScrollY, buffer: buffer)
             titleSprite.drawFrame(3, x: 0, y: skyScrollY + 95, buffer: buffer)
             titleSprite.drawFrame(4, x: 0, y: skyScrollY + 123, buffer: buffer)
-            
-            if currentTime > 7.5 {
-                titleSprite.drawFrame(5, x: 0, y: 48, buffer: buffer)
-            }
-
-            // Partial palette fade in for the red title
-            let clampedProgress = Math.clampf((currentTime - 7.5) / 2.0, 0.0, 1.0)
-            Effects.fade(progress: clampedProgress, startIndex: 224, endIndex: 239)
         }
         
-        // Title fade out
-        if currentTime > 9.5 {
+        // Title fade in & fade out
+        if currentTime > 7.5 {
             if contextBuffer.tag < 0x0012 {
                 contextBuffer.clearBuffer()
 
@@ -115,6 +108,12 @@ final class DuneTitle: DuneNode {
                 contextBuffer.tag = 0x0012
 
                 engine.palette.stash()
+            }
+  
+            // Partial palette fade in for the red title
+            if currentTime < 9.6 {
+                let clampedProgress = Math.clampf((currentTime - 7.5) / 2.0, 0.0, 1.0)
+                Effects.fade(progress: clampedProgress, startIndex: 224, endIndex: 239)
             }
             
             var fxEnd: SpriteEffect {

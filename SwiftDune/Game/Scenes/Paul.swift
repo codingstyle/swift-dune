@@ -120,24 +120,18 @@ final class Paul: DuneNode {
         }
         
         if currentTime >= 2.0 && currentTime <= duration - 2.0 {
-            backgroundSprite.setPalette()
             drawBackground(buffer: buffer)
-
-            paulSprite.setPalette()
             paulSprite.drawAnimation(0, buffer: buffer, time: currentTime - 2.0 + (0.016 * 40.0))
         }
         
         if currentTime > duration - 2.0 {
             if contextBuffer.tag != 0x0002 {
                 contextBuffer.clearBuffer()
-                
-                backgroundSprite.setPalette()
+
                 drawBackground(buffer: contextBuffer)
-
-                paulSprite.setPalette()
                 paulSprite.drawAnimation(0, buffer: contextBuffer, time: currentTime - 2.0 + (0.016 * 40.0))
+                
                 contextBuffer.tag = 0x0002
-
                 engine.palette.stash()
             }
             

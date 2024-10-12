@@ -55,8 +55,6 @@ final class Feyd: DuneNode {
         
         contextBuffer.render(to: buffer, effect: .none)
         
-        feydSprite.setPalette()
-        
         if currentTime <= 1.5 {
             feydSprite.drawAnimation(1, buffer: buffer, time: currentTime, offset: DunePoint(66, 0))
         } else {
@@ -89,5 +87,7 @@ final class Feyd: DuneNode {
 
         backgroundSprite.drawFrame(7, x: 200, y: 13, buffer: contextBuffer)
         backgroundSprite.drawFrame(8, x: 200, y: 13, buffer: contextBuffer)
+
+        feydSprite.setPalette()
     }
 }

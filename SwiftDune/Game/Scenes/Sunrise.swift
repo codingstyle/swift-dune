@@ -42,11 +42,9 @@ final class Sunrise: DuneNode {
     
     
     override func onEnable() {
-        chaniSprite = Sprite("CHAN.HSQ")
-        lietSprite = Sprite("KYNE.HSQ")
         sunriseSprite = Sprite("SUNRS.HSQ")
         sunriseSprite!.setPalette()
-        
+
         let startTime = switch transitionIn {
         case .fadeIn(let fadeDuration):
             fadeDuration
@@ -97,8 +95,16 @@ final class Sunrise: DuneNode {
         
         if let character = params["character"] {
             self.character = character as! DuneCharacter
+          
+            switch self.character {
+            case .chani:
+                chaniSprite = Sprite("CHAN.HSQ")
+            case .liet:
+                lietSprite = Sprite("KYNE.HSQ")
+            default:
+                break
+            }
         }
-
         
         if let transitionInParam = params["transitionIn"] {
             self.transitionIn = transitionInParam as! TransitionEffect

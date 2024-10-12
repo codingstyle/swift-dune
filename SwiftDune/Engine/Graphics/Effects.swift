@@ -146,26 +146,32 @@ struct Effects {
     static func zoom(sourceBuffer: PixelBuffer, destBuffer: PixelBuffer, sourceRect: DuneRect) {
         let xScale = CGFloat(destBuffer.width) / CGFloat(sourceRect.width)
         let yScale = CGFloat(destBuffer.height) / CGFloat(sourceRect.height)
-        
+        let sourceRectX = CGFloat(sourceRect.x)
+        let sourceRectY = CGFloat(sourceRect.y)
+      
         var y = 0
         
         while y < destBuffer.height {
             var x = 0
-            
+            let sourceY = Int(sourceRectY + CGFloat(y) / yScale)
+          
+            guard sourceY < destBuffer.height else {
+              continue
+            }
+
+            let sourceIndex = sourceY * destBuffer.width
+            let destinationIndex = y * destBuffer.width
+
             while x < destBuffer.width {
-                let sourceX = Int(CGFloat(sourceRect.x) + CGFloat(x) / xScale)
-                let sourceY = Int(CGFloat(sourceRect.y) + CGFloat(y) / yScale)
+                let sourceX = Int(sourceRectX + CGFloat(x) / xScale)
                 
                 // Ensure we don't go out of bounds
-                guard sourceX < destBuffer.width, sourceY < destBuffer.height else {
+                guard sourceX < destBuffer.width else {
                     continue
                 }
 
-                let sourceIndex = sourceY * destBuffer.width + sourceX
-                let destinationIndex = y * destBuffer.width + x
-
                 // Copy the pixel from sourceBuffer to destinationBuffer
-                destBuffer.rawPointer[destinationIndex] = sourceBuffer.rawPointer[sourceIndex]
+                destBuffer.rawPointer[destinationIndex + x] = sourceBuffer.rawPointer[sourceIndex + sourceX]
                 
                 x += 1
             }

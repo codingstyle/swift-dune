@@ -392,9 +392,11 @@ final class Sprite: Equatable {
         var flipX = false
         var flipY = false
         var scaleRatio = 1.0
+      
+        var effectIndex = 0
         
-        for effect in effects {
-            switch effect {
+        while effectIndex < effects.count {
+            switch effects[effectIndex] {
             case .transform(let offset, let flipHorizontal, let flipVertical, let scaleFactor):
                 flipX = flipHorizontal
                 flipY = flipVertical
@@ -410,6 +412,8 @@ final class Sprite: Equatable {
             default:
                 break
             }
+          
+            effectIndex += 1
         }
         
         // Do not render sprites outside the screen

@@ -13,7 +13,8 @@ final class Palette {
     private let paletteSize = 256
     private let colorAlignment = MemoryLayout<UInt32>.alignment
     private let colorSize = MemoryLayout<UInt32>.size
-    
+    private let paletteByteSize = 256 * MemoryLayout<UInt32>.size
+
     var stashRawPointer: UnsafeMutablePointer<UInt32>
     var rawPointer: UnsafeMutablePointer<UInt32>
     
@@ -31,16 +32,16 @@ final class Palette {
     
     
     func stash() {
-        memcpy(stashRawPointer, rawPointer, paletteSize * colorSize)
+        memcpy(stashRawPointer, rawPointer, paletteByteSize)
     }
 
     func unstash() {
-        memcpy(rawPointer, stashRawPointer, paletteSize * colorSize)
+        memcpy(rawPointer, stashRawPointer, paletteByteSize)
     }
 
     
     func clear() {
-        let _ = memset(rawPointer, 0, paletteSize * colorSize)
+        let _ = memset(rawPointer, 0, paletteByteSize)
     }
     
     
