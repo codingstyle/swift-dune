@@ -500,7 +500,7 @@ class Resource
                 stream = ResourceStream(unpackedData)
             }
         } catch {
-            engine.logger.log(.error, "\(fileName): unable to decode file.")
+            engine.logger.log(.error, "\(fileName): parsing raw file.")
             parseRaw()
         }
     }
@@ -527,7 +527,7 @@ class Resource
         let realFileSize = try fileHandle.offset()
         
         if realFileSize != fileSize {
-            engine.logger.log(.error, "\(fileName): wrong file size (expected=\(realFileSize), actual=\(fileSize)). HSQ file may be corrupted.")
+            engine.logger.log(.error, "\(fileName): wrong file size (expected=\(realFileSize), isCompressed=\(header.isCompressed!), actual=\(fileSize)). HSQ file may be corrupted.")
             throw ResourceError.fileSizeMismatch
         }
         

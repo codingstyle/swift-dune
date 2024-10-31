@@ -19,6 +19,7 @@ class EditorViewModel: ObservableObject {
     private var isSpriteAnimation = false
     
     @Published var dialogue: Sentence?
+    @Published var music: Music?
     @Published var sound: Sound?
     @Published var video: Video?
     private var isVideoPlaying = false
@@ -55,6 +56,7 @@ class EditorViewModel: ObservableObject {
     private var buffer = PixelBuffer(width: 320, height: 200)
 
     var resourceTypes: [ResourceType] = [
+        .music,
         .globe,
         .sprite,
         .font,
@@ -77,6 +79,7 @@ class EditorViewModel: ObservableObject {
     
     
     func loadResource(_ selection: EditorSelection) {
+        music = nil
         sprite = nil
         dialogue = nil
         sound = nil
@@ -105,6 +108,8 @@ class EditorViewModel: ObservableObject {
             sound = Sound(selection.resourceName)
             sound!.dumpInfo()
             engine.audioPlayer.play(sound!)
+        } else if selection.resourceType == .music {
+            music = Music(selection.resourceName)
         } else if selection.resourceType == .scene {
             scenery = Scenery(selection.resourceName)
         } else if selection.resourceType == .video {

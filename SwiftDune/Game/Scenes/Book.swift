@@ -41,8 +41,6 @@ struct BookPage {
 
 
 final class Book: DuneNode {
-    private let engine = DuneEngine.shared
-    
     private var contextBuffer = PixelBuffer(width: 320, height: 152)
     private var bookSprite: Sprite?
     

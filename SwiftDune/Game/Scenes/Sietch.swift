@@ -31,20 +31,19 @@ final class Sietch: DuneNode {
     private var sky: Sky?
     private var characterSprite: Sprite?
     
-    private var currentTime: TimeInterval = 0.0
-    private let engine = DuneEngine.shared
-    
     private var currentRoom: SietchRoom = .room8
     private var markers: Dictionary<Int, RoomCharacter> = [:]
-    private var duration: TimeInterval = 0.0
     private var character: DuneCharacter = .none
     
     private let waterInitialRadius = DunePoint(15, 3)
     private var waterRadius = DunePoint(15, 3)
     private var waterRadiusAnimation: DuneAnimation<DunePoint>?
     private let waterCenter = DunePoint(175, 95)
-    
-    private var fadeIn: Bool = false
+  
+    private var lightMode: DuneLightMode = .day
+
+    private let desertRect = DuneRect(0, 78, 320, 74)
+    private let desertPaletteIndex = 63
     
     init() {
         super.init("Sietch")
@@ -56,10 +55,6 @@ final class Sietch: DuneNode {
         sky = Sky()
         
         sietchScenery?.characters = markers
-        
-        if character != .none {
-            characterSprite = Sprite(character.rawValue)
-        }
         
         if currentRoom == .water {
             waterRadius = waterInitialRadius
@@ -82,8 +77,10 @@ final class Sietch: DuneNode {
         currentTime = 0.0
         character = .none
         waterRadiusAnimation = nil
-        waterRadius = DunePoint(15, 3)
-        fadeIn = false
+        waterRadius = waterInitialRadius
+        contextBuffer.tag = 0x00
+        contextBuffer.clearBuffer()
+        lightMode = .day
     }
     
     
@@ -103,19 +100,15 @@ final class Sietch: DuneNode {
         if let character = params["character"] {
             self.character = character as! DuneCharacter
         }
-
-        if let fadeIn = params["fadeIn"] {
-            self.fadeIn = fadeIn as! Bool
+      
+        if let lightMode = params["lightMode"] {
+            self.lightMode = lightMode as! DuneLightMode
         }
     }
     
     
     override func update(_ elapsedTime: TimeInterval) {
         currentTime += elapsedTime
-        
-        if duration != 0.0 && currentTime > duration {
-            engine.sendEvent(self, .nodeEnded)
-        }
         
         if let waterRadiusAnimation = waterRadiusAnimation {
             let interpolatedRadius = waterRadiusAnimation.interpolate(currentTime)
@@ -137,12 +130,14 @@ final class Sietch: DuneNode {
         if currentRoom == .entrance {
             if contextBuffer.tag != 0x0001 {
                 // Apply sky gradient with blue palette
-                sky.lightMode = .day
+                sky.lightMode = lightMode
                 sky.render(contextBuffer)
 
                 contextBuffer.tag = 0x0001
             }
-            
+
+            Primitives.fillRect(desertRect, desertPaletteIndex, contextBuffer)
+          
             contextBuffer.render(to: intermediateFrameBuffer, effect: .none)
         }
         
@@ -159,19 +154,7 @@ final class Sietch: DuneNode {
             characterSprite.drawAnimation(0, buffer: intermediateFrameBuffer, time: currentTime)
         }
         
-        var fx: SpriteEffect {
-            if fadeIn && currentTime < 2.0 {
-                return .fadeIn(start: 0.0, duration: 2.0, current: currentTime)
-            }
-            
-            return .none
-        }
-
-        if currentTime < 0.1 {
-            engine.palette.stash()
-        }
-        
         buffer.clearBuffer()
-        intermediateFrameBuffer.render(to: buffer, effect: fx)
+        intermediateFrameBuffer.render(to: buffer)
     }
 }

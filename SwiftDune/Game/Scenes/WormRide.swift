@@ -8,13 +8,9 @@
 import Foundation
 
 final class WormRide: DuneNode {
-    private let engine = DuneEngine.shared
-    
     private var contextBuffer = PixelBuffer(width: 320, height: 152)
     private var wormSprite: Sprite?
     private var sky: Sky?
-    private var duration: TimeInterval = 10.0
-    private var currentTime: TimeInterval = 0.0
     private var dayMode: DuneLightMode = .day
     
     init() {

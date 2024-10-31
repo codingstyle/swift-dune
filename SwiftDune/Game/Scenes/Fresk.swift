@@ -13,13 +13,11 @@ enum FreskPanelState {
 }
 
 final class Fresk: DuneNode {
-    private let engine = DuneEngine.shared
     private var contextBuffer = PixelBuffer(width: 320, height: 152)
     
     private var freskSprite: Sprite?
     private var globe: Globe?
     
-    private var currentTime: TimeInterval = 0.0
     private var panelState: FreskPanelState = .closed {
         didSet {
             panelAnimation = DuneAnimation(

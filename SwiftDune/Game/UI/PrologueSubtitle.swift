@@ -9,7 +9,6 @@ import Foundation
 
 
 final class PrologueSubtitle: DuneNode {
-    private let engine = DuneEngine.shared
     private var gameFont: GameFont?
     private var sentences: Sentence?
     private var sentenceNumber: UInt16 = 0

@@ -9,6 +9,14 @@ import Foundation
 import CoreGraphics
 import AppKit
 
+
+struct PaletteChunk {
+  var chunk: Array<UInt32>
+  var start: Int
+  var count: Int
+}
+
+
 final class Palette {
     private let paletteSize = 256
     private let colorAlignment = MemoryLayout<UInt32>.alignment
@@ -45,8 +53,8 @@ final class Palette {
     }
     
     
-    func update(_ chunk: inout Array<UInt32>, start: UInt16, count: UInt16) {
-        memcpy(rawPointer + Int(start), &chunk, Int(count) * colorSize)
+    func update(_ chunk: inout Array<UInt32>, start: Int, count: Int) {
+        memcpy(rawPointer + start, &chunk, count * colorSize)
     }
     
     

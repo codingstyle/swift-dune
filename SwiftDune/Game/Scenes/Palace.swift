@@ -31,13 +31,9 @@ final class Palace: DuneNode {
     private var palaceScenery: Scenery?
     private var sky: Sky?
     private var characterSprite: Sprite?
-
-    private var currentTime: TimeInterval = 0.0
-    private let engine = DuneEngine.shared
     
     private var currentRoom: PalaceRoom = .stairs
     private var markers: Dictionary<Int, RoomCharacter> = [:]
-    private var duration: TimeInterval = 0.0
     private var character: DuneCharacter = .none
     private var zoomRect: DuneRect?
     private var dayMode: DuneLightMode = .day
@@ -56,10 +52,6 @@ final class Palace: DuneNode {
         
         engine.palette.clear()
         palaceScenery?.characters = markers
-        
-        if character != .none {
-            characterSprite = Sprite(character.rawValue)
-        }
     }
     
     

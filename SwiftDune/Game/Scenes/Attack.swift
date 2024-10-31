@@ -8,12 +8,8 @@
 import Foundation
 
 final class Attack: DuneNode {
-    private let engine = DuneEngine.shared
-    
     private var contextBuffer = PixelBuffer(width: 320, height: 152)
     private var attackSprite: Sprite?
-    private var duration: TimeInterval = 10.0
-    private var currentTime: TimeInterval = 0.0
     
     private var transitionIn: TransitionEffect = .none
     private var transitionOut: TransitionEffect = .none
@@ -60,6 +56,7 @@ final class Attack: DuneNode {
             return
         }
         
+        flash()
         drawBackground(buffer)
         
         // TODO: render projectiles
@@ -107,5 +104,15 @@ final class Attack: DuneNode {
 
         attackSprite.drawFrame(49, x: 0, y: 76, buffer: contextBuffer)
         attackSprite.drawFrame(1, x: 0, y: 134, buffer: contextBuffer)
+    }
+  
+  
+    private func flash() {
+        var i = 0
+      
+        while i < 24 {
+            //engine.palette.rawPointer[132 + i] = Effects.brighten(
+            i += 1
+        }
     }
 }

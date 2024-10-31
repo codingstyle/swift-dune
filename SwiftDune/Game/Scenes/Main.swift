@@ -8,7 +8,6 @@
 import Foundation
 
 final class Main: DuneNode, DuneEventObserver {
-    private let engine = DuneEngine.shared
     private var queue = Queue<String>()
 
     init() {

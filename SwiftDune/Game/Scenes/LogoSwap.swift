@@ -10,10 +10,7 @@ import AppKit
 
 final class LogoSwap: DuneNode {
     private var contextBuffer = PixelBuffer(width: 320, height: 152)
-    private var currentTime: TimeInterval = 0.0
     private var cryoSprite: Sprite?
-
-    private let engine = DuneEngine.shared
     
     // Keyframes
     let cryoLogo = AnimationTimeRange(start: 0.00, end: 1.28)
@@ -39,7 +36,7 @@ final class LogoSwap: DuneNode {
         currentTime += elapsedTime
         
         if currentTime > virginLogo.end {
-            engine.sendEvent(self, .nodeEnded)
+            return
         }
     }
     
@@ -99,8 +96,6 @@ final class LogoSwap: DuneNode {
             var fx: SpriteEffect {
                 if currentTime <= virginLogo.start + 0.3 {
                     return .flipIn(start: virginLogo.start, duration: 0.3, current: currentTime)
-                } else if currentTime >= virginLogo.end - 0.9 {
-                    return .fadeOut(end: virginLogo.end, duration: 0.9, current: currentTime)
                 } else {
                     return .none
                 }

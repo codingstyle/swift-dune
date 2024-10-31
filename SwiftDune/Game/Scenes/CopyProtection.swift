@@ -8,8 +8,6 @@
 import Foundation
 
 final class CopyProtection: DuneNode {
-    private let engine = DuneEngine.shared
-    
     private var thumbnails: Video?
     private var sentences: Sentence?
     private var gameFont: GameFont?

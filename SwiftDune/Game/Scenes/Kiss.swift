@@ -15,14 +15,10 @@ final class Kiss: DuneNode {
     private let desertIndexPalette = 63
     
     private let zoomRect = DuneRect(0, 52, 210, 100)
-    
-    private var currentTime: TimeInterval = 0.0
-    private let engine = DuneEngine.shared
 
     private var kissSprite: Sprite?
     private var dunesSprite: Sprite?
     private var sky: Sky?
-    private var duration: TimeInterval = 10.0
 
     private var transitionIn: TransitionEffect = .none
     private var transitionOut: TransitionEffect = .none

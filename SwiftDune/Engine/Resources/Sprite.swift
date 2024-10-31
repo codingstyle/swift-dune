@@ -10,13 +10,6 @@ import CoreGraphics
 import AppKit
 
 
-struct SpritePalette {
-    var chunk: Array<UInt32>
-    var start: UInt16
-    var count: UInt16
-}
-
-
 class SpriteFrameInfo {
     var startOffset: UInt32 = 0
     var isCompressed: Bool = false
@@ -44,8 +37,8 @@ final class Sprite: Equatable {
     private let engine: DuneEngine = DuneEngine.shared
     private var resource: Resource
     
-    private var palette: [SpritePalette] = []
-    private var alternatePalettes: [SpritePalette] = []
+    private var palette: [PaletteChunk] = []
+    private var alternatePalettes: [PaletteChunk] = []
 
     private var frameIndexOffset: UInt32 = 0
     private var animationOffset: UInt32 = 0
@@ -139,7 +132,7 @@ final class Sprite: Equatable {
                 i += 1
             }
         
-            palette.append(SpritePalette(chunk: paletteChunk, start: paletteStart, count: paletteCount))
+            palette.append(PaletteChunk(chunk: paletteChunk, start: Int(paletteStart), count: Int(paletteCount)))
         }
     }
 
@@ -237,7 +230,7 @@ final class Sprite: Equatable {
                 i += 1
             }
         
-            alternatePalettes.append(SpritePalette(chunk: paletteChunk, start: paletteStart, count: paletteCount))
+            alternatePalettes.append(PaletteChunk(chunk: paletteChunk, start: Int(paletteStart), count: Int(paletteCount)))
         }
     }
     
@@ -437,9 +430,13 @@ final class Sprite: Equatable {
 
         while j < maxY2 {
             var i = minX1
+            let yDelta = j - y1
+            let yRatio = Int(CGFloat(yDelta) / scaleRatio)
+            let yScaled = yRatio * scaledFrameWidth
 
             while i < maxX2 {
-                let srcIndex = Int(CGFloat(j - y1) / scaleRatio) * scaledFrameWidth + Int(CGFloat(i - x1) / scaleRatio)
+                let xDelta = i - x1
+                let srcIndex = yScaled + Int(CGFloat(xDelta) / scaleRatio)
                 var paletteIndex = frameInfo.paletteIndices[srcIndex]
 
                 if paletteIndex <= frameInfo.paletteOffset || paletteIndex == 0 {
@@ -449,8 +446,8 @@ final class Sprite: Equatable {
                 
                 paletteIndex = UInt8(Int(paletteIndex) + roomPaletteOffset)
 
-                let x = flipX ? x2 - (i - x1) - 1 : i
-                let y = flipY ? y2 - (j - y1) - 1 : j
+                let x = flipX ? x2 - xDelta - 1 : i
+                let y = flipY ? y2 - yDelta - 1 : j
                 
                 let destIndex = y * bufferWidth + x
                 

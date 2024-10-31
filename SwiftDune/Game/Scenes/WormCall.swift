@@ -13,9 +13,6 @@ final class WormCall: DuneNode {
     private var wormSprite: Sprite?
     private var sky: Sky?
     
-    private var currentTime: TimeInterval = 0.0
-    private let engine = DuneEngine.shared
-    
     init() {
         super.init("WormCall")
     }
@@ -40,10 +37,6 @@ final class WormCall: DuneNode {
     
     override func update(_ elapsedTime: TimeInterval) {
         currentTime += elapsedTime
-                
-        if currentTime > 9.41 {
-            DuneEngine.shared.sendEvent(self, .nodeEnded)
-        }
     }
     
     
@@ -62,29 +55,15 @@ final class WormCall: DuneNode {
             wormSprite.drawFrame(44, x: 0, y: 74, buffer: contextBuffer)
  
             contextBuffer.tag = 0x0001
-
-            engine.palette.stash()
-        }
-
-        var fx: SpriteEffect {
-            if currentTime < 1.0 {
-                return .fadeIn(start: 0.0, duration: 1.0, current: currentTime)
-            } else if currentTime > 8.41 {
-                return .fadeOut(end: 9.41, duration: 1.0, current: currentTime)
-            }
-            
-            return .none
         }
         
         let intermediateFrameBuffer = engine.intermediateFrameBuffer
 
         intermediateFrameBuffer.clearBuffer()
-        contextBuffer.render(to: intermediateFrameBuffer, effect: .none)
+
+        contextBuffer.render(to: intermediateFrameBuffer)
+        wormSprite.drawAnimation(0, buffer: intermediateFrameBuffer, time: currentTime)
         
-        if currentTime > 1.0 && currentTime < 8.41 {
-            wormSprite.drawAnimation(0, buffer: intermediateFrameBuffer, time: currentTime - 1.0)
-        }
-        
-        intermediateFrameBuffer.render(to: buffer, effect: fx)
+        intermediateFrameBuffer.render(to: buffer)
     }
 }

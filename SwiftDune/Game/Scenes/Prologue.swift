@@ -20,28 +20,25 @@ import Foundation
  */
 
 struct PrologueSteps {
-    var mainNode: DuneNodeParams
+    var background: DuneNodeParams
+    var foreground: DuneNodeParams?
     var subtitle: DuneNodeParams
 }
 
 
 final class Prologue: DuneNode, DuneEventObserver {
-    private let engine = DuneEngine.shared
     private var buffer = PixelBuffer(width: 320, height: 200)
     private var queue = Queue<PrologueSteps>()
-    private var currentTime: TimeInterval = 0.0
-    private var duration: TimeInterval = 999.0
  
     init() {
         super.init("Prologue")
         
         attachNode(Stars())
-        attachNode(Paul())
-        attachNode(DesertBackground())
+        attachNode(Background())
+        attachNode(Character())
         attachNode(Sunrise())
         attachNode(Sietch())
         attachNode(Palace())
-        attachNode(Baron())
         attachNode(DesertWalk())
         attachNode(PrologueSubtitle())
     }
@@ -49,39 +46,42 @@ final class Prologue: DuneNode, DuneEventObserver {
     
     override func onEnable() {
         queue.enqueue(PrologueSteps(
-            mainNode: DuneNodeParams("Stars", [ "mode": StarsMode.planets ]),
+            background: DuneNodeParams("Stars", [ "mode": StarsMode.planets ]),
             subtitle: DuneNodeParams("PrologueSubtitle", [ "sentenceNumber": 267 ])
         ))
         queue.enqueue(PrologueSteps(
-            mainNode: DuneNodeParams("Stars", [ "mode": StarsMode.globe ]),
+            background: DuneNodeParams("Stars", [ "mode": StarsMode.globe ]),
             subtitle: DuneNodeParams("PrologueSubtitle", [ "sentenceNumber": 268 ])
         ))
         queue.enqueue(PrologueSteps(
-            mainNode: DuneNodeParams("DesertBackground", [:]),
+            background: DuneNodeParams("Background", [ "backgroundType": BackgroundType.desert ]),
             subtitle: DuneNodeParams("PrologueSubtitle", [ "sentenceNumber": 269 ])
         ))
         queue.enqueue(PrologueSteps(
-            mainNode: DuneNodeParams("Paul", [ "background": PaulBackground.red, "duration": 999.0 ]),
+            background: DuneNodeParams("Background", [ "backgroundType": BackgroundType.red ]),
+            foreground: DuneNodeParams("Character", [ "character": DuneCharacter.paul ]),
             subtitle: DuneNodeParams("PrologueSubtitle", [ "sentenceNumber": 270 ])
         ))
         queue.enqueue(PrologueSteps(
-            mainNode: DuneNodeParams("Baron", [ "animation": 5, "duration": 999.0 ]),
+            background: DuneNodeParams("Background", [ "backgroundType": BackgroundType.baron ]),
+            foreground: DuneNodeParams("Character", [ "character": DuneCharacter.baron, "animations": [ 5 ] ]),
             subtitle: DuneNodeParams("PrologueSubtitle", [ "sentenceNumber": 271 ])
         ))
         queue.enqueue(PrologueSteps(
-            mainNode: DuneNodeParams("Stars", [ "mode": StarsMode.globe ]),
+            background: DuneNodeParams("Stars", [ "mode": StarsMode.globe ]),
             subtitle: DuneNodeParams("PrologueSubtitle", [ "sentenceNumber": 272 ])
         ))
         queue.enqueue(PrologueSteps(
-            mainNode: DuneNodeParams("Paul", [ "background": PaulBackground.red, "duration": 999.0 ]),
+            background: DuneNodeParams("Background", [ "backgroundType": BackgroundType.red ]),
+            foreground: DuneNodeParams("Character", [ "character": DuneCharacter.paul ]),
             subtitle: DuneNodeParams("PrologueSubtitle", [ "sentenceNumber": 273 ])
         ))
         queue.enqueue(PrologueSteps(
-            mainNode: DuneNodeParams("DesertWalk", [ "dayMode": DuneLightMode.night ]),
+            background: DuneNodeParams("DesertWalk", [ "dayMode": DuneLightMode.night ]),
             subtitle: DuneNodeParams("PrologueSubtitle", [ "sentenceNumber": 274 ])
         ))
         queue.enqueue(PrologueSteps(
-            mainNode: DuneNodeParams("Palace", [ "room": PalaceRoom.stairs, "dayMode": DuneLightMode.sunrise ]),
+            background: DuneNodeParams("Palace", [ "room": PalaceRoom.stairs, "dayMode": DuneLightMode.sunrise ]),
             subtitle: DuneNodeParams("PrologueSubtitle", [:])
         ))
 
@@ -123,15 +123,22 @@ final class Prologue: DuneNode, DuneEventObserver {
         
         currentTime = 0.0
         duration = 999.0
-        
-        if let mainNode = findNode(nextItem.mainNode.name) {
-            mainNode.params = nextItem.mainNode.params
-            setNodeActive(nextItem.mainNode.name, true)
+
+        if let backgroundNode = findNode(nextItem.background.name) {
+            backgroundNode.params = nextItem.background.params
+            setNodeActive(nextItem.background.name, true, .background)
+        }
+
+        if let foreground = nextItem.foreground {
+            if let foregroundNode = findNode(foreground.name) {
+                foregroundNode.params = foreground.params
+                setNodeActive(foreground.name, true, .foreground)
+            }
         }
         
         if let subtitleNode = findNode(nextItem.subtitle.name) {
             subtitleNode.params = nextItem.subtitle.params
-            setNodeActive(nextItem.subtitle.name, true)
+            setNodeActive(nextItem.subtitle.name, true, .foreground)
         }
         
         // Prerender so that palette is stashed

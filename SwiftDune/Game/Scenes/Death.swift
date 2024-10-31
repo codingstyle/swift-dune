@@ -8,15 +8,12 @@
 import Foundation
 
 final class Death: DuneNode {
-    private let engine = DuneEngine.shared
-    
     private var contextBuffer = PixelBuffer(width: 320, height: 152)
+    
     private var deathSprite: Sprite?
     private var death2Sprite: Sprite?
     private var death3Sprite: Sprite?
     private var sky: Sky?
-    private var duration: TimeInterval = 10.0
-    private var currentTime: TimeInterval = 0.0
     
     init() {
         super.init("Death")

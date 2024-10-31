@@ -18,11 +18,8 @@ final class Credits: DuneNode {
     private var duneSprite: Sprite?
     private var sky: Sky?
 
-    private var currentTime: TimeInterval = 0.0
     private var scrollY: Int16 = 152
     private var scrollAnimation: DuneAnimation<Int16>?
-    
-    private let engine = DuneEngine.shared
     
     // Frame index, X position, Y offset
     private let spritePositions = [

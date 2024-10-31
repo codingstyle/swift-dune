@@ -8,7 +8,6 @@
 import Foundation
 
 final class DesertWalk: DuneNode {
-    private let engine = DuneEngine.shared
     private var contextBuffer = PixelBuffer(width: 320, height: 152)
     
     private let desertRect = DuneRect(0, 76, 320, 76)
@@ -18,9 +17,6 @@ final class DesertWalk: DuneNode {
     private var dunes2Sprite: Sprite?
     private var sky: Sky?
     private var dayMode: DuneLightMode = .day
-    
-    private var currentTime: TimeInterval = 0.0
-    private var duration: TimeInterval = 16.0
     
     private var transitionIn: TransitionEffect = .none
     private var transitionOut: TransitionEffect = .none
@@ -80,6 +76,7 @@ final class DesertWalk: DuneNode {
         }
         
         sky.lightMode = dayMode
+        sky.setPalette()
     }
     
     
@@ -91,25 +88,31 @@ final class DesertWalk: DuneNode {
 
         engine.palette.unstash()
 
-        drawBackground(buffer)
+        if contextBuffer.tag != 0x01 {
+            drawBackground(buffer)
+            
+            // Dunes background
+            dunesSprite.drawFrame(4, x: 0, y: 78, buffer: contextBuffer, effect: .transform(scale: 0.2))
+            dunesSprite.drawFrame(1, x: 34, y: 77, buffer: contextBuffer, effect: .transform(scale: 0.1))
+            dunesSprite.drawFrame(6, x: 143, y: 77, buffer: contextBuffer, effect: .transform(scale: 0.2))
+            
+            dunesSprite.drawFrame(0, x: 260, y: 78, buffer: contextBuffer, effect: .transform(scale: 0.15))
+            dunesSprite.drawFrame(4, x: 243, y: 77, buffer: contextBuffer, effect: .transform(scale: 0.2))
+            
+            dunesSprite.drawFrame(4, x: 83, y: 77, buffer: contextBuffer, effect: .transform(scale: 0.1))
+            dunesSprite.drawFrame(2, x: 62, y: 78, buffer: contextBuffer, effect: .transform(scale: 0.15))
+            
+            // Arrakeen
+            dunes2Sprite.drawFrame(16, x: 160, y: 12, buffer: contextBuffer)
+            
+            // Dunes foreground
+            dunesSprite.drawFrame(0, x: 210, y: 72, buffer: contextBuffer)
+            dunesSprite.drawFrame(4, x: 10, y: 76, buffer: contextBuffer)
 
-        // Dunes background
-        dunesSprite.drawFrame(4, x: 0, y: 78, buffer: contextBuffer, effect: .transform(scale: 0.2))
-        dunesSprite.drawFrame(1, x: 34, y: 77, buffer: contextBuffer, effect: .transform(scale: 0.1))
-        dunesSprite.drawFrame(6, x: 143, y: 77, buffer: contextBuffer, effect: .transform(scale: 0.2))
+            engine.palette.stash()
 
-        dunesSprite.drawFrame(0, x: 260, y: 78, buffer: contextBuffer, effect: .transform(scale: 0.15))
-        dunesSprite.drawFrame(4, x: 243, y: 77, buffer: contextBuffer, effect: .transform(scale: 0.2))
-
-        dunesSprite.drawFrame(4, x: 83, y: 77, buffer: contextBuffer, effect: .transform(scale: 0.1))
-        dunesSprite.drawFrame(2, x: 62, y: 78, buffer: contextBuffer, effect: .transform(scale: 0.15))
-
-        // Arrakeen
-        dunes2Sprite.drawFrame(16, x: 160, y: 12, buffer: contextBuffer)
-        
-        // Dunes foreground
-        dunesSprite.drawFrame(0, x: 210, y: 72, buffer: contextBuffer)
-        dunesSprite.drawFrame(4, x: 10, y: 76, buffer: contextBuffer)
+            contextBuffer.tag = 0x01
+        }
 
         var fx: SpriteEffect {
             switch transitionIn {
@@ -121,8 +124,6 @@ final class DesertWalk: DuneNode {
         }
         
         contextBuffer.render(to: buffer, effect: fx)
-        
-        engine.palette.stash()
     }
     
     
@@ -131,7 +132,6 @@ final class DesertWalk: DuneNode {
             return
         }
         
-        sky.setPalette()
         sky.render(contextBuffer)
 
         Primitives.fillRect(desertRect, desertPaletteIndex, contextBuffer)

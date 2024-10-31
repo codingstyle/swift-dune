@@ -8,10 +8,7 @@
 import Foundation
 
 final class Logo: DuneNode {
-    private let engine = DuneEngine.shared
-    private var contextBuffer = PixelBuffer(width: 320, height: 200)
-    
-    private var currentTime: TimeInterval = 0.0
+    private var contextBuffer = PixelBuffer(width: 320, height: 200)    
     private var isPaletteReset = false
 
     private var circlePalette: ContiguousArray<UInt32> = []
@@ -94,7 +91,7 @@ final class Logo: DuneNode {
             let palEnd = palStart + 75
             var chunk = Array<UInt32>(circlePalette[palStart..<palEnd])
             
-            DuneEngine.shared.palette.update(&chunk, start: 85, count: 75)
+            engine.palette.update(&chunk, start: 85, count: 75)
         } else if !cryoVideo.hasFrames() {
             engine.sendEvent(self, .nodeEnded)
         }

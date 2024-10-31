@@ -18,8 +18,6 @@ enum UIFlags: UInt16 {
 
 
 final class UI: DuneNode, DuneEventObserver {
-    private var engine = DuneEngine.shared
-    
     private var uiSprite: Sprite?
     
     private var flags: UInt16 = UIFlags.leftPanelGlobe.rawValue

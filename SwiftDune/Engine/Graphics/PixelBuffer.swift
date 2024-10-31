@@ -87,12 +87,12 @@ final class PixelBuffer {
             break
         case .pixelate(let end, let duration, let current):
             let progress = (end - current) / duration
-            Effects.pixelate(sourceBuffer: self, destBuffer: buffer, progress: progress, offset: y * buffer.rowSizeInBytes)
+            Effects.pixelate(sourceBuffer: self, destBuffer: buffer, progress: progress, yOffset: y)
             break
         case .zoom(let start, let duration, let current, let from, let to):
             let progress = Math.clampf((current - start) / duration, 0.0, 1.0)
             let rect = Math.lerpRect(from, to, progress)
-            Effects.zoom(sourceBuffer: self, destBuffer: buffer, sourceRect: rect)
+            Effects.zoom(sourceBuffer: self, destBuffer: buffer, sourceRect: rect, yOffset: y)
         default:
             let size = max(0, (buffer.height - y) * buffer.rowSizeInBytes)
             self.copyPixels(to: buffer, offset: y * buffer.width, size: size)

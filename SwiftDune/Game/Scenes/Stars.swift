@@ -18,14 +18,11 @@ enum StarsMode {
 }
 
 final class Stars: DuneNode {
-    private let engine = DuneEngine.shared
     private var contextBuffer = PixelBuffer(width: 320, height: 152)
 
     private var starsSprite: Sprite?
     private var globe: Globe?
 
-    private var currentTime: TimeInterval = 0.0
-    private var duration: TimeInterval = 0.0
     private var mode: StarsMode = .stars
     private var transitionIn: TransitionEffect = .none
 
@@ -37,7 +34,9 @@ final class Stars: DuneNode {
     override func onEnable() {
         starsSprite = Sprite("STARS.HSQ")
         starsSprite!.setPalette()
-        
+
+        duration = 2.0
+
         if mode == .globe {
             globe = Globe()
             globe!.setOrientation(tilt: 40, rotation: 5000)
@@ -50,7 +49,6 @@ final class Stars: DuneNode {
         globe = nil
         currentTime = 0.0
         mode = .stars
-        duration = 0.0
         transitionIn = .none
         
         contextBuffer.clearBuffer()
@@ -78,10 +76,6 @@ final class Stars: DuneNode {
         
         if let globe = globe {
             globe.update(currentTime)
-        }
-        
-        if duration > 0.0 && currentTime > duration {
-            engine.sendEvent(self, .nodeEnded)
         }
     }
     
@@ -122,16 +116,7 @@ final class Stars: DuneNode {
             engine.palette.stash()
         }
         
-        var fx: SpriteEffect {
-            switch transitionIn {
-            case .fadeIn(let fadeDuration):
-                return .fadeIn(start: 0.0, duration: fadeDuration, current: currentTime)
-            default:
-                return .none
-            }
-        }
-        
-        contextBuffer.render(to: buffer, effect: fx)
+        contextBuffer.render(to: buffer)
     }
     
     

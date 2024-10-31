@@ -34,7 +34,7 @@ final class DuneEngine {
     private var currentTime: TimeInterval = 0.0
     private var lastTime: TimeInterval = 0.0
 
-    var rootNode: DuneNode = DuneNode("Root")
+    var rootNode: DuneNode
     
     private var eventObservers: [DuneEventObserver] = []
 
@@ -47,11 +47,13 @@ final class DuneEngine {
         return screenBuffers[offscreenBufferIndex]
     }
     
-    init() {
+    private init() {
         intermediateFrameBuffer = PixelBuffer(width: 320, height: 200)
         
         screenBuffers.append(PixelBuffer(width: 320, height: 200))
         screenBuffers.append(PixelBuffer(width: 320, height: 200))
+      
+        rootNode = DuneNode("Root")
     }
 
     

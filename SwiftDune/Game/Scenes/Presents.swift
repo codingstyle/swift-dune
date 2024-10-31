@@ -13,17 +13,23 @@ struct AnimationTimeRange {
     var end: Double
 }
 
+/*
+func animation(is animTick: AnimationTimeRange) -> Bool {
+  return currentTime >= animTick.start && currentTime <= animTick.end
+}
+*/
+
+enum PresentsScreen {
+    case virginPresents
+    case cryoPresents
+}
+
+
 final class Presents: DuneNode {
-    private let engine = DuneEngine.shared
-
     private var contextBuffer = PixelBuffer(width: 320, height: 152)
-    private var currentTime: TimeInterval = 0.0
-
     private var introSprite: Sprite?
-
-    // Keyframes
-    let virginPresents = AnimationTimeRange(start: 0.00, end: 3.71)
-    let cryoPresents = AnimationTimeRange(start: 3.96, end: 9.47)
+  
+    private var screen: PresentsScreen = .virginPresents
 
     init() {
         super.init("Presents")
@@ -38,20 +44,21 @@ final class Presents: DuneNode {
     override func onDisable() {
         introSprite = nil
         currentTime = 0.0
+        screen = .virginPresents
+        contextBuffer.tag = 0x0000
+        contextBuffer.clearBuffer()
+    }
+  
+  
+    override func onParamsChange() {
+        if let screenParam = params["screen"] {
+            self.screen = screenParam as! PresentsScreen
+        }
     }
     
     
     override func update(_ elapsedTime: TimeInterval) {
         currentTime += elapsedTime
-        
-        if currentTime > cryoPresents.end {
-            engine.sendEvent(self, .nodeEnded)
-        }
-    }
-    
-    
-    func animation(is animTick: AnimationTimeRange) -> Bool {
-        return currentTime >= animTick.start && currentTime <= animTick.end
     }
     
     
@@ -60,36 +67,24 @@ final class Presents: DuneNode {
             return
         }
         
-        // Virgin Games presents
-        if animation(is: virginPresents) {
-            if contextBuffer.tag != 0x0003 {
-                introSprite.setPalette()
-
+        // "Virgin Games presents"
+        if screen == .virginPresents {
+            if contextBuffer.tag != 0x0001 {
                 contextBuffer.clearBuffer()
+                
+                introSprite.setPalette()
                 introSprite.drawFrame(6, x: 62, y: 58, buffer: contextBuffer)
                 introSprite.drawFrame(7, x: 114, y: 90, buffer: contextBuffer)
 
-                contextBuffer.tag = 0x0003
-                engine.palette.stash()
-            }
-
-            var fx: SpriteEffect {
-                if currentTime <= virginPresents.start + 0.9 {
-                    return .fadeIn(start: virginPresents.start, duration: 0.9, current: currentTime)
-                } else if currentTime >= virginPresents.end - 0.9 {
-                    return .fadeOut(end: virginPresents.end, duration: 0.9, current: currentTime)
-                } else {
-                    return .none
-                }
+                contextBuffer.tag = 0x0001
             }
             
-            contextBuffer.render(to: buffer, effect: fx)
-            return
+            contextBuffer.render(to: buffer)
         }
 
-        // A production from Cryo Interactive Entertainment Systems
-        if animation(is: cryoPresents) {
-            if contextBuffer.tag != 0x0004 {
+        // "A production from Cryo Interactive Entertainment Systems"
+        if screen == .cryoPresents {
+            if contextBuffer.tag != 0x0001 {
                 contextBuffer.clearBuffer()
                 introSprite.setPalette()
                 
@@ -97,22 +92,10 @@ final class Presents: DuneNode {
                 introSprite.drawFrame(9, x: 132, y: 71, buffer: contextBuffer)
                 introSprite.drawFrame(10, x: 14, y: 96, buffer: contextBuffer)
 
-                contextBuffer.tag = 0x0004
-                engine.palette.stash()
+                contextBuffer.tag = 0x0001
             }
             
-            var fx: SpriteEffect {
-                if currentTime <= cryoPresents.start + 0.9 {
-                    return .fadeIn(start: cryoPresents.start, duration: 0.9, current: currentTime)
-                } else if currentTime >= cryoPresents.end - 0.9 {
-                    return .fadeOut(end: cryoPresents.end, duration: 0.9, current: currentTime)
-                } else {
-                    return .none
-                }
-            }
-            
-            contextBuffer.render(to: buffer, effect: fx)
-            return
+            contextBuffer.render(to: buffer)
         }
     }
 }

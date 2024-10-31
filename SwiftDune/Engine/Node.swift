@@ -47,8 +47,21 @@ struct DuneNodeParams {
 }
 
 
-class DuneNode {
+enum RenderPriority: Int {
+    case none = 0
+    case background = 1
+    case foreground = 2
+}
+
+
+class DuneNode: Comparable {
+    var engine: DuneEngine {
+        return DuneEngine.shared
+    }
+
     var name: String
+    var renderPriority: RenderPriority = .none
+    
     var isActive: Bool = false {
         willSet {
             if newValue {
@@ -59,28 +72,32 @@ class DuneNode {
         }
     }
 
-    private var nodesMap: [String: DuneNode] = [:]
+    open var currentTime: TimeInterval = 0.0
+    open var duration: TimeInterval = 99999.0
 
+    private var nodesMap: [String: DuneNode] = [:]
     open var nodes: [DuneNode] = []
     open var activeNodes: [DuneNode] = []
+  
     open var params: Dictionary<String, Any> = [:] {
         didSet {
             onParamsChange()
         }
     }
 
+  
     init(_ name: String) {
         self.name = name
     }
-    
+
+  
     final func attachNode(_ node: DuneNode) {
         if let existingNode = nodesMap[node.name] {
-            print("Node already registered: \(existingNode.name)")
+            engine.logger.log(.debug, "Node already registered: \(existingNode.name)")
             return
         }
         
         nodesMap[node.name] = node
-
         nodes.append(node)
     }
     
@@ -90,9 +107,10 @@ class DuneNode {
     }
     
     
-    final func setNodeActive(_ name: String, _ active: Bool = true) {
+  final func setNodeActive(_ name: String, _ active: Bool = true, _ renderPriority: RenderPriority = .background) {
         let node = nodesMap[name]
         node?.isActive = active
+        node?.renderPriority = active ? renderPriority : .none
     }
     
     
@@ -105,7 +123,6 @@ class DuneNode {
     
     func update(_ elapsedTime: TimeInterval) {
         activeNodes = nodes.filter { $0.isActive }
-        
         activeNodes.forEach { node in
             node.update(elapsedTime)
         }
@@ -115,9 +132,9 @@ class DuneNode {
         activeNodes.forEach { node in
             node.render(buffer)
         }
-        
     }
     
+  
     func onEnable() {
         
     }
@@ -125,20 +142,32 @@ class DuneNode {
     func onDisable() {
         
     }
-    
+  
+  
     func onParamsChange() {
         
     }
-    
+  
+  
     func onKey(_ event: DuneKeyEvent) {
         activeNodes.forEach { node in
             node.onKey(event)
         }
     }
-    
+  
+  
     func onClick(_ event: DuneMouseClickEvent) {
         activeNodes.forEach { node in
             node.onClick(event)
         }
+    }
+  
+  
+    static func < (lhs: DuneNode, rhs: DuneNode) -> Bool {
+        return lhs.renderPriority.rawValue < rhs.renderPriority.rawValue
+    }
+    
+    static func == (lhs: DuneNode, rhs: DuneNode) -> Bool {
+        return lhs.name == rhs.name
     }
 }

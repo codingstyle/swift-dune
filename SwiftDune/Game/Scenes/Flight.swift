@@ -46,15 +46,12 @@ struct FlightPath {
 }
 
 final class Flight: DuneNode {
-    private let engine = DuneEngine.shared
     private var contextBuffer = PixelBuffer(width: 320, height: 152)
 
     private var dunesSprite: Sprite?
     private var sky: Sky?
     private var dayMode: DuneLightMode = .day
     
-    private var currentTime: TimeInterval = 0.0
-    private var duration: TimeInterval = 16.0
     private var frameCount: UInt32 = 0
     
     private var flightSprites: [FlightSprite] = []

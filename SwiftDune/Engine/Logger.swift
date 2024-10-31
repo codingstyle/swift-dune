@@ -19,8 +19,8 @@ enum LogLevel {
 class Logger {
     private var metrics: [(Double, Double)] = []
     private let maxEntries: Int = 500
-    private let metricsQueue = DispatchQueue(label: "com.dunelogger.queue", attributes: .concurrent)
-    private let loggingQueue = DispatchQueue(label: "com.dunemetrics.queue", attributes: .concurrent)
+    private let metricsQueue = DispatchQueue(label: "com.dune.logger.queue")
+    private let loggingQueue = DispatchQueue(label: "com.dune.metrics.queue")
     
     
     func log(_ level: LogLevel, _ s: String) {

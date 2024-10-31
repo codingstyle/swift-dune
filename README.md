@@ -10,9 +10,9 @@ Create a subfolder `DuneFiles` and place the files in it.
 
 ## How to use
 
-The application currently has two modes:
-- Editor view: used to view the assets (shortcut: `Cmd` + `E`)
-- Game view: for playing the game (shortcut: `Cmd` + `G`)
+There are 2 applications:
+- Editor view: used to browse the assets
+- Game view: play the game
 
 ## Architecture
 
@@ -21,7 +21,9 @@ Code is split between three main sections:
 - Game: the game logic
 - Engine: primitives for parsing original assets, perform world simulation and rendering
 
-Architecture tries to use modern patterns like events and node structure.  
+Architecture tries to use modern game patterns:
+- events
+- node structure
 
 ## Thanks
 

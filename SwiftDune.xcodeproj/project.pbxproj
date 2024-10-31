@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		0600C9E02C82EEE600E552DD /* VideoListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0600C9DF2C82EEE600E552DD /* VideoListView.swift */; };
 		0600C9E22C834BF700E552DD /* CopyProtection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0600C9E12C834BF700E552DD /* CopyProtection.swift */; };
+		0601F8772CD20E0500581B49 /* Character.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0601F8762CD20E0000581B49 /* Character.swift */; };
 		0603BFC02B30BA630022CA3B /* Intro.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0603BFBF2B30BA630022CA3B /* Intro.swift */; };
 		061351B42B43647D00A46F67 /* Math.swift in Sources */ = {isa = PBXBuildFile; fileRef = 061351B32B43647D00A46F67 /* Math.swift */; };
 		061725EB2B77AA8400254635 /* Kiss.swift in Sources */ = {isa = PBXBuildFile; fileRef = 061725EA2B77AA8400254635 /* Kiss.swift */; };
@@ -21,11 +22,12 @@
 		062779662B9AEB940046E068 /* Sky.swift in Sources */ = {isa = PBXBuildFile; fileRef = 062779652B9AEB940046E068 /* Sky.swift */; };
 		062779682B9AEED00046E068 /* Main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 062779672B9AEED00046E068 /* Main.swift */; };
 		062A77682B53FE9C001CA514 /* Types.swift in Sources */ = {isa = PBXBuildFile; fileRef = 062A77672B53FE9C001CA514 /* Types.swift */; };
-		062A776A2B53FEB8001CA514 /* DuneNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 062A77692B53FEB8001CA514 /* DuneNode.swift */; };
+		062A776A2B53FEB8001CA514 /* Node.swift in Sources */ = {isa = PBXBuildFile; fileRef = 062A77692B53FEB8001CA514 /* Node.swift */; };
 		062A776C2B53FF27001CA514 /* Queue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 062A776B2B53FF27001CA514 /* Queue.swift */; };
 		0638C2532AD1FD2E006B00CF /* Logo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0638C2522AD1FD2E006B00CF /* Logo.swift */; };
 		0638C2552AD298B1006B00CF /* Presents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0638C2542AD298B1006B00CF /* Presents.swift */; };
 		0638C2572AD29B2F006B00CF /* Credits.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0638C2562AD29B2F006B00CF /* Credits.swift */; };
+		064103D12CCF746800369239 /* Background.swift in Sources */ = {isa = PBXBuildFile; fileRef = 064103D02CCF746300369239 /* Background.swift */; };
 		06547D062C6D4F7D008E5C64 /* WormRide.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06547D052C6D4F7D008E5C64 /* WormRide.swift */; };
 		06566A692ADEA3A800AF5734 /* Font.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06566A682ADEA3A800AF5734 /* Font.swift */; };
 		065AEE8B2B93B2B000547487 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 065AEE8A2B93B2B000547487 /* Logger.swift */; };
@@ -34,7 +36,6 @@
 		067791222C728CE0008CB4A7 /* StatsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 067791212C728CE0008CB4A7 /* StatsView.swift */; };
 		067791242C728CEF008CB4A7 /* StatsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 067791232C728CEF008CB4A7 /* StatsViewModel.swift */; };
 		06799CBB2B3600B000A196A3 /* WormCall.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06799CBA2B3600AF00A196A3 /* WormCall.swift */; };
-		0682820C2B3DA208009C9FF7 /* Paul.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0682820B2B3DA208009C9FF7 /* Paul.swift */; };
 		0682820E2B3E06C5009C9FF7 /* Sunrise.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0682820D2B3E06C5009C9FF7 /* Sunrise.swift */; };
 		068300842A9D080800414896 /* Sound.swift in Sources */ = {isa = PBXBuildFile; fileRef = 068300832A9D080800414896 /* Sound.swift */; };
 		06892D522C19750F00B08B22 /* Mouse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06892D512C19750F00B08B22 /* Mouse.swift */; };
@@ -62,8 +63,6 @@
 		06B812CD2BB559B90048C8AC /* PrologueSubtitle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06B812CC2BB559B90048C8AC /* PrologueSubtitle.swift */; };
 		06C16D872B1C8F0100CBEAA2 /* PixelBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06C16D862B1C8F0100CBEAA2 /* PixelBuffer.swift */; };
 		06C16D892B1CB01700CBEAA2 /* Effects.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06C16D882B1CB01700CBEAA2 /* Effects.swift */; };
-		06C16E3C2B57B27C00E54A38 /* Baron.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06C16E3B2B57B27C00E54A38 /* Baron.swift */; };
-		06C16E3E2B57B64F00E54A38 /* Feyd.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06C16E3D2B57B64F00E54A38 /* Feyd.swift */; };
 		06CA2B892C7A647400B47D13 /* Book.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06CA2B882C7A647400B47D13 /* Book.swift */; };
 		06CA2B8B2C7A7D8700B47D13 /* Game.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06CA2B8A2C7A7D8700B47D13 /* Game.swift */; };
 		06CA2B9A2C7B32B200B47D13 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 06CA2B992C7B32B200B47D13 /* Assets.xcassets */; };
@@ -98,7 +97,7 @@
 		06CA2BBE2C7B350F00B47D13 /* Globe.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06DC67A22BE2320B0067DFEA /* Globe.swift */; };
 		06CA2BBF2C7B350F00B47D13 /* DuneEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0699D27D2A93D245006287E0 /* DuneEngine.swift */; };
 		06CA2BC02C7B350F00B47D13 /* Types.swift in Sources */ = {isa = PBXBuildFile; fileRef = 062A77672B53FE9C001CA514 /* Types.swift */; };
-		06CA2BC12C7B350F00B47D13 /* DuneNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 062A77692B53FEB8001CA514 /* DuneNode.swift */; };
+		06CA2BC12C7B350F00B47D13 /* Node.swift in Sources */ = {isa = PBXBuildFile; fileRef = 062A77692B53FEB8001CA514 /* Node.swift */; };
 		06CA2BC22C7B350F00B47D13 /* Math.swift in Sources */ = {isa = PBXBuildFile; fileRef = 061351B32B43647D00A46F67 /* Math.swift */; };
 		06CA2BC32C7B350F00B47D13 /* Queue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 062A776B2B53FF27001CA514 /* Queue.swift */; };
 		06CA2BC42C7B350F00B47D13 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 065AEE8A2B93B2B000547487 /* Logger.swift */; };
@@ -109,12 +108,14 @@
 		06D359D02B4D778000D79173 /* Scenery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06D359CF2B4D778000D79173 /* Scenery.swift */; };
 		06D372D52B516132006BDDF3 /* GameTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06D372D42B516132006BDDF3 /* GameTypes.swift */; };
 		06DC67A32BE2320B0067DFEA /* Globe.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06DC67A22BE2320B0067DFEA /* Globe.swift */; };
-		06E8FC272BC3C77300F78082 /* DesertBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06E8FC262BC3C77300F78082 /* DesertBackground.swift */; };
+		06F806902CB2D99E00C70D58 /* Music.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06F8068F2CB2D99C00C70D58 /* Music.swift */; };
+		06F806912CB2D99E00C70D58 /* Music.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06F8068F2CB2D99C00C70D58 /* Music.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		0600C9DF2C82EEE600E552DD /* VideoListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoListView.swift; sourceTree = "<group>"; };
 		0600C9E12C834BF700E552DD /* CopyProtection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CopyProtection.swift; sourceTree = "<group>"; };
+		0601F8762CD20E0000581B49 /* Character.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Character.swift; sourceTree = "<group>"; };
 		0603BFBF2B30BA630022CA3B /* Intro.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Intro.swift; sourceTree = "<group>"; };
 		0604932C2AEC552300A6A46E /* TextDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextDetailsView.swift; sourceTree = "<group>"; };
 		0604932E2AEE6F7D00A6A46E /* VideoDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoDetailsView.swift; sourceTree = "<group>"; };
@@ -130,11 +131,12 @@
 		062779672B9AEED00046E068 /* Main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Main.swift; sourceTree = "<group>"; };
 		0627796D2BA043280046E068 /* GlobeDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobeDetailsView.swift; sourceTree = "<group>"; };
 		062A77672B53FE9C001CA514 /* Types.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Types.swift; sourceTree = "<group>"; };
-		062A77692B53FEB8001CA514 /* DuneNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuneNode.swift; sourceTree = "<group>"; };
+		062A77692B53FEB8001CA514 /* Node.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Node.swift; sourceTree = "<group>"; };
 		062A776B2B53FF27001CA514 /* Queue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Queue.swift; sourceTree = "<group>"; };
 		0638C2522AD1FD2E006B00CF /* Logo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logo.swift; sourceTree = "<group>"; };
 		0638C2542AD298B1006B00CF /* Presents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Presents.swift; sourceTree = "<group>"; };
 		0638C2562AD29B2F006B00CF /* Credits.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Credits.swift; sourceTree = "<group>"; };
+		064103D02CCF746300369239 /* Background.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Background.swift; sourceTree = "<group>"; };
 		06547D052C6D4F7D008E5C64 /* WormRide.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WormRide.swift; sourceTree = "<group>"; };
 		06566A682ADEA3A800AF5734 /* Font.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Font.swift; sourceTree = "<group>"; };
 		06566A6A2ADEFDD500AF5734 /* FontDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FontDetailsView.swift; sourceTree = "<group>"; };
@@ -144,7 +146,6 @@
 		067791212C728CE0008CB4A7 /* StatsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatsView.swift; sourceTree = "<group>"; };
 		067791232C728CEF008CB4A7 /* StatsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatsViewModel.swift; sourceTree = "<group>"; };
 		06799CBA2B3600AF00A196A3 /* WormCall.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WormCall.swift; sourceTree = "<group>"; };
-		0682820B2B3DA208009C9FF7 /* Paul.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Paul.swift; sourceTree = "<group>"; };
 		0682820D2B3E06C5009C9FF7 /* Sunrise.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sunrise.swift; sourceTree = "<group>"; };
 		068300832A9D080800414896 /* Sound.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sound.swift; sourceTree = "<group>"; };
 		06892D512C19750F00B08B22 /* Mouse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Mouse.swift; sourceTree = "<group>"; };
@@ -180,8 +181,6 @@
 		06B812CC2BB559B90048C8AC /* PrologueSubtitle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrologueSubtitle.swift; sourceTree = "<group>"; };
 		06C16D862B1C8F0100CBEAA2 /* PixelBuffer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PixelBuffer.swift; sourceTree = "<group>"; };
 		06C16D882B1CB01700CBEAA2 /* Effects.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Effects.swift; sourceTree = "<group>"; };
-		06C16E3B2B57B27C00E54A38 /* Baron.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Baron.swift; sourceTree = "<group>"; };
-		06C16E3D2B57B64F00E54A38 /* Feyd.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Feyd.swift; sourceTree = "<group>"; };
 		06CA2B882C7A647400B47D13 /* Book.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Book.swift; sourceTree = "<group>"; };
 		06CA2B8A2C7A7D8700B47D13 /* Game.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Game.swift; sourceTree = "<group>"; };
 		06CA2B8D2C7B30B800B47D13 /* DuneEditorApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuneEditorApp.swift; sourceTree = "<group>"; };
@@ -195,7 +194,7 @@
 		06D372D62B529939006BDDF3 /* SceneryListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneryListView.swift; sourceTree = "<group>"; };
 		06D372D82B529946006BDDF3 /* SceneryDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneryDetailsView.swift; sourceTree = "<group>"; };
 		06DC67A22BE2320B0067DFEA /* Globe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Globe.swift; sourceTree = "<group>"; };
-		06E8FC262BC3C77300F78082 /* DesertBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesertBackground.swift; sourceTree = "<group>"; };
+		06F8068F2CB2D99C00C70D58 /* Music.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Music.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -249,11 +248,10 @@
 				066D9D3C2B4AA0510003ADD3 /* Stars.swift */,
 				06A494032B2634AC00D60425 /* DuneTitle.swift */,
 				06799CBA2B3600AF00A196A3 /* WormCall.swift */,
-				0682820B2B3DA208009C9FF7 /* Paul.swift */,
+				064103D02CCF746300369239 /* Background.swift */,
+				0601F8762CD20E0000581B49 /* Character.swift */,
 				0682820D2B3E06C5009C9FF7 /* Sunrise.swift */,
 				0638C2562AD29B2F006B00CF /* Credits.swift */,
-				06C16E3B2B57B27C00E54A38 /* Baron.swift */,
-				06C16E3D2B57B64F00E54A38 /* Feyd.swift */,
 				068E195C2B68420A0071DD36 /* Fresk.swift */,
 				061725EA2B77AA8400254635 /* Kiss.swift */,
 				061725EC2B7968DA00254635 /* Palace.swift */,
@@ -261,7 +259,6 @@
 				061725F02B8B559900254635 /* Sietch.swift */,
 				06AB96D42BEB7DC300482823 /* Attack.swift */,
 				062779652B9AEB940046E068 /* Sky.swift */,
-				06E8FC262BC3C77300F78082 /* DesertBackground.swift */,
 				06AB96DB2BEFC4FD00482823 /* Flight.swift */,
 				06892D532C1EE62700B08B22 /* DesertWalk.swift */,
 				06D16B672C5D557300C85A78 /* Death.swift */,
@@ -279,6 +276,7 @@
 				062439F92A97E5A200981BCC /* Sprite.swift */,
 				06D16B692C5FEC2300C85A78 /* SpriteAnimation.swift */,
 				068300832A9D080800414896 /* Sound.swift */,
+				06F8068F2CB2D99C00C70D58 /* Music.swift */,
 				06566A682ADEA3A800AF5734 /* Font.swift */,
 				06A023422A9FC5BA0091D581 /* Video.swift */,
 				06D359CF2B4D778000D79173 /* Scenery.swift */,
@@ -322,7 +320,9 @@
 				0699D2632A93C682006287E0 /* SwiftDune */,
 				0699D2622A93C682006287E0 /* Products */,
 			);
+			indentWidth = 4;
 			sourceTree = "<group>";
+			tabWidth = 4;
 		};
 		0699D2622A93C682006287E0 /* Products */ = {
 			isa = PBXGroup;
@@ -353,7 +353,7 @@
 				063549442B1D04E200885655 /* Resources */,
 				0699D27D2A93D245006287E0 /* DuneEngine.swift */,
 				062A77672B53FE9C001CA514 /* Types.swift */,
-				062A77692B53FEB8001CA514 /* DuneNode.swift */,
+				062A77692B53FEB8001CA514 /* Node.swift */,
 				061351B32B43647D00A46F67 /* Math.swift */,
 				062A776B2B53FF27001CA514 /* Queue.swift */,
 				065AEE8A2B93B2B000547487 /* Logger.swift */,
@@ -518,17 +518,15 @@
 				068E195F2B6928E90071DD36 /* Primitives.swift in Sources */,
 				062779662B9AEB940046E068 /* Sky.swift in Sources */,
 				0638C2532AD1FD2E006B00CF /* Logo.swift in Sources */,
-				0682820C2B3DA208009C9FF7 /* Paul.swift in Sources */,
 				068300842A9D080800414896 /* Sound.swift in Sources */,
 				067791222C728CE0008CB4A7 /* StatsView.swift in Sources */,
 				061725ED2B7968DA00254635 /* Palace.swift in Sources */,
 				0682820E2B3E06C5009C9FF7 /* Sunrise.swift in Sources */,
-				06C16E3E2B57B64F00E54A38 /* Feyd.swift in Sources */,
 				061725EB2B77AA8400254635 /* Kiss.swift in Sources */,
 				062A77682B53FE9C001CA514 /* Types.swift in Sources */,
 				066D9D3D2B4AA0510003ADD3 /* Stars.swift in Sources */,
 				065AEE8B2B93B2B000547487 /* Logger.swift in Sources */,
-				062A776A2B53FEB8001CA514 /* DuneNode.swift in Sources */,
+				062A776A2B53FEB8001CA514 /* Node.swift in Sources */,
 				06AB96DA2BEE160B00482823 /* Keyboard.swift in Sources */,
 				06AB96DC2BEFC4FD00482823 /* Flight.swift in Sources */,
 				061725EF2B8542A400254635 /* Ornithopter.swift in Sources */,
@@ -541,16 +539,17 @@
 				0638C2552AD298B1006B00CF /* Presents.swift in Sources */,
 				06243A1E2A9B798300981BCC /* Sentence.swift in Sources */,
 				062779682B9AEED00046E068 /* Main.swift in Sources */,
+				06F806902CB2D99E00C70D58 /* Music.swift in Sources */,
 				06AB96D72BEE013300482823 /* Animation.swift in Sources */,
 				067791242C728CEF008CB4A7 /* StatsViewModel.swift in Sources */,
 				06566A692ADEA3A800AF5734 /* Font.swift in Sources */,
 				06799CBB2B3600B000A196A3 /* WormCall.swift in Sources */,
 				06D16B682C5D557300C85A78 /* Death.swift in Sources */,
-				06C16E3C2B57B27C00E54A38 /* Baron.swift in Sources */,
 				06D359D02B4D778000D79173 /* Scenery.swift in Sources */,
 				06AB96D52BEB7DC300482823 /* Attack.swift in Sources */,
 				0699D27E2A93D245006287E0 /* DuneEngine.swift in Sources */,
 				06892D542C1EE62700B08B22 /* DesertWalk.swift in Sources */,
+				064103D12CCF746800369239 /* Background.swift in Sources */,
 				066D9D3B2B4A9EC40003ADD3 /* LogoSwap.swift in Sources */,
 				06CA2B8B2C7A7D8700B47D13 /* Game.swift in Sources */,
 				06243A1C2A9B6E8800981BCC /* Palette.swift in Sources */,
@@ -559,10 +558,10 @@
 				0699D2772A93C702006287E0 /* Resource.swift in Sources */,
 				0603BFC02B30BA630022CA3B /* Intro.swift in Sources */,
 				061725F12B8B559900254635 /* Sietch.swift in Sources */,
+				0601F8772CD20E0500581B49 /* Character.swift in Sources */,
 				06A023442A9FC5BA0091D581 /* Video.swift in Sources */,
 				06CA2B892C7A647400B47D13 /* Book.swift in Sources */,
 				06892D592C31CAE700B08B22 /* Shaders.metal in Sources */,
-				06E8FC272BC3C77300F78082 /* DesertBackground.swift in Sources */,
 				06D372D52B516132006BDDF3 /* GameTypes.swift in Sources */,
 				0699D2652A93C682006287E0 /* DuneGameApp.swift in Sources */,
 				062A776C2B53FF27001CA514 /* Queue.swift in Sources */,
@@ -605,12 +604,13 @@
 				06CA2BB92C7B350F00B47D13 /* Sound.swift in Sources */,
 				06CA2BBA2C7B350F00B47D13 /* Font.swift in Sources */,
 				06CA2BBB2C7B350F00B47D13 /* Palette.swift in Sources */,
+				06F806912CB2D99E00C70D58 /* Music.swift in Sources */,
 				06CA2BBC2C7B350F00B47D13 /* Video.swift in Sources */,
 				06CA2BBD2C7B350F00B47D13 /* Scenery.swift in Sources */,
 				06CA2BBE2C7B350F00B47D13 /* Globe.swift in Sources */,
 				06CA2BBF2C7B350F00B47D13 /* DuneEngine.swift in Sources */,
 				06CA2BC02C7B350F00B47D13 /* Types.swift in Sources */,
-				06CA2BC12C7B350F00B47D13 /* DuneNode.swift in Sources */,
+				06CA2BC12C7B350F00B47D13 /* Node.swift in Sources */,
 				06CA2BC22C7B350F00B47D13 /* Math.swift in Sources */,
 				06CA2BC32C7B350F00B47D13 /* Queue.swift in Sources */,
 				06CA2BC42C7B350F00B47D13 /* Logger.swift in Sources */,

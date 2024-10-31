@@ -18,14 +18,8 @@ enum VideoTwoCC: UInt16 {
     case pt = 0x7470 // ? (Game related)
 }
 
-struct VideoPalette {
-    var chunk: Array<UInt32>
-    var start: UInt16
-    var count: UInt16
-}
-
 struct PaletteBlock {
-    var paletteChunks: [VideoPalette]
+    var paletteChunks: [PaletteChunk]
     
     private func dumpInfo() {
     }
@@ -62,7 +56,7 @@ struct VideoFrame {
 
 struct VideoHeader {
     var headerSize: UInt16
-    var palette: [VideoPalette]
+    var palette: [PaletteChunk]
     
     func dumpInfo() {
         print("Video header:")
@@ -172,7 +166,7 @@ final class Video {
     
     
     private func parsePaletteBlock(_ stream: ResourceStream) -> PaletteBlock {
-        var paletteChunks: [VideoPalette] = []
+        var paletteChunks: [PaletteChunk] = []
 
         while true {
             let h = stream.readUInt16LE()
@@ -212,7 +206,7 @@ final class Video {
                 i += 1
             }
 
-            paletteChunks.append(VideoPalette(chunk: paletteChunk, start: paletteStart, count: paletteCount))
+            paletteChunks.append(PaletteChunk(chunk: paletteChunk, start: Int(paletteStart), count: Int(paletteCount)))
         }
 
         // Skip bytes of padding (0xFF)

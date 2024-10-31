@@ -16,8 +16,55 @@ enum TransitionEffect {
     case flipOut(duration: Double)
     case dissolveIn(duration: Double)
     case dissolveOut(duration: Double)
-    case pixelate
-    case zoom
+    case pixelate(duration: Double)
+    case zoom(duration: Double, from: DuneRect, to: DuneRect)
+  
+    var duration: Double {
+        switch self {
+        case .fadeIn(let duration):
+            return duration
+        case .fadeOut(let duration):
+            return duration
+        case .flipIn(let duration):
+            return duration
+        case .flipOut(let duration):
+            return duration
+        case .dissolveIn(let duration):
+            return duration
+        case .dissolveOut(let duration):
+            return duration
+        case .pixelate(let duration):
+            return duration
+        case .zoom(let duration, _, _):
+            return duration
+        case .none:
+            return 0.0
+        }
+    }
+  
+  
+    func spriteEffect(start: Double, end: Double, currentTime: Double) -> SpriteEffect {
+        switch self {
+        case .fadeIn(let duration):
+            return .fadeIn(start: start, duration: duration, current: currentTime)
+        case .fadeOut(let duration):
+            return .fadeOut(end: end, duration: duration, current: currentTime)
+        case .flipIn(let duration):
+            return .flipIn(start: start, duration: duration, current: currentTime)
+        case .flipOut(let duration):
+            return .flipOut(end: end, duration: duration, current: currentTime)
+        case .dissolveIn(let duration):
+            return .dissolveIn(start: start, duration: duration, current: currentTime)
+        case .dissolveOut(let duration):
+            return .dissolveOut(end: end, duration: duration, current: currentTime)
+        case .pixelate(let duration):
+            return .pixelate(end: duration, duration: duration, current: currentTime)
+        case .zoom(let duration, let from, let to):
+            return .zoom(start: end - duration, duration: duration, current: currentTime, from: from, to: to)
+        case .none:
+            return .none
+        }
+    }
 }
 
 
@@ -44,12 +91,12 @@ struct Effects {
         let clampedProgress = Math.clampf(progress, 0.0, 1.0)
         var n = startIndex
         
-        while n < endIndex + 1 {
+        while n < endIndex &+ 1 {
             let src = engine.palette.rawPointer[n]
             
             let r = (src & 0xFF)
-            let g = (src & 0xFF00) >> 8
-            let b = (src & 0xFF0000) >> 16
+            let g = (src >> 8) & 0xFF
+            let b = (src >> 16) & 0xFF
             
             let dR = UInt32(CGFloat(r) * clampedProgress)
             let dG = UInt32(CGFloat(g) * clampedProgress)
@@ -73,7 +120,7 @@ struct Effects {
         let pixelCount = Int(round(16.0 * Math.clampf(progress, 0.0, 1.0)))
         
         var y = yOffset
-        let height = Int16(destBuffer.height - Int(yOffset * 2))
+        let height = Int16(destBuffer.height - Int(yOffset))
 
         while y < height {
             var x: Int = 0
@@ -83,7 +130,7 @@ struct Effects {
                 
                 while n < pixelCount {
                     let pt = pixelTransitionOffsets[n]
-                    let index = Int(320 * (y + Int(pt.y)) + (x + Int(pt.x)))
+                    let index = Int(320 * (y &+ Int(pt.y)) &+ (x &+ Int(pt.x)))
                     destBuffer.rawPointer[index] = 0
                     
                     n += 1
@@ -103,7 +150,7 @@ struct Effects {
         let rowSizeInBytes = sourceBuffer.rowSizeInBytes
         let flipHeight = Int(fHeight * progress)
         let y0 = (sourceBuffer.height - flipHeight) / 2
-        let y1 = (y0 + flipHeight)
+        let y1 = (y0 &+ flipHeight)
         
         var yDest = y0
         
@@ -115,13 +162,12 @@ struct Effects {
     }
     
     
-    static func pixelate(sourceBuffer: PixelBuffer, destBuffer: PixelBuffer, progress: CGFloat, offset: Int = 0) {
-        let maxPixelation = 16
-        let pixelation = Int(round(Math.clampf(progress, 0.0, 1.0) * CGFloat(maxPixelation)))
-        sourceBuffer.copyPixels(to: destBuffer)
+    static func pixelate(sourceBuffer: PixelBuffer, destBuffer: PixelBuffer, progress: CGFloat, yOffset: Int = 0) {
+      let maxPixelation = 16.0
+        var pixelation = Int(round(Math.clampf(progress, 0.0, 1.0) * maxPixelation))
         
         if pixelation <= 1 {
-            return
+            pixelation = 1
         }
         
         let frameSize = Int(sourceBuffer.frameSize)
@@ -136,27 +182,29 @@ struct Effects {
             let x2 = x - (x % pixelation)
             let y2 = y - (y % pixelation)
             let j = y2 * rowSize + x2
-            
-            destBuffer.rawPointer[n] = destBuffer.rawPointer[j]
+          
+            destBuffer.rawPointer[n + (yOffset * rowSize)] = sourceBuffer.rawPointer[j]
             n += 1
         }
     }
     
     
-    static func zoom(sourceBuffer: PixelBuffer, destBuffer: PixelBuffer, sourceRect: DuneRect) {
+    static func zoom(sourceBuffer: PixelBuffer, destBuffer: PixelBuffer, sourceRect: DuneRect, yOffset: Int = 0) {
+        var y = yOffset
+        let destHeight = Int16(destBuffer.height - Int(yOffset * 2))
+        let destY = Int16(destBuffer.height - Int(yOffset))
+
         let xScale = CGFloat(destBuffer.width) / CGFloat(sourceRect.width)
-        let yScale = CGFloat(destBuffer.height) / CGFloat(sourceRect.height)
+        let yScale = CGFloat(destHeight) / CGFloat(sourceRect.height)
         let sourceRectX = CGFloat(sourceRect.x)
         let sourceRectY = CGFloat(sourceRect.y)
-      
-        var y = 0
-        
-        while y < destBuffer.height {
+
+        while y < destY {
             var x = 0
-            let sourceY = Int(sourceRectY + CGFloat(y) / yScale)
+            let sourceY = Int(sourceRectY + CGFloat(y - yOffset) / yScale)
           
             guard sourceY < destBuffer.height else {
-              continue
+                continue
             }
 
             let sourceIndex = sourceY * destBuffer.width
