@@ -20,7 +20,7 @@ enum UIFlags: UInt16 {
 final class UI: DuneNode, DuneEventObserver {
     private var uiSprite: Sprite?
     
-    private var flags: UInt16 = UIFlags.leftPanelGlobe.rawValue
+    private var flags: UInt16 = UIFlags.leftPanelBookClosed.rawValue
     private var menuItems: [UInt16] = []
     
     private var commands: Sentence?
@@ -29,6 +29,8 @@ final class UI: DuneNode, DuneEventObserver {
     private let menuRect = DuneRect(92, 159, 136, 40)
     private var menuItemBackgroundRect = DuneRect(93, 159, 134, 7)
     private var menuItemTextRect = DuneRect(97, 159, 120, 8)
+  
+    private let dayTextRect = DuneRect(7, 188, 22, 10)
     
     // Colors for text and background
     private let lightColorIndex: UInt8 = 250
@@ -53,13 +55,16 @@ final class UI: DuneNode, DuneEventObserver {
     
     
     override func render(_ buffer: PixelBuffer) {
-        guard let uiSprite = uiSprite else {
+        guard let uiSprite = uiSprite,
+              let font = font else {
             return
         }
                 
         // Left part
         if flags & UIFlags.leftPanelBookClosed.rawValue != 0x0 {
             uiSprite.drawFrame(0, x: 0, y: 152, buffer: buffer)
+          
+            renderTimeAndDay(buffer)
         } else if flags & UIFlags.leftPanelBookOpen.rawValue != 0x0 {
             uiSprite.drawFrame(9, x: 0, y: 152, buffer: buffer)
         } else if flags & UIFlags.leftPanelGlobe.rawValue != 0x0 {
@@ -96,6 +101,20 @@ final class UI: DuneNode, DuneEventObserver {
         }
 
         renderMenus(buffer)
+    }
+  
+  
+    private func renderTimeAndDay(_ buffer: PixelBuffer) {
+        guard let uiSprite = uiSprite,
+              let font = font else {
+            return
+        }
+      
+        font.paletteIndex = lightColorIndex
+        font.render("10", rect: dayTextRect, buffer: buffer, alignment: .center, style: .small)
+      
+        // uiSprite.drawFrame(74, x: 6, y: 188, buffer: buffer)
+        uiSprite.drawFrame(75, x: 8, y: 188, buffer: buffer)
     }
     
     

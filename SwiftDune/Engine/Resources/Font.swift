@@ -11,6 +11,7 @@ import AppKit
 
 enum FontAlignment {
     case left
+    case center
     case justify
 }
 
@@ -94,7 +95,7 @@ final class GameFont {
         while n < lines.count {
             let x = UInt16(rect.x)
             let y = UInt16(Int(rect.y) + yOffset + (n * charHeight))
-            let horizontalAlignment = n < lines.count - 1 ? alignment : .left
+            let horizontalAlignment = n < lines.count - 1 || alignment != .justify ? alignment : .left
             self.drawText(lines[n], x: x, y: y, width: rect.width, buffer: buffer, style: style, alignment: horizontalAlignment)
             
             n += 1
@@ -149,6 +150,18 @@ final class GameFont {
             }
             
             spaces = Array<Int>(repeating: spaceWidth, count: words.count - 1)
+        } else if alignment == .center {
+            // Calculate text size including spaces
+            let wordsWidth = words.reduce(0) { $0 + $1.size }
+            var spaceWidth = Int(self.charWidths[32])
+          
+            if style == .small {
+                spaceWidth = min(6, spaceWidth)
+            }
+          
+            let textWidth = wordsWidth + (spaceWidth * (words.count - 1))
+            
+            currentX += (Int(width) - textWidth) / 2
         }
         
         var j = 0
