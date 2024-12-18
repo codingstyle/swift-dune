@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import os
 
 
 enum LogLevel {
@@ -16,17 +17,33 @@ enum LogLevel {
 }
 
 
-class Logger {
+final class Logger {
     private var metrics: [(Double, Double)] = []
     private let maxEntries: Int = 500
     private let metricsQueue = DispatchQueue(label: "com.dune.logger.queue")
-    private let loggingQueue = DispatchQueue(label: "com.dune.metrics.queue")
-    
+    //private let loggingQueue = DispatchQueue(label: "com.dune.metrics.queue")
+    private let osLogger = os.Logger.init(subsystem: "com.dune.logger", category: "Engine")
+
     
     func log(_ level: LogLevel, _ s: String) {
-        loggingQueue.async {
-            print(s)
-        }
+        //loggingQueue.async { [weak self] in
+            //guard let self = self else { return }
+
+            switch level {
+              case .debug:
+                self.osLogger.debug("\(s)")
+                break
+              case .error:
+                self.osLogger.error("\(s)")
+                break
+              case .info:
+                self.osLogger.info("\(s)")
+                break
+              case .warn:
+                self.osLogger.warning("\(s)")
+                break
+            }
+        //}
     }
     
     
@@ -35,7 +52,7 @@ class Logger {
             guard let self = self else { return }
             metrics.append((time, value))
             
-            if metrics.count > maxEntries {
+            while metrics.count > maxEntries {
                 metrics.removeFirst()
             }
         }
