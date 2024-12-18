@@ -20,7 +20,6 @@ final class PixelBuffer {
     let rowSizeInBytes: Int
     
     var rawPointer: UnsafeMutablePointer<UInt8>
-    private var clearRawPointer: UnsafeMutablePointer<UInt8>
 
     init(width: Int, height: Int) {
         self.width = width
@@ -31,23 +30,15 @@ final class PixelBuffer {
         
         // Create buffer
         self.rawPointer = UnsafeMutablePointer<UInt8>.allocate(capacity: frameSize)
-        
-        self.clearRawPointer = UnsafeMutablePointer<UInt8>.allocate(capacity: frameSize)
-        self.clearRawPointer.initialize(repeating: 0x00, count: frameSize)
     }
     
     deinit {
         self.rawPointer.deallocate()
-        self.clearRawPointer.deallocate()
     }
 
     
-    func clearBuffer(transparent: Bool = false) {
-        if transparent {
-            _ = memset(rawPointer, 0, frameSizeInBytes)
-        } else {
-            _ = memcpy(rawPointer, clearRawPointer, frameSizeInBytes)
-        }
+    func clearBuffer() {
+        _ = memset(rawPointer, 0, frameSizeInBytes)
     }
     
     

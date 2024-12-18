@@ -169,7 +169,7 @@ class EditorViewModel: ObservableObject {
     
     
     func clearBuffer() {
-        buffer.clearBuffer(transparent: true)
+        buffer.clearBuffer()
     }
     
     
