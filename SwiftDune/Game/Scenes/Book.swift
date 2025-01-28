@@ -62,9 +62,11 @@ final class Book: DuneNode {
     
     
     override func update(_ elapsedTime: TimeInterval) {
-        
-        engine.sendEvent(self, .uiFlagsChanged(flags: UIFlags.leftPanelBookOpen.rawValue | UIFlags.rightPanelRect.rawValue))
-        engine.sendEvent(self, .uiMenuChanged(items: menuItemsBook))
+        EventManager.uiStateChangedEvent.notify(UIStateEventData(
+            leftPanel: .bookOpen,
+            rightPanel: .rect,
+            items: menuItemsBook
+        ))
     }
     
     

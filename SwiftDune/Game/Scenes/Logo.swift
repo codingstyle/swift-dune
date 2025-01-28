@@ -93,7 +93,7 @@ final class Logo: DuneNode {
             
             engine.palette.update(&chunk, start: 85, count: 75)
         } else if !cryoVideo.hasFrames() {
-            engine.sendEvent(self, .nodeEnded)
+            EventManager.nodeEndedEvent.notify(NodeEventData(self.name))
         }
     }
     

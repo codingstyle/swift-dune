@@ -50,11 +50,11 @@
 		0699D2742A93C6D8006287E0 /* DuneFiles in Resources */ = {isa = PBXBuildFile; fileRef = 0699D2732A93C6D7006287E0 /* DuneFiles */; };
 		0699D2772A93C702006287E0 /* Resource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0699D2762A93C702006287E0 /* Resource.swift */; };
 		0699D27E2A93D245006287E0 /* DuneEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0699D27D2A93D245006287E0 /* DuneEngine.swift */; };
+		069B74792D1822660071E68C /* Event.swift in Sources */ = {isa = PBXBuildFile; fileRef = 069B74782D1822660071E68C /* Event.swift */; };
+		069B747A2D1822660071E68C /* Event.swift in Sources */ = {isa = PBXBuildFile; fileRef = 069B74782D1822660071E68C /* Event.swift */; };
 		06A023442A9FC5BA0091D581 /* Video.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06A023422A9FC5BA0091D581 /* Video.swift */; };
 		06A023452A9FC5BA0091D581 /* AudioPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06A023432A9FC5BA0091D581 /* AudioPlayer.swift */; };
 		06A494042B2634AC00D60425 /* DuneTitle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06A494032B2634AC00D60425 /* DuneTitle.swift */; };
-		06A7E8662AD41B2F0042D878 /* GameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06A7E8652AD41B2F0042D878 /* GameView.swift */; };
-		06A7E8682AD41B5F0042D878 /* GameViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06A7E8672AD41B5F0042D878 /* GameViewModel.swift */; };
 		06AB96D52BEB7DC300482823 /* Attack.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06AB96D42BEB7DC300482823 /* Attack.swift */; };
 		06AB96D72BEE013300482823 /* Animation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06AB96D62BEE013300482823 /* Animation.swift */; };
 		06AB96DA2BEE160B00482823 /* Keyboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06AB96D92BEE160B00482823 /* Keyboard.swift */; };
@@ -119,7 +119,7 @@
 		0603BFBF2B30BA630022CA3B /* Intro.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Intro.swift; sourceTree = "<group>"; };
 		0604932C2AEC552300A6A46E /* TextDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextDetailsView.swift; sourceTree = "<group>"; };
 		0604932E2AEE6F7D00A6A46E /* VideoDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoDetailsView.swift; sourceTree = "<group>"; };
-		061351B32B43647D00A46F67 /* Math.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Math.swift; sourceTree = "<group>"; };
+		061351B32B43647D00A46F67 /* Math.swift */ = {isa = PBXFileReference; indentWidth = 4; lastKnownFileType = sourcecode.swift; path = Math.swift; sourceTree = "<group>"; tabWidth = 4; };
 		061725EA2B77AA8400254635 /* Kiss.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Kiss.swift; sourceTree = "<group>"; };
 		061725EC2B7968DA00254635 /* Palace.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Palace.swift; sourceTree = "<group>"; };
 		061725EE2B8542A400254635 /* Ornithopter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Ornithopter.swift; sourceTree = "<group>"; };
@@ -162,11 +162,10 @@
 		0699D2732A93C6D7006287E0 /* DuneFiles */ = {isa = PBXFileReference; lastKnownFileType = folder; path = DuneFiles; sourceTree = "<group>"; };
 		0699D2762A93C702006287E0 /* Resource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Resource.swift; sourceTree = "<group>"; };
 		0699D27D2A93D245006287E0 /* DuneEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuneEngine.swift; sourceTree = "<group>"; };
+		069B74782D1822660071E68C /* Event.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Event.swift; sourceTree = "<group>"; };
 		06A023422A9FC5BA0091D581 /* Video.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Video.swift; sourceTree = "<group>"; };
 		06A023432A9FC5BA0091D581 /* AudioPlayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AudioPlayer.swift; sourceTree = "<group>"; };
 		06A494032B2634AC00D60425 /* DuneTitle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuneTitle.swift; sourceTree = "<group>"; };
-		06A7E8652AD41B2F0042D878 /* GameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameView.swift; sourceTree = "<group>"; };
-		06A7E8672AD41B5F0042D878 /* GameViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewModel.swift; sourceTree = "<group>"; };
 		06A7E8812AD6FA400042D878 /* EditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorView.swift; sourceTree = "<group>"; };
 		06A7E8832AD6FBA80042D878 /* EditorViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorViewModel.swift; sourceTree = "<group>"; };
 		06A7E8862AD700910042D878 /* SpriteListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpriteListView.swift; sourceTree = "<group>"; };
@@ -291,8 +290,6 @@
 				06D359D12B4F2ABC00D79173 /* UI */,
 				063549432B1D00DE00885655 /* Scenes */,
 				06D372D42B516132006BDDF3 /* GameTypes.swift */,
-				06A7E8652AD41B2F0042D878 /* GameView.swift */,
-				06A7E8672AD41B5F0042D878 /* GameViewModel.swift */,
 				067791212C728CE0008CB4A7 /* StatsView.swift */,
 				067791232C728CEF008CB4A7 /* StatsViewModel.swift */,
 				0699D2642A93C682006287E0 /* DuneGameApp.swift */,
@@ -323,6 +320,7 @@
 			indentWidth = 4;
 			sourceTree = "<group>";
 			tabWidth = 4;
+			wrapsLines = 1;
 		};
 		0699D2622A93C682006287E0 /* Products */ = {
 			isa = PBXGroup;
@@ -352,6 +350,7 @@
 				062779692B9AF9290046E068 /* Graphics */,
 				063549442B1D04E200885655 /* Resources */,
 				0699D27D2A93D245006287E0 /* DuneEngine.swift */,
+				069B74782D1822660071E68C /* Event.swift */,
 				062A77672B53FE9C001CA514 /* Types.swift */,
 				062A77692B53FEB8001CA514 /* Node.swift */,
 				061351B32B43647D00A46F67 /* Math.swift */,
@@ -454,7 +453,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1540;
-				LastUpgradeCheck = 1430;
+				LastUpgradeCheck = 1610;
 				TargetAttributes = {
 					0699D2602A93C682006287E0 = {
 						CreatedOnToolsVersion = 14.3.1;
@@ -534,7 +533,6 @@
 				06B812CD2BB559B90048C8AC /* PrologueSubtitle.swift in Sources */,
 				06B812CB2BB0CF3D0048C8AC /* Prologue.swift in Sources */,
 				06D16B6A2C5FEC2300C85A78 /* SpriteAnimation.swift in Sources */,
-				06A7E8682AD41B5F0042D878 /* GameViewModel.swift in Sources */,
 				06892D572C3031F400B08B22 /* Renderer.swift in Sources */,
 				0638C2552AD298B1006B00CF /* Presents.swift in Sources */,
 				06243A1E2A9B798300981BCC /* Sentence.swift in Sources */,
@@ -562,11 +560,11 @@
 				06A023442A9FC5BA0091D581 /* Video.swift in Sources */,
 				06CA2B892C7A647400B47D13 /* Book.swift in Sources */,
 				06892D592C31CAE700B08B22 /* Shaders.metal in Sources */,
+				069B74792D1822660071E68C /* Event.swift in Sources */,
 				06D372D52B516132006BDDF3 /* GameTypes.swift in Sources */,
 				0699D2652A93C682006287E0 /* DuneGameApp.swift in Sources */,
 				062A776C2B53FF27001CA514 /* Queue.swift in Sources */,
 				062439FA2A97E5A200981BCC /* Sprite.swift in Sources */,
-				06A7E8662AD41B2F0042D878 /* GameView.swift in Sources */,
 				06892D522C19750F00B08B22 /* Mouse.swift in Sources */,
 				0638C2572AD29B2F006B00CF /* Credits.swift in Sources */,
 				06DC67A32BE2320B0067DFEA /* Globe.swift in Sources */,
@@ -596,6 +594,7 @@
 				06CA2BB12C7B350F00B47D13 /* AudioPlayer.swift in Sources */,
 				06CA2BB22C7B350F00B47D13 /* PixelBuffer.swift in Sources */,
 				06CA2BB32C7B350F00B47D13 /* Effects.swift in Sources */,
+				069B747A2D1822660071E68C /* Event.swift in Sources */,
 				06CA2BB42C7B350F00B47D13 /* Primitives.swift in Sources */,
 				06CA2BB52C7B350F00B47D13 /* Resource.swift in Sources */,
 				06CA2BB62C7B350F00B47D13 /* Sentence.swift in Sources */,
@@ -654,6 +653,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
@@ -714,6 +714,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -738,12 +739,14 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GENERATE_ASSET_SYMBOL_FRAMEWORKS = AppKit;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = SwiftDune/Game/SwiftDune.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = DNKT2M44R6;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -769,16 +772,18 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GENERATE_ASSET_SYMBOL_FRAMEWORKS = AppKit;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = SwiftDune/Game/SwiftDune.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = DNKT2M44R6;
 				ENABLE_HARDENED_RUNTIME = YES;
-				ENABLE_PREVIEWS = YES;
+				ENABLE_PREVIEWS = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Dune;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.adventure-games";
@@ -807,6 +812,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = DNKT2M44R6;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -843,6 +849,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = DNKT2M44R6;
 				ENABLE_HARDENED_RUNTIME = YES;

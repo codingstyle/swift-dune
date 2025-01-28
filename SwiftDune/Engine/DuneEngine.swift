@@ -10,21 +10,16 @@ import AppKit
 import Darwin
 import UniformTypeIdentifiers
 
-protocol DuneEngineDelegate {
-    func renderDidFinish()
-}
 
 final class DuneEngine {
     static let shared = DuneEngine()
     
-    var palette = Palette()
-    var audioPlayer = AudioPlayer()
-    var keyboard = Keyboard()
-    var mouse = Mouse()
-    var renderer = Renderer()
-    var logger = Logger()
-    
-    var delegate: DuneEngineDelegate?
+    var palette: Palette
+    var audioPlayer: AudioPlayer
+    var keyboard: Keyboard
+    var mouse: Mouse
+    var renderer: Renderer
+    var logger: Logger
 
     var isRunning: Bool = false
 
@@ -36,8 +31,6 @@ final class DuneEngine {
 
     var rootNode: DuneNode
     
-    private var eventObservers: [DuneEventObserver] = []
-
     var intermediateFrameBuffer: PixelBuffer
     
     private var screenBuffers: [PixelBuffer] = []
@@ -48,6 +41,13 @@ final class DuneEngine {
     }
     
     private init() {
+        palette = Palette()
+        audioPlayer = AudioPlayer()
+        keyboard = Keyboard()
+        mouse = Mouse()
+        renderer = Renderer()
+        logger = Logger()
+
         intermediateFrameBuffer = PixelBuffer(width: 320, height: 200)
         
         screenBuffers.append(PixelBuffer(width: 320, height: 200))
@@ -99,14 +99,16 @@ final class DuneEngine {
                 break
             }
 
-            currentTime = ProcessInfo.processInfo.systemUptime
-            let elapsedTime = currentTime - lastTime
-            gameTime += elapsedTime
-
-            processInput()
-
-            update(elapsedTime)
-            render()
+            autoreleasepool {
+                currentTime = ProcessInfo.processInfo.systemUptime
+                let elapsedTime = currentTime - lastTime
+                gameTime += elapsedTime
+                
+                processInput()
+                
+                update(elapsedTime)
+                render()
+            }
         }
     }
     
@@ -132,15 +134,15 @@ final class DuneEngine {
     func render() {
         // Prepare buffer
         let currentOffscreenBuffer = screenBuffers[offscreenBufferIndex]
-
+        
         currentOffscreenBuffer.clearBuffer()
         rootNode.render(currentOffscreenBuffer)
         
         // Sends update to the front
         DispatchQueue.main.sync {
-            renderer.update(currentOffscreenBuffer)
+            self.renderer.update(currentOffscreenBuffer)
         }
-
+        
         // Swap the pixel buffers
         offscreenBufferIndex = (offscreenBufferIndex + 1) % screenBuffers.count
         
@@ -153,29 +155,8 @@ final class DuneEngine {
         if sleepTime > 0.0 {
             usleep(useconds_t(sleepTime * 1000.0))
         }
-
-        logger.addMetric(1.0 / (renderingTime + (sleepTime > 0.0 ? sleepTime : 0.0)), at: gameTime)
         
-        delegate?.renderDidFinish()
-    }
-    
-    
-    func sendEvent(_ source: DuneNode, _ event: DuneEvent) {
-        for observer in eventObservers {
-            observer.onEvent(source.name, event)
-        }
-    }
-    
-    
-    func addEventObserver(_ observer: DuneEventObserver) {
-        eventObservers.append(observer)
-    }
-    
-    
-    func removeEventObserver(_ observer: DuneEventObserver) {
-        if let index = eventObservers.firstIndex(where: { $0 === observer }) {
-            eventObservers.remove(at: index)
-        }
+        logger.addMetric(1.0 / (renderingTime + (sleepTime > 0.0 ? sleepTime : 0.0)), at: gameTime)
     }
     
     

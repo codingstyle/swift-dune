@@ -89,7 +89,7 @@ final class CopyProtection: DuneNode {
         }
         
         let frame = thumbnails.frame(at: selectedFrameIndex)
-        let frameWidth = frame.videoBlock!.width
+        // let frameWidth = frame.videoBlock!.width
         
         thumbnails.renderFrame(buffer, pt: thumbnailPosition)
         let text = sentences.sentence(at: sentenceIndex)
@@ -119,6 +119,6 @@ final class CopyProtection: DuneNode {
         }
         
         // User passed the protection, end node and switch to main game
-        engine.sendEvent(self, .nodeEnded)
+        EventManager.nodeEndedEvent.notify(NodeEventData(self.name))
     }
 }

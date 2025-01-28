@@ -60,7 +60,11 @@ final class Fresk: DuneNode {
         
         globe.update(currentTime)
 
-        engine.sendEvent(self, .uiMenuChanged(items: menuItemsGlobe))
+        EventManager.uiStateChangedEvent.notify(UIStateEventData(
+            leftPanel: .globe,
+            rightPanel: .rect,
+            items: menuItemsGlobe
+        ))
     }
     
     

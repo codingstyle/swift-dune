@@ -26,7 +26,7 @@ struct PrologueSteps {
 }
 
 
-final class Prologue: DuneNode, DuneEventObserver {
+final class Prologue: DuneNode {
     private var buffer = PixelBuffer(width: 320, height: 200)
     private var queue = Queue<PrologueSteps>()
  
@@ -85,7 +85,10 @@ final class Prologue: DuneNode, DuneEventObserver {
             subtitle: DuneNodeParams("PrologueSubtitle", [:])
         ))
 
-        engine.addEventObserver(self)
+        EventManager.nodeEndedEvent.addListener(self) { [weak self] nodeData in
+            guard let self = self else { return }
+            self.onNodeEvent(nodeData)
+        }
 
         processNextStep()
     }
@@ -93,12 +96,12 @@ final class Prologue: DuneNode, DuneEventObserver {
     
     override func onDisable() {
         queue.empty()
-        engine.removeEventObserver(self)
+        EventManager.nodeEndedEvent.removeListener(self)
     }
     
     
-    func onEvent(_ source: String, _ e: DuneEvent) {
-        if !self.isActive || !self.isChildNode(source) {
+    func onNodeEvent(_ e: NodeEventData) {
+        if !self.isActive || !self.isChildNode(e.nodeName) {
             return
         }
         
@@ -117,7 +120,7 @@ final class Prologue: DuneNode, DuneEventObserver {
         }
 
         guard let nextItem = queue.dequeueFirst() else {
-            engine.sendEvent(self, .nodeEnded)
+            EventManager.nodeEndedEvent.notify(NodeEventData(self.name))
             return
         }
         

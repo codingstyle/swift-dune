@@ -67,7 +67,7 @@ final class DesertWalk: DuneNode {
         currentTime += elapsedTime
         
         if currentTime > duration {
-            engine.sendEvent(self, .nodeEnded)
+            EventManager.nodeEndedEvent.notify(NodeEventData(self.name))
             return
         }
         

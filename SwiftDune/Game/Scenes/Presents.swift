@@ -6,18 +6,6 @@
 //
 
 import Foundation
-import AppKit
-
-struct AnimationTimeRange {
-    var start: Double
-    var end: Double
-}
-
-/*
-func animation(is animTick: AnimationTimeRange) -> Bool {
-  return currentTime >= animTick.start && currentTime <= animTick.end
-}
-*/
 
 enum PresentsScreen {
     case virginPresents

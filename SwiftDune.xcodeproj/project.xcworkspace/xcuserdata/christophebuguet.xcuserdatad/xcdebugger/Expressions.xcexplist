@@ -11,6 +11,17 @@
          </PersistentStrings>
       </ContextState>
       <ContextState
+         contextName = "AppDelegate.applicationDidFinishLaunching(_:):DuneGameApp.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "gameViewController">
+            </PersistentString>
+            <PersistentString
+               value = "window">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
          contextName = "EditorViewModel.blitBuffer():EditorViewModel.swift">
          <PersistentStrings>
             <PersistentString

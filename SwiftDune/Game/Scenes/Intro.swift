@@ -17,7 +17,7 @@ struct IntroStep {
 }
 
 
-final class Intro: DuneNode, DuneEventObserver {
+final class Intro: DuneNode {
     private var buffer = PixelBuffer(width: 320, height: 152)
     private var queue = Queue<IntroStep>()
     private var currentStep: IntroStep?
@@ -243,7 +243,10 @@ final class Intro: DuneNode, DuneEventObserver {
           transitionOut: .fadeOut(duration: 2.0)
         ))
          
-        engine.addEventObserver(self)
+        EventManager.nodeEndedEvent.addListener(self) { [weak self] nodeData in
+            guard let self = self else { return }
+            self.onNodeEvent(nodeData)
+        }
 
         guard let nextStep = queue.dequeueFirst() else {
             return
@@ -255,7 +258,7 @@ final class Intro: DuneNode, DuneEventObserver {
   
     override func onDisable() {
         queue.empty()
-        engine.removeEventObserver(self)
+        EventManager.nodeEndedEvent.removeListener(self)
     }
     
   
@@ -265,7 +268,7 @@ final class Intro: DuneNode, DuneEventObserver {
         currentTime += elapsedTime
       
         if currentTime > currentStep.duration {
-            onEvent(currentStep.background!.name, .nodeEnded)
+            EventManager.nodeEndedEvent.notify(NodeEventData(currentStep.background!.name))
             return
         }
       
@@ -326,15 +329,15 @@ final class Intro: DuneNode, DuneEventObserver {
     }
     
     
-    func onEvent(_ source: String, _ e: DuneEvent) {
-        if !self.isActive || !self.isChildNode(source) {
+  func onNodeEvent(_ e: NodeEventData) {
+        if !self.isActive || !self.isChildNode(e.nodeName) {
             return
         }
         
         disableStep()
       
         guard let nextStep = queue.dequeueFirst() else {
-            engine.sendEvent(self, .nodeEnded)
+            EventManager.nodeEndedEvent.notify(NodeEventData(self.name))
             return
         }
         

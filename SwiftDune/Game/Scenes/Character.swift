@@ -84,6 +84,7 @@ final class Character: DuneNode {
   
   override func onEnable() {
     characterSprite = Sprite(character.resourceName)
+    characterSprite?.setPalette()
   }
   
   
@@ -116,7 +117,6 @@ final class Character: DuneNode {
     // TODO: add ability to chain animations sequentially (play 1, then 2...)
     // Feyd: (1, 4, 4) - Chani: (1, 2) - Liet: (1, 2)
     
-    characterSprite.setPalette()
     characterSprite.drawAnimation(0, buffer: buffer, time: currentTime, offset: characterOffset)
   }
 }

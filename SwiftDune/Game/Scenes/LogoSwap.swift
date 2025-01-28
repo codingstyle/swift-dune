@@ -6,7 +6,11 @@
 //
 
 import Foundation
-import AppKit
+
+struct AnimationTimeRange {
+  var start: TimeInterval
+  var end: TimeInterval
+}
 
 final class LogoSwap: DuneNode {
     private var contextBuffer = PixelBuffer(width: 320, height: 152)

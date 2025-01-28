@@ -53,6 +53,9 @@ struct PaletteView: View {
 
 
 struct FPSChartView: View {
+    private let timeLabel = "Time"
+    private let frameLabel = "Frame"
+  
     var fpsChartData: [GameFPSData]
     
     var averageFPS: Double {
@@ -79,16 +82,16 @@ struct FPSChartView: View {
         ZStack {
             Chart(fpsChartData) {
                 LineMark(
-                    x: .value("Time", $0.time),
-                    y: .value("Frame", $0.fps)
+                    x: .value(timeLabel, $0.time),
+                    y: .value(frameLabel, $0.fps)
                 )
                 .interpolationMethod(.catmullRom)
                 .foregroundStyle(.blue)
                 
                 
                 AreaMark(
-                    x: .value("Time", $0.time),
-                    y: .value("Frame", $0.fps)
+                    x: .value(timeLabel, $0.time),
+                    y: .value(frameLabel, $0.fps)
                 )
                 .interpolationMethod(.catmullRom)
                 .foregroundStyle(areaGradient)
@@ -110,7 +113,9 @@ struct FPSChartView: View {
 
 struct StatsView: View {
     @StateObject var viewModel = StatsViewModel()
-    
+
+    private let toolsViewName = "Tools"
+  
     var body: some View {
         VStack(alignment: .center) {
             HStack {
@@ -136,7 +141,7 @@ struct StatsView: View {
         }
         .frame(width: 250, height: 400)
         .preferredColorScheme(.dark)
-        .navigationTitle("Tools")
+        .navigationTitle(toolsViewName)
         .padding()
     }
 }

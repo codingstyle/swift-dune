@@ -107,7 +107,7 @@ class DuneNode: Comparable {
     }
     
     
-  final func setNodeActive(_ name: String, _ active: Bool = true, _ renderPriority: RenderPriority = .background) {
+    final func setNodeActive(_ name: String, _ active: Bool = true, _ renderPriority: RenderPriority = .background) {
         let node = nodesMap[name]
         node?.isActive = active
         node?.renderPriority = active ? renderPriority : .none
@@ -169,5 +169,14 @@ class DuneNode: Comparable {
     
     static func == (lhs: DuneNode, rhs: DuneNode) -> Bool {
         return lhs.name == rhs.name
+    }
+}
+
+
+struct NodeEventData {
+    let nodeName: String
+  
+    init(_ nodeName: String) {
+        self.nodeName = nodeName
     }
 }

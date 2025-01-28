@@ -22,11 +22,12 @@ class SpriteFrameInfo {
     init(_ bufferSize: Int) {
         paletteIndices = UnsafeMutablePointer<UInt8>.allocate(capacity: bufferSize)
     }
-    
+  
     deinit {
         paletteIndices.deallocate()
     }
 }
+
 
 final class Sprite: Equatable {
     static func == (lhs: Sprite, rhs: Sprite) -> Bool {
@@ -49,6 +50,7 @@ final class Sprite: Equatable {
     var fileName: String {
         return resource.fileName
     }
+  
     var frameCount: Int {
         return frames.count
     }
@@ -68,6 +70,7 @@ final class Sprite: Equatable {
     
     private let rect = NSRect(x: 0, y: 0, width: 320, height: 200)
     
+  
     init(_ fileName: String) {
         self.resource = Resource(fileName)
         
@@ -147,7 +150,7 @@ final class Sprite: Equatable {
     }
 
     
-    func setAlternatePalette(_ index: Int, _ prevIndex: Int = -1, blend: CGFloat = 1.0) {
+  func setAlternatePalette(_ index: Int, _ prevIndex: Int = -1, blend: CGFloat = 1.0) {
         guard index < alternatePalettes.count else {
             return
         }
@@ -161,7 +164,6 @@ final class Sprite: Equatable {
             let prevChunk = Array<UInt32>(alternatePalettes[prevIndex].chunk)
 
             var i = 0
-
             let a = UInt32(0xFF)
 
             while i < paletteCount {
@@ -173,9 +175,13 @@ final class Sprite: Equatable {
                 let g1 = UInt32(prevChunk[i] >> 8) & 0xFF
                 let b1 = UInt32(prevChunk[i] >> 16) & 0xFF
                 
-                let r = Math.lerp(r1, r2, blend)
-                let g = Math.lerp(g1, g2, blend)
-                let b = Math.lerp(b1, b2, blend)
+                // Calculate a subtle delay effect by adjusting the blend per index
+                let colorBlend = blend
+                engine.logger.log(.debug, "colorBlend: \(colorBlend) - i: \(i) - paletteCount: \(paletteCount)")
+              
+                let r = Math.lerp(r1, r2, colorBlend)
+                let g = Math.lerp(g1, g2, colorBlend)
+                let b = Math.lerp(b1, b2, colorBlend)
                 
                 chunk[i] = (a << 24) | (b << 16) | (g << 8) | r
                 i += 1
@@ -345,13 +351,16 @@ final class Sprite: Equatable {
         
         var m = 0
         
+        let xPos = animation.x + offset.x
+        let yPos = animation.y + offset.y
+      
         while m < animationFrame.groups.count {
             let group = animationFrame.groups[m]
             var n = 0
             
             while n < group.images.count {
-                let x = animation.x + group.images[n].xOffset + offset.x
-                let y = animation.y + group.images[n].yOffset + offset.y
+                let x = xPos + group.images[n].xOffset
+                let y = yPos + group.images[n].yOffset
                 
                 drawFrame(group.images[n].imageNumber, x: x, y: y, buffer: buffer)
                 n += 1

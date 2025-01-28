@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import SwiftUI
 import Metal
 import MetalKit
 
@@ -14,37 +13,50 @@ import MetalKit
 final class Renderer: NSObject, ObservableObject, MTKViewDelegate {
     private let region = MTLRegionMake2D(0, 0, 320, 200)
     private let frameSize = 320 * 200 * 4
+  
+    private let vertexData: [Float] = [
+        -1.0, -1.0, 0.0, 1.0, 0.0, 1.0,
+         1.0, -1.0, 0.0, 1.0, 1.0, 1.0,
+        -1.0,  1.0, 0.0, 1.0, 0.0, 0.0,
+         1.0,  1.0, 0.0, 1.0, 1.0, 0.0,
+    ]
+    private let vertexDataSize = 24 * MemoryLayout<Float>.size
     
     private var device: MTLDevice
     private var commandQueue: MTLCommandQueue
     private var texture: MTLTexture
-    private var vertexBuffer: MTLBuffer
     private var pipelineState: MTLRenderPipelineState
     private var rawBufferPointer: UnsafeMutablePointer<UInt8>
     private var shouldTakeScreenshot = false
     private var screenshotScale = 3
 
     var metalView: MTKView
-
-    @Published var tick: UInt64 = 0
     
     override init() {
         device = MTLCreateSystemDefaultDevice()!
-        commandQueue = device.makeCommandQueue()!
+        commandQueue = device.makeCommandQueue(maxCommandBufferCount: 1)!
         
         // Create Texture
-        let textureDescriptor = MTLTextureDescriptor()
-        textureDescriptor.pixelFormat = .rgba8Unorm
-        textureDescriptor.width = region.size.width
-        textureDescriptor.height = region.size.height
-        textureDescriptor.usage = .shaderRead
-        
+        let textureDescriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .rgba8Unorm, width: region.size.width, height: region.size.height, mipmapped: false)
+        textureDescriptor.sampleCount = 1
+        textureDescriptor.usage = [.shaderRead, .renderTarget]
+        textureDescriptor.storageMode = .shared
+      
         texture = device.makeTexture(descriptor: textureDescriptor)!
-
-        metalView = MTKView(frame: CGRectMake(0, 0, 320, 200), device: device)
-        metalView.framebufferOnly = false
-        metalView.colorPixelFormat = .rgba8Unorm
         
+        metalView = MTKView(frame: .zero, device: device)
+        metalView.colorPixelFormat = .rgba8Unorm
+        metalView.framebufferOnly = false
+        metalView.preferredFramesPerSecond = 60
+        //metalView.presentsWithTransaction = true  // Reduces memory overhead
+        //metalView.enableSetNeedsDisplay = true  // Only render when needed
+        metalView.autoResizeDrawable = true
+        metalView.depthStencilPixelFormat = .invalid
+        metalView.depthStencilAttachmentTextureUsage = .unknown
+        metalView.sampleCount = 1
+        metalView.clearColor = MTLClearColorMake(0.0, 0.0, 0.0, 1.0)
+        metalView.releaseDrawables()
+      
         // Load the shader files
         let defaultLibrary = device.makeDefaultLibrary()!
         let vertexFunction = defaultLibrary.makeFunction(name: "vertex_main")
@@ -52,35 +64,27 @@ final class Renderer: NSObject, ObservableObject, MTKViewDelegate {
         
         // Create the vertex descriptor
         let vertexDescriptor = MTLVertexDescriptor()
-        vertexDescriptor.attributes[0].format = .float4
+        vertexDescriptor.attributes[0].format = .float3
         vertexDescriptor.attributes[0].offset = 0
         vertexDescriptor.attributes[0].bufferIndex = 0
-        vertexDescriptor.attributes[1].format = .float2
+        vertexDescriptor.attributes[1].format = .float3
         vertexDescriptor.attributes[1].offset = 16
         vertexDescriptor.attributes[1].bufferIndex = 0
         vertexDescriptor.layouts[0].stride = 24
         vertexDescriptor.layouts[0].stepRate = 1
         vertexDescriptor.layouts[0].stepFunction = .perVertex
-        
+      
         // Create the pipeline state tying everything together
         let pipelineDescriptor = MTLRenderPipelineDescriptor()
         pipelineDescriptor.vertexFunction = vertexFunction
         pipelineDescriptor.fragmentFunction = fragmentFunction
         pipelineDescriptor.vertexDescriptor = vertexDescriptor
         pipelineDescriptor.colorAttachments[0].pixelFormat = metalView.colorPixelFormat
+        pipelineDescriptor.depthAttachmentPixelFormat = .invalid
+        pipelineDescriptor.stencilAttachmentPixelFormat = .invalid
         
         pipelineState = try! device.makeRenderPipelineState(descriptor: pipelineDescriptor)
-        
-        // Create the vertex data for a simple rectangle made of 2 polygons
-        let vertexData: [Float] = [
-            -1.0, -1.0, 0.0, 1.0,  0.0, 1.0,
-             1.0, -1.0, 0.0, 1.0,  1.0, 1.0,
-            -1.0,  1.0, 0.0, 1.0,  0.0, 0.0,
-             1.0,  1.0, 0.0, 1.0,  1.0, 0.0,
-        ]
-        
-        vertexBuffer = device.makeBuffer(bytes: vertexData, length: vertexData.count * MemoryLayout<Float>.size, options: [])!
-        
+      
         // Create a frame buffer that will contain RGBA components for each pixel to update the texture
         rawBufferPointer = UnsafeMutablePointer<UInt8>.allocate(capacity: frameSize)
         
@@ -88,6 +92,7 @@ final class Renderer: NSObject, ObservableObject, MTKViewDelegate {
 
         metalView.delegate = self
     }
+  
     
     deinit {
         rawBufferPointer.deallocate()
@@ -103,28 +108,24 @@ final class Renderer: NSObject, ObservableObject, MTKViewDelegate {
         // Convert the buffer containing palette indexes to an actual pixel buffer with RGBA colors
         var n = 0
         
+        let srcBuffer = buffer.rawPointer
+        let rawPalettePointer = engine.palette.rawPointer
+      
         while n < buffer.frameSizeInBytes {
-            let destIndex = n * 4
-            let paletteIndex = buffer.rawPointer[n]
             
-            if paletteIndex == 0 {
-                n += 1
-                continue
+            if srcBuffer[n] != 0 {
+                memcpy(rawBufferPointer + (n * 4), rawPalettePointer + Int(srcBuffer[n]), 4)
             }
             
-            var color = engine.palette.rawPointer[Int(paletteIndex)]
-            memcpy(rawBufferPointer + destIndex, &color, 4)
             n += 1
         }
+        
         
         // Screenshots are taken one rendering to framebuffer is done
         if shouldTakeScreenshot {
             captureToPNG(screenshotScale)
             shouldTakeScreenshot = false
         }
-        
-        // Fill the texture with RGBA pixel buffer data
-        texture.replace(region: region, mipmapLevel: 0, withBytes: rawBufferPointer, bytesPerRow: 320 * 4)
     }
     
     
@@ -133,34 +134,31 @@ final class Renderer: NSObject, ObservableObject, MTKViewDelegate {
     }
     
     func draw(in view: MTKView) {
-        let renderer = DuneEngine.shared.renderer
-        
-        guard let drawable = renderer.metalView.currentDrawable else {
-            return
+        autoreleasepool {
+            // Fill the texture with RGBA pixel buffer data
+            texture.replace(region: region, mipmapLevel: 0, withBytes: rawBufferPointer, bytesPerRow: 320 * 4)
+          
+            guard let commandBuffer = commandQueue.makeCommandBuffer(),
+                  let passDescriptor = metalView.currentRenderPassDescriptor,
+                  let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: passDescriptor) else {
+              return
+            }
+            
+            encoder.setRenderPipelineState(pipelineState)
+            encoder.setVertexBytes(vertexData, length: vertexDataSize, index: 0)
+            encoder.setFragmentTexture(texture, index: 0)
+            
+            // Draw the texture to the screen
+            encoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4)
+            encoder.endEncoding()
+            
+            guard let drawable = view.currentDrawable else {
+                return
+            }
+            
+            commandBuffer.present(drawable)
+            commandBuffer.commit()
         }
-
-        guard let commandBuffer = renderer.commandQueue.makeCommandBuffer() else {
-            return
-        }
-        
-        let passDescriptor = renderer.metalView.currentRenderPassDescriptor
-        
-        guard let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: passDescriptor!) else {
-            return
-        }
-        
-        encoder.setRenderPipelineState(renderer.pipelineState)
-        encoder.setVertexBuffer(renderer.vertexBuffer, offset: 0, index: 0)
-        encoder.setFragmentTexture(renderer.texture, index: 0)
-        
-        // Draw the texture to the screen
-        encoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4)
-                
-        encoder.endEncoding()
-        commandBuffer.present(drawable)
-        commandBuffer.commit()
-        
-        tick += 1
     }
     
     
@@ -222,20 +220,13 @@ final class Renderer: NSObject, ObservableObject, MTKViewDelegate {
     }
 }
 
-
+/*
 struct MetalRenderView: NSViewRepresentable {
     typealias NSViewType = MTKView
 
     static let tagID = 0x4d75616427446962
-    
     private let engine = DuneEngine.shared
 
-    @ObservedObject var renderer: Renderer
-    
-    init() {
-        self.renderer = engine.renderer
-    }
-    
     func makeNSView(context: Context) -> MTKView {
         return engine.renderer.metalView
     }
@@ -244,6 +235,7 @@ struct MetalRenderView: NSViewRepresentable {
         nsView.setNeedsDisplay(nsView.bounds)
     }
 }
+*/
 
 
 extension CGImage {

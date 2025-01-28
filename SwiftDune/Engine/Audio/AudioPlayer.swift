@@ -8,7 +8,7 @@
 import Foundation
 import AVFoundation
 
-class AudioPlayer {
+final class AudioPlayer {
     private var audioEngine = AVAudioEngine()
     private var playerNode = AVAudioPlayerNode()
     private var playerAudioFormat = AVAudioFormat(standardFormatWithSampleRate: 22500.0, channels: 1)!

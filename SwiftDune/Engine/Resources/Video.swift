@@ -97,6 +97,8 @@ final class Video {
                 ptr.deallocate()
             }
         }
+      
+        videoHeader = nil
     }
     
     

@@ -108,7 +108,7 @@ final class Palace: DuneNode {
         currentTime += elapsedTime
         
         if duration != 0.0 && currentTime > duration {
-            engine.sendEvent(self, .nodeEnded)
+            EventManager.nodeEndedEvent.notify(NodeEventData(self.name))
         }
     }
     

@@ -273,7 +273,7 @@ struct ResourceHeader
 }
 
 
-class ResourceStream {
+final class ResourceStream {
     var data: [UInt8] = []
     var offset: UInt32 = 0
     var size: UInt32 = 0
@@ -407,7 +407,7 @@ class ResourceStream {
 /**
  Represents a HSQ file
  */
-class Resource
+final class Resource
 {
     var unpackedData: [UInt8] = []
     var stream: ResourceStream?

@@ -16,23 +16,14 @@ struct GameFPSData: Identifiable {
     var fps: Double
 }
 
-final class StatsViewModel: ObservableObject, DuneEngineDelegate {
+final class StatsViewModel: ObservableObject {
     @Published var isRunning = false
     @Published var fpsChartData: [GameFPSData] = []
     @Published var palette: [NSColor] = [NSColor](repeating: NSColor.clear, count: 256)
     
     let engine = DuneEngine.shared
 
-    init() {
-        engine.delegate = self
-    }
-    
-    
-    deinit {
-        engine.delegate = nil
-    }
-    
-    
+  
     func renderDidFinish() {
         DispatchQueue.main.sync {
             isRunning = engine.isRunning

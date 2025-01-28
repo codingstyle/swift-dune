@@ -387,39 +387,32 @@ struct SpriteAnimation {
     
     static func parseAttackAnimations(_ resource: Resource, animationOffset: UInt32) -> [SpriteAnimation] {
         var animations: [SpriteAnimation] = []
-        
-        //return animations
+
+        // TODO: fix animation parsing
+        return animations
 
         resource.stream!.seek(animationOffset)
-        resource.stream!.skip(1) // 0x00
-
-        let animHeight = resource.stream!.readUInt16()
-        let animWidth = resource.stream!.readUInt16()
-        var frameCount = resource.stream!.readByte()
-        resource.stream!.skip(1)
-
+        resource.stream!.skip(2)
+      
+        var animWidth = resource.stream!.readUInt16LE()
+        var animHeight = UInt16(resource.stream!.readByte())
         var animation = SpriteAnimation(x: 0, y: 0, width: animWidth, height: animHeight)
 
-        while true {
-            if animation.frames.count == frameCount {
+        while !resource.stream!.isEOF() {
+            if animation.frames.count == 28 {
                 animations.append(animation)
 
-                if animations.count == 3 {
-                    break
-                }
-                
-                let animHeight = resource.stream!.readUInt16()
-                let animWidth = resource.stream!.readUInt16()
-                frameCount = resource.stream!.readByte()
-                resource.stream!.skip(1)
+                resource.stream!.skip(2)
+              
+                animWidth = resource.stream!.readUInt16LE()
+                animHeight = UInt16(resource.stream!.readByte())
                 
                 animation = SpriteAnimation(x: 0, y: 0, width: animWidth, height: animHeight)
-                continue
             }
             
+            let x = Int16(resource.stream!.readSByte())
+            let y = Int16(resource.stream!.readSByte())
             let spriteIndex = UInt16(resource.stream!.readByte())
-            let x = Int16(resource.stream!.readByte())
-            let y = resource.stream!.isEOF() ? Int16(63) : Int16(resource.stream!.readByte())
 
             let spriteImage = SpriteAnimationImage(imageNumber: spriteIndex, xOffset: x, yOffset: y)
 
@@ -431,7 +424,9 @@ struct SpriteAnimation {
 
             animation.frames.append(frame)
         }
-        
+
+        animations.append(animation)
+
         return animations
     }
 }

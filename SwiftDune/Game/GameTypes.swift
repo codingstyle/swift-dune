@@ -8,11 +8,11 @@
 import Foundation
 
 struct ResourceFile {
-    var id: UInt16
+    var flags: UInt16
     var fileName: String
     
-    init(_ id: UInt16, _ fileName: String) {
-        self.id = id
+    init(_ flags: UInt16, _ fileName: String) {
+        self.flags = flags
         self.fileName = fileName
     }
 }

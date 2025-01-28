@@ -7,7 +7,7 @@
 
 import Foundation
 
-final class Main: DuneNode, DuneEventObserver {
+final class Main: DuneNode {
     private var queue = Queue<String>()
 
     init() {
@@ -23,7 +23,10 @@ final class Main: DuneNode, DuneEventObserver {
     
     
     override func onEnable() {
-        engine.addEventObserver(self)
+        EventManager.nodeEndedEvent.addListener(self) { [weak self] nodeData in
+            guard let self = self else { return }
+            self.onNodeEvent(nodeData)
+        }
         
         queue.enqueue("Logo")
         queue.enqueue("Intro")
@@ -44,7 +47,7 @@ final class Main: DuneNode, DuneEventObserver {
     
     override func onDisable() {
         queue.empty()
-        engine.removeEventObserver(self)
+        EventManager.nodeEndedEvent.removeListener(self)
     }
     
     
@@ -57,8 +60,8 @@ final class Main: DuneNode, DuneEventObserver {
     }
     
     
-    func onEvent(_ source: String, _ e: DuneEvent) {
-        if !self.isActive || !self.isChildNode(source) {
+    func onNodeEvent(_ e: NodeEventData) {
+        if !self.isActive || !self.isChildNode(e.nodeName) {
             return
         }
         
@@ -75,7 +78,7 @@ final class Main: DuneNode, DuneEventObserver {
 
         guard let nextItem = queue.dequeueFirst() else {
             setNodeActive("Main", false)
-            engine.sendEvent(self, .nodeEnded)
+            EventManager.nodeEndedEvent.notify(NodeEventData("Main"))
             return
         }
         

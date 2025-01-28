@@ -17,7 +17,7 @@
 ## Engine
 
 - [ ] ADD: create an asset cache and preload all resources for faster access
-- [ ] UPDATE: node params as property wrappers
+- [ ] UPDATE: node params as property wrappers ?
 - [ ] UPDATE: rewrite editor to properly use node system and engine
 
 ## Animations
@@ -59,7 +59,8 @@
 
 ## Platform
 
-- [ ] ADD: eupport Swift 6: CustomDebugStringConvertible and @DebugDescription, 
+- [ ] FIX: high memory consumption from Metal renderer
+- [ ] ADD: support Swift 6: CustomDebugStringConvertible and @DebugDescription, 
 - [ ] ADD: extend port to Linux and Windows
 - [ ] ADD: support PC-CD versions
 - [ ] ADD: support different versions of Dune (detect Savegame)

@@ -12,8 +12,18 @@ final class Game: DuneNode {
     init() {
         super.init("Game")
         
-        showBook()
+        showRoom()
         showUI()
+    }
+  
+  
+    func showRoom() {
+        let palaceNode = Palace()
+        palaceNode.params = [
+          "room": PalaceRoom.porch
+        ]
+        attachNode(palaceNode)
+        setNodeActive("Palace", true)
     }
 
     

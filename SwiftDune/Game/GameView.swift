@@ -5,9 +5,9 @@
 //  Created by Christophe Buguet on 09/10/2023.
 //
 
+/*
 import Foundation
 import SwiftUI
-import Charts
 
 struct GameView: View {
     @StateObject var viewModel = GameViewModel()
@@ -31,3 +31,4 @@ struct GameView: View {
         .preferredColorScheme(.dark)
     }
 }
+*/
