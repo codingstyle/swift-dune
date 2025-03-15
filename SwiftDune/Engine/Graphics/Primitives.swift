@@ -26,6 +26,10 @@ struct Primitives {
         let paletteIndexWithOffset = UInt8((isOffset ? 127 : 0) + paletteIndex)
 
         while true {
+            if x0 < 0 || x0 >= buffer.width || y0 < 0 || y0 >= buffer.height {
+              break
+            }
+          
             let destIndex = y0 * buffer.width + x0
             buffer.rawPointer[destIndex] = paletteIndexWithOffset
 
