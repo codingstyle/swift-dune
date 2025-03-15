@@ -123,7 +123,7 @@ final class Intro: DuneNode {
         ))
         queue.enqueue(IntroStep(
           background: DuneNodeParams("Background", [ "backgroundType": BackgroundType.desert ]),
-          foreground: DuneNodeParams("Character", [ "character": DuneCharacter.paul ]),
+          foreground: DuneNodeParams("Character", [ "character": DuneCharacter.paul, "animations": [ 0 ] ]),
           duration: 4.0,
           transitionOut: .fadeOut(duration: 2.0)
         ))
@@ -203,7 +203,7 @@ final class Intro: DuneNode {
         ))
         queue.enqueue(IntroStep(
           background: DuneNodeParams("Background", [ "backgroundType": BackgroundType.feyd ]),
-          foreground: DuneNodeParams("Character", [ "character": DuneCharacter.feyd, "animations": [ 1, 4, 4, 4 ] ]),
+          foreground: DuneNodeParams("Character", [ "character": DuneCharacter.feyd, "animations": [ 1, 4 ] ]),
           duration: 4.0
         ))
         queue.enqueue(IntroStep(

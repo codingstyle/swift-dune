@@ -75,7 +75,11 @@ final class Character: DuneNode {
   private var characterSprite: Sprite?
   private var character: DuneCharacter = .none
   private var characterOffset: DunePoint = .zero
-  
+  private var animations: [Int] = []
+  private var idleAnimation = 0
+  private var animationStartTime = 0.0
+  private var animationDuration = 0.0
+  private var currentAnimation = -1
   
   init() {
     super.init("Character")
@@ -93,6 +97,11 @@ final class Character: DuneNode {
     character = .none
     characterOffset = .zero
     currentTime = 0.0
+    animationStartTime = 0.0
+    animationDuration = 0
+    idleAnimation = 0
+    currentAnimation = -1
+    animations = []
   }
   
   
@@ -100,6 +109,14 @@ final class Character: DuneNode {
     if let characterParam = params["character"] {
       self.character = characterParam as! DuneCharacter
       self.characterOffset = self.character.offset
+    }
+    
+    if let animationsParam = params["animations"] {
+      self.animations = animationsParam as! [Int]
+
+      if !self.animations.isEmpty {
+        self.idleAnimation = self.animations.last!
+      }
     }
   }
   
@@ -114,9 +131,23 @@ final class Character: DuneNode {
       return
     }
     
-    // TODO: add ability to chain animations sequentially (play 1, then 2...)
-    // Feyd: (1, 4, 4) - Chani: (1, 2) - Liet: (1, 2)
+    let animationTime = currentTime - animationStartTime
     
-    characterSprite.drawAnimation(0, buffer: buffer, time: currentTime, offset: characterOffset)
+    // Play animations or fallback to idle animation (last animation)
+    if animationDuration <= animationTime {
+      animationStartTime = currentTime
+      
+      if animations.count > 0 {
+        currentAnimation = animations.remove(at: 0)
+      } else {
+        currentAnimation = idleAnimation
+        animationDuration = 99999.9
+      }
+      
+      let animationInfo = characterSprite.animation(at: currentAnimation)
+      animationDuration = Double(animationInfo.frames.count) * 0.16
+    }
+    
+    characterSprite.drawAnimation(UInt16(currentAnimation), buffer: buffer, time: animationTime, offset: characterOffset)
   }
 }
