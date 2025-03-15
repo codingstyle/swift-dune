@@ -42,7 +42,7 @@ final class UI: DuneNode {
     
     private var leftPanel: UILeftPanel = .bookClosed
     private var rightPanel: UIRightPanel = .roomDirections
-    private var directions: UIDirection = .all
+    private var directions: UIDirection = [.up, .down, .right]
     private var menuItems: [UInt16] = []
     
     private var commands: Sentence?
@@ -52,7 +52,7 @@ final class UI: DuneNode {
     private var menuItemBackgroundRect = DuneRect(93, 159, 134, 7)
     private var menuItemTextRect = DuneRect(97, 159, 120, 8)
   
-    private let dayTextRect = DuneRect(7, 188, 22, 10)
+    private let dayTextRect = DuneRect(7, 189, 22, 10)
     
     // Colors for text and background
     private let lightColorIndex: UInt8 = 250
@@ -124,23 +124,32 @@ final class UI: DuneNode {
             break
         }
       
+        // Characters
+        uiSprite.drawFrame(64, x: 35, y: 182, buffer: buffer)
+        uiSprite.drawFrame(64, x: 58, y: 182, buffer: buffer)
+
+        // Right part
         switch rightPanel {
           case .mapDirections:
             uiSprite.drawFrame(41, x: 266, y: 171, buffer: buffer)
           case .roomDirections:
-            uiSprite.drawFrame(33, x: 255, y: 163, buffer: buffer)
+            uiSprite.drawFrame(33, x: 255, y: 162, buffer: buffer)
+            uiSprite.drawFrame(36, x: 269, y: 173, buffer: buffer)
             
-            switch directions {
-              case .up:
-                uiSprite.drawFrame(42, x: 266, y: 171, buffer: buffer)
-              case .down:
-                uiSprite.drawFrame(43, x: 266, y: 171, buffer: buffer)
-              case .left:
-                uiSprite.drawFrame(44, x: 266, y: 171, buffer: buffer)
-              case .right:
-                uiSprite.drawFrame(45, x: 266, y: 171, buffer: buffer)
-              default:
-                break
+            if directions.contains(.up) {
+              uiSprite.drawFrame(29, x: 269, y: 162, buffer: buffer)
+            }
+
+            if directions.contains(.down) {
+              uiSprite.drawFrame(31, x: 269, y: 181, buffer: buffer)
+            }
+
+            if directions.contains(.left) {
+              uiSprite.drawFrame(32, x: 255, y: 172, buffer: buffer)
+            }
+
+            if directions.contains(.right) {
+              uiSprite.drawFrame(30, x: 284, y: 172, buffer: buffer)
             }
           case .rect:
             break

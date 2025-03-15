@@ -61,9 +61,9 @@
 
 - [ ] FIX: high memory consumption from Metal renderer
 - [ ] ADD: support Swift 6: CustomDebugStringConvertible and @DebugDescription, 
+- [ ] ADD: support different versions of Dune (detect Savegame)
 - [ ] ADD: extend port to Linux and Windows
 - [ ] ADD: support PC-CD versions
-- [ ] ADD: support different versions of Dune (detect Savegame)
 
 # Archive
 
