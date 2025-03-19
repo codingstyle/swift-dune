@@ -7,6 +7,15 @@
 
 import Foundation
 
+enum GameVersion {
+  case v21 // 2.1 (floppy)
+  case v23 // 2.3 (floppy)
+  case v24 // 2.4 (floppy)
+  case v37 // 3.7 (PC-CD)
+  case v38 // 3.8 (PC-CD)
+}
+
+
 struct ResourceFile {
     var flags: UInt16
     var fileName: String

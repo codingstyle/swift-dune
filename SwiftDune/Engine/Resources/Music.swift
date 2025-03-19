@@ -191,7 +191,7 @@ final class Music {
     }
 
     for instrument in instruments {
-      engine.logger.log(.debug, " - Instrument: ")
+      engine.logger.log(.debug, " - Instrument: \(instrument.mode)")
     }
   }
 }

@@ -11,6 +11,8 @@ import Foundation
 enum DuneAnimationTiming {
     case linear
     case easeIn
+    case square
+    case cubic
 }
 
 
@@ -81,10 +83,23 @@ final class DuneAnimation<T: DuneAnimatable> {
     
     
     func interpolate(_ time: TimeInterval) -> T {
-        var progress = Math.clampf((time - startTime) / (endTime - startTime), 0.0, 1.0)
+        let elapsedTime = time - startTime
+        let totalTime = endTime - startTime
+        var progress = 0.0
         
-        if timing == .easeIn {
-            progress *= progress
+        switch timing {
+          case .linear:
+            progress = Math.clampf(elapsedTime / totalTime, 0.0, 1.0)
+            break
+          case .easeIn:
+            progress = Math.clampf(1.0 / pow(elapsedTime / totalTime, 2.0), 0.0, 1.0)
+            break
+          case .square:
+            progress = Math.clampf(pow(elapsedTime, 2.0) / totalTime, 0.0, 1.0)
+            break
+          case .cubic:
+            progress = Math.clampf(pow(elapsedTime, 3.0) / totalTime, 0.0, 1.0)
+            break
         }
         
         return T.interpolated(

@@ -20,7 +20,10 @@ final class Game: DuneNode {
     func showRoom() {
         let palaceNode = Palace()
         palaceNode.params = [
-          "room": PalaceRoom.porch
+          "room": PalaceRoom.porch,
+          "markers": [
+            8: RoomCharacter.leto
+          ]
         ]
         attachNode(palaceNode)
         setNodeActive("Palace", true)
