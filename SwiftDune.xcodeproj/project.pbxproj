@@ -108,6 +108,8 @@
 		06D359D02B4D778000D79173 /* Scenery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06D359CF2B4D778000D79173 /* Scenery.swift */; };
 		06D372D52B516132006BDDF3 /* GameTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06D372D42B516132006BDDF3 /* GameTypes.swift */; };
 		06DC67A32BE2320B0067DFEA /* Globe.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06DC67A22BE2320B0067DFEA /* Globe.swift */; };
+		06F1887D2D8A8D3E0056CFBF /* Savegame.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06F1887C2D8A8D3B0056CFBF /* Savegame.swift */; };
+		06F1887E2D8A8D3E0056CFBF /* Savegame.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06F1887C2D8A8D3B0056CFBF /* Savegame.swift */; };
 		06F806902CB2D99E00C70D58 /* Music.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06F8068F2CB2D99C00C70D58 /* Music.swift */; };
 		06F806912CB2D99E00C70D58 /* Music.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06F8068F2CB2D99C00C70D58 /* Music.swift */; };
 /* End PBXBuildFile section */
@@ -193,6 +195,7 @@
 		06D372D62B529939006BDDF3 /* SceneryListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneryListView.swift; sourceTree = "<group>"; };
 		06D372D82B529946006BDDF3 /* SceneryDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneryDetailsView.swift; sourceTree = "<group>"; };
 		06DC67A22BE2320B0067DFEA /* Globe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Globe.swift; sourceTree = "<group>"; };
+		06F1887C2D8A8D3B0056CFBF /* Savegame.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Savegame.swift; sourceTree = "<group>"; };
 		06F8068F2CB2D99C00C70D58 /* Music.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Music.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -279,6 +282,7 @@
 				06566A682ADEA3A800AF5734 /* Font.swift */,
 				06A023422A9FC5BA0091D581 /* Video.swift */,
 				06D359CF2B4D778000D79173 /* Scenery.swift */,
+				06F1887C2D8A8D3B0056CFBF /* Savegame.swift */,
 				06DC67A22BE2320B0067DFEA /* Globe.swift */,
 			);
 			path = Resources;
@@ -528,6 +532,7 @@
 				062A776A2B53FEB8001CA514 /* Node.swift in Sources */,
 				06AB96DA2BEE160B00482823 /* Keyboard.swift in Sources */,
 				06AB96DC2BEFC4FD00482823 /* Flight.swift in Sources */,
+				06F1887E2D8A8D3E0056CFBF /* Savegame.swift in Sources */,
 				061725EF2B8542A400254635 /* Ornithopter.swift in Sources */,
 				0600C9E22C834BF700E552DD /* CopyProtection.swift in Sources */,
 				06B812CD2BB559B90048C8AC /* PrologueSubtitle.swift in Sources */,
@@ -601,6 +606,7 @@
 				06CA2BB72C7B350F00B47D13 /* Sprite.swift in Sources */,
 				06CA2BB82C7B350F00B47D13 /* SpriteAnimation.swift in Sources */,
 				06CA2BB92C7B350F00B47D13 /* Sound.swift in Sources */,
+				06F1887D2D8A8D3E0056CFBF /* Savegame.swift in Sources */,
 				06CA2BBA2C7B350F00B47D13 /* Font.swift in Sources */,
 				06CA2BBB2C7B350F00B47D13 /* Palette.swift in Sources */,
 				06F806912CB2D99E00C70D58 /* Music.swift in Sources */,
