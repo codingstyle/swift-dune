@@ -13,6 +13,7 @@ import AVFoundation
 
 // @see https://wiki.multimedia.cx/index.php/Creative_Voice
 // @see https://wiki.multimedia.cx/index.php/Creative_8_bits_ADPCM
+// @see https://fabiensanglard.net/reverse_engineering_strike_commander/docs/Creative%20Voice%20(VOC)%20file%20format.txt
 
 let adpcmStepTable: [Int] = [
     7, 8, 9, 10, 11, 12, 13, 14, 16, 17, 19, 21, 23, 25, 28, 31,
@@ -80,6 +81,9 @@ enum VOCDataBlock {
     case repetition(count: UInt16)
     case endRepetition
     
+    /**
+     Converts VOC data to an AVAudioPCMBuffer
+     */
     var asPCMBuffer: AVAudioPCMBuffer? {
         var bytes: [UInt8] = []
         var codec: VOCAudioCodec
@@ -199,7 +203,9 @@ final class Sound {
         
     }
     
-    
+    /**
+     Saves decompressed HSQ as a VOC file
+     */
     func saveAsVOC() {
         let fileName = resource.fileName.replacingOccurrences(of: ".HSQ", with: ".VOC")
         let data = Data(resource.stream!.data)
@@ -219,10 +225,12 @@ final class Sound {
     private func parseVOC() {
         resource.stream!.seek(0)
 
-        let signatureBytes = resource.stream!.readBytes(20)
+        let signatureBytes = resource.stream!.readBytes(19)
         signature = String(bytes: signatureBytes, encoding: .ascii)!
+      
+        let eofByte = resource.stream!.readByte()
 
-        if signature != "Creative Voice File\u{1a}" {
+        if signature != "Creative Voice File" || eofByte != 0x1A {
             engine.logger.log(.error, "parseVOC(): Invalid signature")
             return
         }
@@ -265,7 +273,7 @@ final class Sound {
             switch dataTypeCode {
             case 0x01, 0x02:
                 let frequencyDivisor = resource.stream!.readByte()
-                let samplingRate = 1000000 / (256 - UInt32(frequencyDivisor))
+                let samplingRate = UInt32(1000000.0 / (256.0 - Float(frequencyDivisor)))
                 let codec = resource.stream!.readByte()
                 
                 let audioBytes = resource.stream!.readBytes(dataSize - 2)
@@ -290,9 +298,11 @@ final class Sound {
                 
                 dataBlocks.append(.repetition(count: repetitionCount))
             case 0x07:
+                dataBlocks.append(.endRepetition)
                 break
             default:
-                break //print("Unsupported block: \(String(format: "%02X", dataTypeCode))")
+                print("Unsupported block: \(String(format: "%02X", dataTypeCode))")
+                break
             }
         }
     }
@@ -311,14 +321,14 @@ final class Sound {
                 engine.logger.log(.debug, "- Sound data: codec=\(codec), samplingRate=\(samplingRate), bytes=\(bytes.count)")
             case .repetition(let count):
                 engine.logger.log(.debug, "- Repeat block start: count=\(count)")
+              case .marker(let bytes):
+                engine.logger.log(.debug, "- Marker: \(String.fromByte(bytes[0])) - \(String.fromByte(bytes[1]))")
             case .endRepetition:
                 engine.logger.log(.debug, "- Repeat block end")
             case .silence(let codec, let length, let samplingRate):
                 engine.logger.log(.debug, "- Silence: codec=\(codec), length=\(length), samplingRate=\(samplingRate)")
             case .string(let s):
                 engine.logger.log(.debug, "- String: \(s)")
-            case .marker(let bytes):
-                engine.logger.log(.debug, "- Marker: bytes=\(bytes.count)")
             }
         }
 

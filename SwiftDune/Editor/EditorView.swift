@@ -97,8 +97,8 @@ struct EditorView: View {
                 SceneryDetailsView(viewModel: viewModel)
             } else if selection?.resourceType == .globe {
                 GlobeDetailsView(viewModel: viewModel)
-            } else if selection?.resourceType == .globe {
-                //MusicDetailsView(viewModel: viewModel)
+            /*} else if selection?.resourceType == .music {
+                MusicDetailsView(viewModel: viewModel)*/
             } else {
                 Text("No content selected")
             }

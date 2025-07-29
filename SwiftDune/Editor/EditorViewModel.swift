@@ -110,6 +110,8 @@ class EditorViewModel: ObservableObject {
             engine.audioPlayer.play(sound!)
         } else if selection.resourceType == .music {
             music = Music(selection.resourceName)
+            music!.dumpInfo()
+            engine.audioPlayer.play(music!)
         } else if selection.resourceType == .scene {
             scenery = Scenery(selection.resourceName)
         } else if selection.resourceType == .video {

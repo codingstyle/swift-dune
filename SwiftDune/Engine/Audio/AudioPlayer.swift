@@ -9,9 +9,17 @@ import Foundation
 import AVFoundation
 
 final class AudioPlayer {
-    private var audioEngine = AVAudioEngine()
-    private var playerNode = AVAudioPlayerNode()
-    private var playerAudioFormat = AVAudioFormat(standardFormatWithSampleRate: 22500.0, channels: 1)!
+    private let audioEngine = AVAudioEngine()
+    private let soundFxNode = AVAudioPlayerNode()
+    private let soundFxMixerNode = AVAudioMixerNode()
+    private let soundFxAudioFormat = AVAudioFormat(standardFormatWithSampleRate: 22500.0, channels: 1)!
+  
+    private let musicMaxTracks = 21
+    private var musicSamplerNode: [AVAudioUnitSampler] = []
+    private let musicMixerNode = AVAudioMixerNode()
+    private var currentMusicTicks = 0
+    private var musicTimer: Timer?
+    private var isMusicPlaying: Bool = false
 
     init() {
         initAudioEngine()
@@ -24,19 +32,37 @@ final class AudioPlayer {
     
     private func initAudioEngine() {
         // Start the audio engine
-         do {
-            // Attach mixer
-            let outputAudioFormat = audioEngine.mainMixerNode.outputFormat(forBus: 0)
-            audioEngine.mainMixerNode.outputVolume = 0.1
-            audioEngine.connect(audioEngine.mainMixerNode, to: audioEngine.outputNode, format: outputAudioFormat)
+      do {
+          // Attach mixer
+          let outputAudioFormat = audioEngine.mainMixerNode.outputFormat(forBus: 0)
+          audioEngine.mainMixerNode.outputVolume = 0.1
+          audioEngine.connect(audioEngine.mainMixerNode, to: audioEngine.outputNode, format: outputAudioFormat)
+          
+          // Sound FX nodes with 11500 Hz sample rate
+          audioEngine.attach(soundFxNode)
+          audioEngine.attach(soundFxMixerNode)
+          audioEngine.connect(soundFxNode, to: soundFxMixerNode, format: soundFxAudioFormat)
+          audioEngine.connect(soundFxMixerNode, to: audioEngine.mainMixerNode, format: nil)
+   
+          // Music sampler nodes
+          for i in 0..<musicMaxTracks {
+            let samplerNode = AVAudioUnitSampler()
+            musicSamplerNode.append(samplerNode)
+            audioEngine.attach(musicSamplerNode[i])
+          }
+          
+          audioEngine.attach(musicMixerNode)
 
-            // Attach player node with 11500 Hz sample rate
-            audioEngine.attach(playerNode)
-            audioEngine.connect(playerNode, to: audioEngine.mainMixerNode, format: playerAudioFormat)
+          for i in 0..<musicMaxTracks {
+            audioEngine.connect(musicSamplerNode[i], to: musicMixerNode, format: nil)
+          }
 
-            audioEngine.prepare()
-            try audioEngine.start()
-            print("[AudioPlayer] Engine started.")
+          audioEngine.connect(musicMixerNode, to: audioEngine.mainMixerNode, format: nil)
+
+          audioEngine.prepare()
+          try audioEngine.start()
+
+          print("[AudioPlayer] Engine started.")
         } catch {
             print("Error starting the audio engine: \(error.localizedDescription)")
         }
@@ -54,8 +80,8 @@ final class AudioPlayer {
     
     
     func play(_ sound: Sound) {
-        if playerNode.isPlaying {
-            playerNode.stop()
+        if soundFxNode.isPlaying {
+          soundFxNode.stop()
         }
 
         print("Playing sound: \(sound.resource.fileName)")
@@ -94,8 +120,9 @@ final class AudioPlayer {
                 continue
             }
             
-            playerNode.scheduleBuffersLoop(pendingBuffers, numberOfLoops: repeatCount)
-            playerNode.play()
+            soundFxNode.scheduleBuffersLoop(pendingBuffers, numberOfLoops: repeatCount)
+            soundFxNode.play()
+            
             i += 1
             
             repeatCount = 1
@@ -104,15 +131,52 @@ final class AudioPlayer {
         
         // print("[AudioPlayer] Audio graph = \(audioEngine.debugDescription)")
     }
+  
+  
+    func play(_ music: Music) {
+      stop(music)
+      self.isMusicPlaying = true
+      
+      self.musicTimer = Timer.scheduledTimer(withTimeInterval: 1.0 / music.ticksPerSecond, repeats: true, block: { _ in
+        var i = 0
+        
+        while i < music.tracks.count {
+          let track = music.tracks[i]
+          let event = track.event(at: self.currentMusicTicks)
+          
+          if let event = event {
+            self.musicSamplerNode[i].playHeradEvent(event)
+          }
+          
+          i += 1
+        }
+
+        self.currentMusicTicks += 1
+      })
+    }
+  
+  
+    func stop(_ music: Music) {
+      if !self.isMusicPlaying { return }
+      
+      self.currentMusicTicks = 0
+      
+      if self.musicTimer != nil {
+        self.musicTimer!.invalidate()
+        self.musicTimer = nil
+      }
+      
+      self.isMusicPlaying = false
+    }
     
     
     private func resampledBuffer(_ sourceBuffer: AVAudioPCMBuffer) -> AVAudioPCMBuffer? {
-        let frameCapacity = AVAudioFrameCount(CGFloat(sourceBuffer.frameCapacity) * (playerAudioFormat.sampleRate / sourceBuffer.format.sampleRate))
-        guard let destBuffer = AVAudioPCMBuffer(pcmFormat: playerAudioFormat, frameCapacity: frameCapacity) else { return nil }
+        let frameCapacity = AVAudioFrameCount(CGFloat(sourceBuffer.frameCapacity) * (soundFxAudioFormat.sampleRate / sourceBuffer.format.sampleRate))
+        guard let destBuffer = AVAudioPCMBuffer(pcmFormat: soundFxAudioFormat, frameCapacity: frameCapacity) else { return nil }
         
         var error: NSError?
         
-        let converter = AVAudioConverter(from: sourceBuffer.format, to: playerAudioFormat)!
+        let converter = AVAudioConverter(from: sourceBuffer.format, to: soundFxAudioFormat)!
         let outputStatus = converter.convert(to: destBuffer, error: &error) { numberOfFrames, inputStatus in
             inputStatus.pointee = .haveData
             return sourceBuffer
@@ -128,6 +192,30 @@ final class AudioPlayer {
     }
 }
 
+
+
+extension AVAudioUnitSampler {
+    func playHeradEvent(_ event: HeradEvent) {
+        switch event.type {
+            case .noteOn(let note, let velocity, let channel):
+              self.startNote(note, withVelocity: velocity, onChannel: channel)
+            case .noteOff(let note, let channel):
+              self.stopNote(note, onChannel: channel)
+            case .programChange(let program, let channel):
+              self.sendProgramChange(program, onChannel: channel)
+            case .pitchBend(let pitchBend, let channel):
+              self.sendPitchBend(UInt16(pitchBend), onChannel: channel)
+            case .channelPressure(let pressure, let channel):
+              self.sendPressure(pressure, onChannel: channel)
+            case .controlChange(let controlNumber, let value, let channel):
+              break
+            case .aftertouch(let note, let value, let channel):
+              break
+            default:
+              break
+        }
+    }
+}
 
 
 
