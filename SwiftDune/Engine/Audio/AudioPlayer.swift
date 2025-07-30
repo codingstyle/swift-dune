@@ -159,14 +159,20 @@ final class AudioPlayer {
     func stop(_ music: Music) {
       if !self.isMusicPlaying { return }
       
+      self.isMusicPlaying = false
       self.currentMusicTicks = 0
       
       if self.musicTimer != nil {
         self.musicTimer!.invalidate()
         self.musicTimer = nil
       }
+
+      var i = 0
       
-      self.isMusicPlaying = false
+      while i < musicSamplerNode.count {
+        musicSamplerNode[i].reset()
+        i += 1
+      }
     }
     
     
@@ -208,6 +214,7 @@ extension AVAudioUnitSampler {
             case .channelPressure(let pressure, let channel):
               self.sendPressure(pressure, onChannel: channel)
             case .controlChange(let controlNumber, let value, let channel):
+              self.sendController(UInt8(controlNumber), withValue: UInt8(value), onChannel: channel)
               break
             case .aftertouch(let note, let value, let channel):
               break
