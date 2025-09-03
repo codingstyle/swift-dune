@@ -108,8 +108,14 @@
 		06D359D02B4D778000D79173 /* Scenery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06D359CF2B4D778000D79173 /* Scenery.swift */; };
 		06D372D52B516132006BDDF3 /* GameTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06D372D42B516132006BDDF3 /* GameTypes.swift */; };
 		06DC67A32BE2320B0067DFEA /* Globe.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06DC67A22BE2320B0067DFEA /* Globe.swift */; };
+		06EBFA072E39F6CF00AB510B /* OPL3.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06EBFA062E39F6CC00AB510B /* OPL3.swift */; };
+		06EBFA082E39F6CF00AB510B /* OPL3.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06EBFA062E39F6CC00AB510B /* OPL3.swift */; };
 		06F806902CB2D99E00C70D58 /* Music.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06F8068F2CB2D99C00C70D58 /* Music.swift */; };
 		06F806912CB2D99E00C70D58 /* Music.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06F8068F2CB2D99C00C70D58 /* Music.swift */; };
+		06FC4EF32E657A0B00F68119 /* HERAD.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06FC4EF22E657A0800F68119 /* HERAD.swift */; };
+		06FC4EF42E657A0B00F68119 /* HERAD.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06FC4EF22E657A0800F68119 /* HERAD.swift */; };
+		06FC4EF62E66C6AC00F68119 /* CreativeVoice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06FC4EF52E66C6A600F68119 /* CreativeVoice.swift */; };
+		06FC4EF72E66C6AC00F68119 /* CreativeVoice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06FC4EF52E66C6A600F68119 /* CreativeVoice.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -193,7 +199,10 @@
 		06D372D62B529939006BDDF3 /* SceneryListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneryListView.swift; sourceTree = "<group>"; };
 		06D372D82B529946006BDDF3 /* SceneryDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneryDetailsView.swift; sourceTree = "<group>"; };
 		06DC67A22BE2320B0067DFEA /* Globe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Globe.swift; sourceTree = "<group>"; };
+		06EBFA062E39F6CC00AB510B /* OPL3.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OPL3.swift; sourceTree = "<group>"; };
 		06F8068F2CB2D99C00C70D58 /* Music.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Music.swift; sourceTree = "<group>"; };
+		06FC4EF22E657A0800F68119 /* HERAD.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HERAD.swift; sourceTree = "<group>"; };
+		06FC4EF52E66C6A600F68119 /* CreativeVoice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreativeVoice.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -228,6 +237,9 @@
 		0627796A2B9AF94A0046E068 /* Audio */ = {
 			isa = PBXGroup;
 			children = (
+				06FC4EF52E66C6A600F68119 /* CreativeVoice.swift */,
+				06FC4EF22E657A0800F68119 /* HERAD.swift */,
+				06EBFA062E39F6CC00AB510B /* OPL3.swift */,
 				06A023432A9FC5BA0091D581 /* AudioPlayer.swift */,
 			);
 			path = Audio;
@@ -523,6 +535,7 @@
 				0682820E2B3E06C5009C9FF7 /* Sunrise.swift in Sources */,
 				061725EB2B77AA8400254635 /* Kiss.swift in Sources */,
 				062A77682B53FE9C001CA514 /* Types.swift in Sources */,
+				06EBFA072E39F6CF00AB510B /* OPL3.swift in Sources */,
 				066D9D3D2B4AA0510003ADD3 /* Stars.swift in Sources */,
 				065AEE8B2B93B2B000547487 /* Logger.swift in Sources */,
 				062A776A2B53FEB8001CA514 /* Node.swift in Sources */,
@@ -533,8 +546,10 @@
 				06B812CD2BB559B90048C8AC /* PrologueSubtitle.swift in Sources */,
 				06B812CB2BB0CF3D0048C8AC /* Prologue.swift in Sources */,
 				06D16B6A2C5FEC2300C85A78 /* SpriteAnimation.swift in Sources */,
+				06FC4EF42E657A0B00F68119 /* HERAD.swift in Sources */,
 				06892D572C3031F400B08B22 /* Renderer.swift in Sources */,
 				0638C2552AD298B1006B00CF /* Presents.swift in Sources */,
+				06FC4EF62E66C6AC00F68119 /* CreativeVoice.swift in Sources */,
 				06243A1E2A9B798300981BCC /* Sentence.swift in Sources */,
 				062779682B9AEED00046E068 /* Main.swift in Sources */,
 				06F806902CB2D99E00C70D58 /* Music.swift in Sources */,
@@ -579,6 +594,7 @@
 				06CA2BA32C7B350F00B47D13 /* SpriteDetailsView.swift in Sources */,
 				06CA2BA42C7B350F00B47D13 /* FontDetailsView.swift in Sources */,
 				06CA2BA52C7B350F00B47D13 /* TextDetailsView.swift in Sources */,
+				06FC4EF32E657A0B00F68119 /* HERAD.swift in Sources */,
 				06CA2BA62C7B350F00B47D13 /* VideoDetailsView.swift in Sources */,
 				06CA2BA72C7B350F00B47D13 /* SceneryListView.swift in Sources */,
 				06CA2BA82C7B350F00B47D13 /* SceneryDetailsView.swift in Sources */,
@@ -594,6 +610,7 @@
 				06CA2BB12C7B350F00B47D13 /* AudioPlayer.swift in Sources */,
 				06CA2BB22C7B350F00B47D13 /* PixelBuffer.swift in Sources */,
 				06CA2BB32C7B350F00B47D13 /* Effects.swift in Sources */,
+				06EBFA082E39F6CF00AB510B /* OPL3.swift in Sources */,
 				069B747A2D1822660071E68C /* Event.swift in Sources */,
 				06CA2BB42C7B350F00B47D13 /* Primitives.swift in Sources */,
 				06CA2BB52C7B350F00B47D13 /* Resource.swift in Sources */,
@@ -602,6 +619,7 @@
 				06CA2BB82C7B350F00B47D13 /* SpriteAnimation.swift in Sources */,
 				06CA2BB92C7B350F00B47D13 /* Sound.swift in Sources */,
 				06CA2BBA2C7B350F00B47D13 /* Font.swift in Sources */,
+				06FC4EF72E66C6AC00F68119 /* CreativeVoice.swift in Sources */,
 				06CA2BBB2C7B350F00B47D13 /* Palette.swift in Sources */,
 				06F806912CB2D99E00C70D58 /* Music.swift in Sources */,
 				06CA2BBC2C7B350F00B47D13 /* Video.swift in Sources */,

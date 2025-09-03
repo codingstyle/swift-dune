@@ -29,49 +29,6 @@ let adpcmIndexTable: [Int] = [
     -1, -1, -1, -1, 2, 4, 6, 8
 ]
 
-enum SoundError: Error {
-    case invalidSignature
-    case invalidChecksum
-    case wrongHeaderSize
-    case unknownVersion
-}
-
-enum VOCAudioCodec: UInt8 {
-    case unsigned8bitPCM    = 0x00 // 8 bits unsigned PCM
-    case creative4bitADPCM  = 0x01 // 4 bits to 8 bits Creative ADPCM
-    case creative3bitADCPM  = 0x02 // 3 bits to 8 bits Creative ADPCM (AKA 2.6 bits)
-    case creative2bitADPCM  = 0x03 // 2 bits to 8 bits Creative ADPCM
-    case signed16bitPCM     = 0x04 // 16 bits signed PCM
-    case alaw               = 0x06 // alaw
-    case mulaw              = 0x07 // µ-law
-    
-    var bytesPerFrame: UInt32 {
-        switch self {
-        case .unsigned8bitPCM, .creative4bitADPCM, .creative2bitADPCM, .alaw, .mulaw:
-            return 1
-        case .creative3bitADCPM:
-            return 3
-        case .signed16bitPCM:
-            return 2
-        }
-    }
-    
-    var bitsPerSample: UInt32 {
-        switch self {
-        case .unsigned8bitPCM, .alaw, .mulaw:
-            return 8
-        case .creative4bitADPCM:
-            return 4
-        case .creative3bitADCPM:
-            return 3
-        case .creative2bitADPCM:
-            return 2
-        case .signed16bitPCM:
-            return 16
-        }
-    }
-}
-
 enum VOCDataBlock {
     case terminate
     case soundData(codec: VOCAudioCodec, samplingRate: UInt16, bytes: [UInt8])
@@ -80,258 +37,214 @@ enum VOCDataBlock {
     case string(s: String)
     case repetition(count: UInt16)
     case endRepetition
-    
-    /**
-     Converts VOC data to an AVAudioPCMBuffer
-     */
-    var asPCMBuffer: AVAudioPCMBuffer? {
-        var bytes: [UInt8] = []
-        var codec: VOCAudioCodec
-        var samplingRate: CGFloat = 0.0
-        var sample: [Float32] = []
-        
-        switch self {
-        case .soundData(let sCodec, let sSamplingRate, let sBytes):
-            codec = sCodec
-            samplingRate = CGFloat(sSamplingRate)
-            bytes = sBytes
-            break
-        case .silence(let sCodec, let sSamplingRate, let sLength):
-            codec = sCodec
-            samplingRate = CGFloat(sSamplingRate)
-            bytes = [UInt8](repeating: 0, count: Int(sLength))
-            break
-        default:
-            return nil
-        }
-        
-        switch codec {
-        case .creative4bitADPCM:
-            sample = convertCreative4bitADPCMToFloat32PCM(bytes)
-        case .unsigned8bitPCM:
-            sample = convertUnsigned8bitPCMToFloat32PCM(bytes)
-        default:
-            DuneEngine.shared.logger.log(.error, "Unsupported codec: \(codec)")
-        }
-
-        let format = AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: samplingRate, channels: 1, interleaved: false)!
-        
-        let frameCapacity = AVAudioFrameCount(UInt32(sample.count))
-        guard let audioBuffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: frameCapacity) else { return nil }
-        
-        memcpy(audioBuffer.mutableAudioBufferList.pointee.mBuffers.mData, sample, sample.count * MemoryLayout<Float32>.size)
-        audioBuffer.frameLength = frameCapacity
-        
-        return audioBuffer
-    }
-    
-    
-    /**
-     Converts samples from unsigned 8-bit PCM to Float32 PCM
-     */
-    private func convertUnsigned8bitPCMToFloat32PCM(_ eightBitData: [UInt8]) -> [Float32] {
-        var floatData = [Float32]()
-        var i = 0
-        
-        // Convert sample from unsigned 8-bit to Float32
-        while i < eightBitData.count {
-            let tempData = Int16(eightBitData[i]) - 0x80
-            let floatSample = Float32(tempData << 8) / 256.0
-            floatData.append(floatSample)
-            i += 1
-        }
-        
-        return floatData
-    }
-    
-    
-    /**
-     Decodes and converts samples from Sound Blaster 4-bit ADPCM to Float32 PCM
-     */
-    private func convertCreative4bitADPCMToFloat32PCM(_ eightBitData: [UInt8]) -> [Float32] {
-        var floatData = [Float32]()
-        
-        var step: Int = 0
-        let shift = 0
-        let limit = 5
-        var prediction = Int16(bitPattern: UInt16(eightBitData[0]))
-        var i = 1
-
-        while i < eightBitData.count {
-            let value = eightBitData[i] & 0x7F
-            let sign: Int16 = (eightBitData[i] & 0x80) > 0 ? 1 : -1
-            let sample = Math.clamp(prediction + sign * Int16(value << (step + shift)), 0, 255)
-
-            prediction = sample
-
-            if value >= limit {
-                step += 1
-            } else if value == 0 {
-                step -= 1
-            }
-            
-            step = Math.clamp(step, 0, 3)
-            
-            let tempData = Int16(sample) - 0x80
-            
-            let floatSample = Float32(tempData) / 128.0
-            floatData.append(floatSample)
-            i += 1
-        }
-        
-        return floatData
-    }
 }
 
 
+final class Sound: AudioPlayerItem {
+  var type: AudioPlayerItemType {
+    return .sound
+  }
+  
+  private let engine = DuneEngine.shared
+  private var creativeVoice: CreativeVoice
+  private var resource: Resource
+  private var player: AudioPlayer
+  
+  init(_ fileName: String, player: AudioPlayer) {
+    self.player = player
+    self.resource = Resource(fileName, uncompressed: fileName == "SD5.HSQ")
+    self.creativeVoice = CreativeVoice(resource)
+  }
+  
+  
+  func play() {
+    let node = player.node(for: .sound)
+    
+    if node.isPlaying {
+      node.stop()
+    }
 
-final class Sound {
-    private let engine = DuneEngine.shared
-    var resource: Resource
-    var dataBlocks: [VOCDataBlock] = []
+    print("Playing sound: \(resource.fileName)")
     
-    private var signature: String?
-    private var version: UInt16 = 0
+    var i = 0
     
-    init(_ fileName: String) {
-        self.resource = Resource(fileName, uncompressed: fileName == "SD5.HSQ")
-        self.parseVOC()
-    }
+    var pendingBuffers: [AVAudioPCMBuffer] = []
+    var isRepeating = false
+    var repeatCount = 1
     
-    
-    func play() {
-        
-    }
-    
-    /**
-     Saves decompressed HSQ as a VOC file
-     */
-    func saveAsVOC() {
-        let fileName = resource.fileName.replacingOccurrences(of: ".HSQ", with: ".VOC")
-        let data = Data(resource.stream!.data)
-        
-        let downloadsDirectory = FileManager.default.urls(for: .downloadsDirectory, in: .userDomainMask).first!
-        let fileURL = downloadsDirectory.appendingPathComponent(fileName)
-        
-        do {
-            try data.write(to: fileURL)
-            engine.logger.log(.info, "Array saved to file: \(fileURL.absoluteString)")
-        } catch {
-            engine.logger.log(.error, "Error saving \(fileName): \(error)")
-        }
-    }
-    
-    
-    private func parseVOC() {
-        resource.stream!.seek(0)
-
-        let signatureBytes = resource.stream!.readBytes(19)
-        signature = String(bytes: signatureBytes, encoding: .ascii)!
+    while i < creativeVoice.dataBlocks.count {
+      let dataBlock = creativeVoice.dataBlocks[i]
       
-        let eofByte = resource.stream!.readByte()
-
-        if signature != "Creative Voice File" || eofByte != 0x1A {
-            engine.logger.log(.error, "parseVOC(): Invalid signature")
-            return
-        }
-
-        // Header size
-        let headerSize = resource.stream!.readUInt16LE()
-        
-        if headerSize != 26 {
-            engine.logger.log(.error, "parseVOC(): Wrong header size")
-        }
-        
-        version = resource.stream!.readUInt16LE()
-
-        if version != 0x10A && version != 0x114 {
-            engine.logger.log(.error, "parseVOC(): Unknown VOC version: \(String.fromWord(version))")
-        }
-
-        
-        let checksum = resource.stream!.readUInt16LE()
-        let computedChecksum = (UInt(~version) + 0x1234) & 0x0000FFFF
-
-        if checksum != computedChecksum {
-            engine.logger.log(.error, "parseVOC(): Invalid checksum: \(checksum)")
-        }
-         
-        // Read data blocks
-        var dataTypeCode: UInt8 = 0x01
-
-        while dataTypeCode != 0x00 {
-            dataTypeCode = resource.stream!.readByte()
-
-            if dataTypeCode == 0x00 {
-                dataBlocks.append(.terminate)
-                break
-            }
-            
-            let dataSizeBytes = resource.stream!.readBytes(3)
-            let dataSize = UInt32(dataSizeBytes[2]) << 16 | UInt32(dataSizeBytes[1]) << 8 | UInt32(dataSizeBytes[0])
-
-            switch dataTypeCode {
-            case 0x01, 0x02:
-                let frequencyDivisor = resource.stream!.readByte()
-                let samplingRate = UInt32(1000000.0 / (256.0 - Float(frequencyDivisor)))
-                let codec = resource.stream!.readByte()
-                
-                let audioBytes = resource.stream!.readBytes(dataSize - 2)
-                dataBlocks.append(.soundData(codec: VOCAudioCodec(rawValue: codec)!, samplingRate: UInt16(samplingRate), bytes: audioBytes))
-            case 0x03:
-                let silenceLength = resource.stream!.readUInt16()
-                let frequencyDivisor = resource.stream!.readByte()
-                let samplingRate = 1000000 / (256 - UInt32(frequencyDivisor))
-
-                dataBlocks.append(.silence(codec: .unsigned8bitPCM, samplingRate: UInt16(samplingRate), length: silenceLength))
-            case 0x04:
-                let markerBytes = resource.stream!.readBytes(2)
-                
-                dataBlocks.append(.marker(bytes: markerBytes))
-            case 0x05:
-                let bytes = resource.stream!.readBytes(dataSize)
-                resource.stream!.skip(1)
-
-                dataBlocks.append(.string(s: String(bytes: bytes, encoding: .ascii)!))
-            case 0x06:
-                let repetitionCount = resource.stream!.readUInt16LE()
-                
-                dataBlocks.append(.repetition(count: repetitionCount))
-            case 0x07:
-                dataBlocks.append(.endRepetition)
-                break
-            default:
-                print("Unsupported block: \(String(format: "%02X", dataTypeCode))")
-                break
-            }
-        }
+      switch dataBlock {
+        case .endRepetition:
+          isRepeating = false
+          break
+        case .terminate:
+          isRepeating = false
+          break
+        case .soundData(_, _, _):
+          let buffer = makePCMBuffer(from: dataBlock)!
+          let resampledBuffer = player.resampledBuffer(buffer)
+          pendingBuffers.append(resampledBuffer!)
+          isRepeating = false
+          break
+        case .repetition(let count):
+          isRepeating = true
+          repeatCount = Int(count)
+          break
+        default:
+          break
+      }
+      
+      if isRepeating {
+        i += 1
+        continue
+      }
+      
+      node.scheduleBuffersLoop(pendingBuffers, numberOfLoops: repeatCount)
+      node.play()
+      
+      i += 1
+      
+      repeatCount = 1
+      pendingBuffers = []
     }
     
-    func dumpInfo() {
-        engine.logger.log(.debug, "File: \(resource.fileName)")
-        engine.logger.log(.debug, "Signature: \(signature!)")
-        engine.logger.log(.debug, "Version: \(version >> 8).\(version & 0xFF)")
-        engine.logger.log(.debug, "Blocks:")
-        
-        for i in 0..<dataBlocks.count {
-            switch dataBlocks[i] {
-            case .terminate:
-                engine.logger.log(.debug, "- Terminate")
-            case .soundData(let codec, let samplingRate, let bytes):
-                engine.logger.log(.debug, "- Sound data: codec=\(codec), samplingRate=\(samplingRate), bytes=\(bytes.count)")
-            case .repetition(let count):
-                engine.logger.log(.debug, "- Repeat block start: count=\(count)")
-              case .marker(let bytes):
-                engine.logger.log(.debug, "- Marker: \(String.fromByte(bytes[0])) - \(String.fromByte(bytes[1]))")
-            case .endRepetition:
-                engine.logger.log(.debug, "- Repeat block end")
-            case .silence(let codec, let length, let samplingRate):
-                engine.logger.log(.debug, "- Silence: codec=\(codec), length=\(length), samplingRate=\(samplingRate)")
-            case .string(let s):
-                engine.logger.log(.debug, "- String: \(s)")
-            }
-        }
-
-        print("")
+    // print("[AudioPlayer] Audio graph = \(audioEngine.debugDescription)")
+  }
+  
+  
+  func stop() {
+    let node = player.node(for: .sound)
+    
+    if node.isPlaying {
+      node.stop()
     }
+  }
+    
+  
+  /**
+   Converts VOC data to an AVAudioPCMBuffer
+   */
+  private func makePCMBuffer(from dataBlock: VOCDataBlock) -> AVAudioPCMBuffer? {
+    var bytes: [UInt8] = []
+    var codec: VOCAudioCodec
+    var samplingRate: CGFloat = 0.0
+    var sample: [Float32] = []
+    
+    switch dataBlock {
+      case .soundData(let sCodec, let sSamplingRate, let sBytes):
+        codec = sCodec
+        samplingRate = CGFloat(sSamplingRate)
+        bytes = sBytes
+        break
+      case .silence(let sCodec, let sSamplingRate, let sLength):
+        codec = sCodec
+        samplingRate = CGFloat(sSamplingRate)
+        bytes = [UInt8](repeating: 0, count: Int(sLength))
+        break
+      default:
+        return nil
+    }
+    
+    switch codec {
+      case .creative4bitADPCM:
+        sample = convertCreative4bitADPCMToFloat32PCM(bytes)
+      case .unsigned8bitPCM:
+        sample = convertUnsigned8bitPCMToFloat32PCM(bytes)
+      default:
+        DuneEngine.shared.logger.log(.error, "Unsupported codec: \(codec)")
+    }
+    
+    let format = AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: samplingRate, channels: 1, interleaved: false)!
+    
+    let frameCapacity = AVAudioFrameCount(UInt32(sample.count))
+    guard let audioBuffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: frameCapacity) else { return nil }
+    
+    memcpy(audioBuffer.mutableAudioBufferList.pointee.mBuffers.mData, sample, sample.count * MemoryLayout<Float32>.size)
+    audioBuffer.frameLength = frameCapacity
+    
+    return audioBuffer
+  }
+  
+  
+  /**
+   Converts samples from unsigned 8-bit PCM to Float32 PCM
+   */
+  private func convertUnsigned8bitPCMToFloat32PCM(_ eightBitData: [UInt8]) -> [Float32] {
+    var floatData = [Float32]()
+    var i = 0
+    
+    // Convert sample from unsigned 8-bit to Float32
+    while i < eightBitData.count {
+      let tempData = Int16(eightBitData[i]) - 0x80
+      let floatSample = Float32(tempData << 8) / 256.0
+      floatData.append(floatSample)
+      i += 1
+    }
+    
+    return floatData
+  }
+  
+  
+  /**
+   Decodes and converts samples from Sound Blaster 4-bit ADPCM to Float32 PCM
+   */
+  private func convertCreative4bitADPCMToFloat32PCM(_ eightBitData: [UInt8]) -> [Float32] {
+    var floatData = [Float32]()
+    
+    var step: Int = 0
+    let shift = 0
+    let limit = 5
+    var prediction = Int16(bitPattern: UInt16(eightBitData[0]))
+    var i = 1
+    
+    while i < eightBitData.count {
+      let value = eightBitData[i] & 0x7F
+      let sign: Int16 = (eightBitData[i] & 0x80) > 0 ? 1 : -1
+      let sample = Math.clamp(prediction + sign * Int16(value << (step + shift)), 0, 255)
+      
+      prediction = sample
+      
+      if value >= limit {
+        step += 1
+      } else if value == 0 {
+        step -= 1
+      }
+      
+      step = Math.clamp(step, 0, 3)
+      
+      let tempData = Int16(sample) - 0x80
+      
+      let floatSample = Float32(tempData) / 128.0
+      floatData.append(floatSample)
+      i += 1
+    }
+    
+    return floatData
+  }
+  
+    
+  /**
+   Saves decompressed HSQ as a VOC file
+   */
+  func saveAsVOC() {
+    let fileName = resource.fileName.replacingOccurrences(of: ".HSQ", with: ".VOC")
+    let data = Data(resource.stream!.data)
+    
+    let downloadsDirectory = FileManager.default.urls(for: .downloadsDirectory, in: .userDomainMask).first!
+    let fileURL = downloadsDirectory.appendingPathComponent(fileName)
+    
+    do {
+        try data.write(to: fileURL)
+        engine.logger.log(.info, "Array saved to file: \(fileURL.absoluteString)")
+    } catch {
+        engine.logger.log(.error, "Error saving \(fileName): \(error)")
+    }
+  }
+  
+    
+  func dumpInfo() {
+    creativeVoice.dumpInfo()
+  }
 }
