@@ -11,16 +11,15 @@
  HERAD documentation: https://www.vgmpf.com/Wiki/index.php/HERAD
  HERAD implementation on ScummVM: https://github.com/bluegr/scummvm/tree/dune/engines/dune/sound
  HERAD implementation on ADPlug: https://github.com/adplug/adplug/blob/herad-dev/src/herad.cpp
- 
  DUNE AdLib implementation: https://github.com/synamaxmusic/herad/blob/main/DFADL.ASM
  
  */
 
-struct HeradEvent {
+struct HeradEvent: CustomDebugStringConvertible {
   var ticks: UInt32
   var type: HeradEventType
   
-  var asString: String {
+  var debugDescription: String {
     switch self.type {
       case .noteOff(let noteNumber, let channel): return "noteOff: ticks=\(ticks), noteNumber=\(noteNumber), channel=\(channel)"
       case .noteOn(let noteNumber, let velocity, let channel): return "noteOn: ticks=\(ticks), noteNumber=\(noteNumber), velocity=\(velocity), channel=\(channel)"
@@ -32,6 +31,13 @@ struct HeradEvent {
       case .endTrack: return "endTrack"
     }
   }
+}
+
+
+public enum HeradNote: UInt8 {
+  case noteOff = 0
+  case noteOn = 1
+  case noteUpdate = 2
 }
 
 
@@ -62,25 +68,9 @@ public struct HeradTrack {
   var data: [UInt8] = []
   var events: [HeradEvent] = []
   var instrument: HeradInstrument?
-  
-  func event(at ticks: Int) -> HeradEvent? {
-    var i = 0
-    
-    while i < events.count {
-      if events[i].ticks > ticks {
-        return nil
-      }
-      
-      if events[i].ticks < ticks {
-        i += 1
-        continue
-      }
-      
-      return events[i]
-    }
-    
-    return nil
-  }
+
+  /// Cursor for efficient sequential event processing (avoids re-scanning from start)
+  var eventCursor: Int = 0
 }
 
 public struct HeradInstrument {
@@ -127,33 +117,44 @@ public struct HeradInstrument {
 }
 
 public struct HeradChannel {
-  var program: HeradInstrument
-  var playProgram: HeradInstrument
-  var note: UInt8
-  var keyOn: Bool
-  var bend: UInt8
-  var pitchSlideDuration: UInt8
+  var program: HeradInstrument?
+  var playProgram: HeradInstrument?
+  var note: UInt8 = 0
+  var keyOn: Bool = false
+  var bend: UInt8 = 0
+  var pitchSlideDuration: UInt8 = 0
 }
 
 
-public final class HERAD {
+public final class HERAD: CustomDebugStringConvertible {
   private var header = HeradHeader()
   private var resource: Resource
   
   private let headerSize: UInt32 = 52
   private let instrumentsSize = 40
-  private let voicesSize = 9
-  private let tracksSize = 21
   
-  private let fNum: [UInt16] = [
+  let voicesSize = 9
+  let tracksSize = 21
+  let notesSize = 12
+  let fNumMin = 325 // Min note frequency number
+  let fNumMax = 688 // Max note frequency number
+  
+  // Pitch bend middle value
+  let bendCenter: UInt8 = 0x40
+  
+  let slotOffset: [UInt8] = [
+    0, 1, 2, 8, 9, 10, 16, 17, 18
+  ]
+  
+  let fNum: [UInt16] = [
     343, 364, 385, 408, 433, 459, 486, 515, 546, 579, 614, 650
   ]
   
-  private let fineBend: [UInt8] = [
+  let fineBend: [UInt8] = [
     19, 21, 21, 23, 25, 26, 27, 29, 31, 33, 35, 36, 37
   ]
   
-  private let coarseBend: [UInt8] = [
+  let coarseBend: [UInt8] = [
     0, 5, 10, 15, 20,
     0, 6, 12, 18, 24
   ]
@@ -171,7 +172,7 @@ public final class HERAD {
   var maxTicks: UInt32 = 0
   var instruments: [HeradInstrument] = []
   var tracks: [HeradTrack] = []
-  
+  var channels: [HeradChannel] = [HeradChannel](repeating: .init(), count: 16)
   
   init(_ resource: Resource) {
     self.resource = resource
@@ -183,12 +184,12 @@ public final class HERAD {
   
   
   private func parseHeradHeader(_ resource: Resource) {
-    // Header data
+    // Header data size
     header.chunkSize = resource.stream!.readUInt16LE()
     
     var i = 0
     
-    // Maximum 21 tracks
+    // Maximum of 21 tracks
     while i < tracksSize {
       let offset = resource.stream!.readUInt16LE()
       
@@ -377,6 +378,7 @@ public final class HERAD {
       instrument.carrierOutputLevelAftertouchScaling = resource.stream!.readSByte()
       
       instruments.append(instrument)
+      
       i += 1
     }
   }
@@ -388,5 +390,34 @@ public final class HERAD {
     let key = UInt8(note % fNum.count)
     
     return key + octave * 12
+  }
+  
+  
+  public var debugDescription: String {
+    var debugString: String = ""
+    
+    debugString.append("Music file: \(resource.fileName)\r")
+    debugString.append(" - Header: chunkSize=\(header.chunkSize), loopStart=\(header.loopStart), loopEnd=\(header.loopEnd), loopCount=\(header.loopCount),speed=\(String.fromWord(header.speed))\r")
+     
+    var n = 0
+     
+    for track in tracks {
+      debugString.append(" - Track #\(n): offset=\(track.offset), size=\(track.size)\r")
+       
+      /*for event in track.events {
+        debugString.append("    - \(event)\r")
+      }*/
+       
+      n += 1
+    }
+     
+    n = 0
+     
+    for instrument in instruments {
+      debugString.append(" - Instrument #\(n): voiceNumber=\(instrument.voiceNumber)\r")
+      n += 1
+    }
+    
+    return debugString
   }
 }

@@ -31,6 +31,22 @@
 		06547D062C6D4F7D008E5C64 /* WormRide.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06547D052C6D4F7D008E5C64 /* WormRide.swift */; };
 		06566A692ADEA3A800AF5734 /* Font.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06566A682ADEA3A800AF5734 /* Font.swift */; };
 		065AEE8B2B93B2B000547487 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 065AEE8A2B93B2B000547487 /* Logger.swift */; };
+		065F0C9B2F33C4B90032796E /* OPL3Tables.swift in Sources */ = {isa = PBXBuildFile; fileRef = 065F0C982F33C4B90032796E /* OPL3Tables.swift */; };
+		065F0C9C2F33C4B90032796E /* OPL3Channel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 065F0C922F33C4B90032796E /* OPL3Channel.swift */; };
+		065F0C9D2F33C4B90032796E /* OPL3Lfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 065F0C952F33C4B90032796E /* OPL3Lfo.swift */; };
+		065F0C9E2F33C4B90032796E /* OPL3Fm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 065F0C9A2F33C4B90032796E /* OPL3Fm.swift */; };
+		065F0C9F2F33C4B90032796E /* OPL3Operator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 065F0C962F33C4B90032796E /* OPL3Operator.swift */; };
+		065F0CA02F33C4B90032796E /* OPL3SignalSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 065F0C972F33C4B90032796E /* OPL3SignalSource.swift */; };
+		065F0CA12F33C4B90032796E /* OPL3Envelope.swift in Sources */ = {isa = PBXBuildFile; fileRef = 065F0C942F33C4B90032796E /* OPL3Envelope.swift */; };
+		065F0CA32F33C4B90032796E /* OPL3Chip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 065F0C932F33C4B90032796E /* OPL3Chip.swift */; };
+		065F0CA42F33C4B90032796E /* OPL3Tables.swift in Sources */ = {isa = PBXBuildFile; fileRef = 065F0C982F33C4B90032796E /* OPL3Tables.swift */; };
+		065F0CA52F33C4B90032796E /* OPL3Channel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 065F0C922F33C4B90032796E /* OPL3Channel.swift */; };
+		065F0CA62F33C4B90032796E /* OPL3Lfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 065F0C952F33C4B90032796E /* OPL3Lfo.swift */; };
+		065F0CA72F33C4B90032796E /* OPL3Fm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 065F0C9A2F33C4B90032796E /* OPL3Fm.swift */; };
+		065F0CA82F33C4B90032796E /* OPL3Operator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 065F0C962F33C4B90032796E /* OPL3Operator.swift */; };
+		065F0CA92F33C4B90032796E /* OPL3SignalSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 065F0C972F33C4B90032796E /* OPL3SignalSource.swift */; };
+		065F0CAA2F33C4B90032796E /* OPL3Envelope.swift in Sources */ = {isa = PBXBuildFile; fileRef = 065F0C942F33C4B90032796E /* OPL3Envelope.swift */; };
+		065F0CAC2F33C4B90032796E /* OPL3Chip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 065F0C932F33C4B90032796E /* OPL3Chip.swift */; };
 		066D9D3B2B4A9EC40003ADD3 /* LogoSwap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 066D9D3A2B4A9EC40003ADD3 /* LogoSwap.swift */; };
 		066D9D3D2B4AA0510003ADD3 /* Stars.swift in Sources */ = {isa = PBXBuildFile; fileRef = 066D9D3C2B4AA0510003ADD3 /* Stars.swift */; };
 		067791222C728CE0008CB4A7 /* StatsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 067791212C728CE0008CB4A7 /* StatsView.swift */; };
@@ -108,8 +124,6 @@
 		06D359D02B4D778000D79173 /* Scenery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06D359CF2B4D778000D79173 /* Scenery.swift */; };
 		06D372D52B516132006BDDF3 /* GameTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06D372D42B516132006BDDF3 /* GameTypes.swift */; };
 		06DC67A32BE2320B0067DFEA /* Globe.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06DC67A22BE2320B0067DFEA /* Globe.swift */; };
-		06EBFA072E39F6CF00AB510B /* OPL3.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06EBFA062E39F6CC00AB510B /* OPL3.swift */; };
-		06EBFA082E39F6CF00AB510B /* OPL3.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06EBFA062E39F6CC00AB510B /* OPL3.swift */; };
 		06F806902CB2D99E00C70D58 /* Music.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06F8068F2CB2D99C00C70D58 /* Music.swift */; };
 		06F806912CB2D99E00C70D58 /* Music.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06F8068F2CB2D99C00C70D58 /* Music.swift */; };
 		06FC4EF32E657A0B00F68119 /* HERAD.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06FC4EF22E657A0800F68119 /* HERAD.swift */; };
@@ -147,6 +161,14 @@
 		06566A682ADEA3A800AF5734 /* Font.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Font.swift; sourceTree = "<group>"; };
 		06566A6A2ADEFDD500AF5734 /* FontDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FontDetailsView.swift; sourceTree = "<group>"; };
 		065AEE8A2B93B2B000547487 /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
+		065F0C922F33C4B90032796E /* OPL3Channel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OPL3Channel.swift; sourceTree = "<group>"; };
+		065F0C932F33C4B90032796E /* OPL3Chip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OPL3Chip.swift; sourceTree = "<group>"; };
+		065F0C942F33C4B90032796E /* OPL3Envelope.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OPL3Envelope.swift; sourceTree = "<group>"; };
+		065F0C952F33C4B90032796E /* OPL3Lfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OPL3Lfo.swift; sourceTree = "<group>"; };
+		065F0C962F33C4B90032796E /* OPL3Operator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OPL3Operator.swift; sourceTree = "<group>"; };
+		065F0C972F33C4B90032796E /* OPL3SignalSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OPL3SignalSource.swift; sourceTree = "<group>"; };
+		065F0C982F33C4B90032796E /* OPL3Tables.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OPL3Tables.swift; sourceTree = "<group>"; };
+		065F0C9A2F33C4B90032796E /* OPL3Fm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OPL3Fm.swift; sourceTree = "<group>"; };
 		066D9D3A2B4A9EC40003ADD3 /* LogoSwap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogoSwap.swift; sourceTree = "<group>"; };
 		066D9D3C2B4AA0510003ADD3 /* Stars.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Stars.swift; sourceTree = "<group>"; };
 		067791212C728CE0008CB4A7 /* StatsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatsView.swift; sourceTree = "<group>"; };
@@ -199,7 +221,6 @@
 		06D372D62B529939006BDDF3 /* SceneryListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneryListView.swift; sourceTree = "<group>"; };
 		06D372D82B529946006BDDF3 /* SceneryDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneryDetailsView.swift; sourceTree = "<group>"; };
 		06DC67A22BE2320B0067DFEA /* Globe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Globe.swift; sourceTree = "<group>"; };
-		06EBFA062E39F6CC00AB510B /* OPL3.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OPL3.swift; sourceTree = "<group>"; };
 		06F8068F2CB2D99C00C70D58 /* Music.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Music.swift; sourceTree = "<group>"; };
 		06FC4EF22E657A0800F68119 /* HERAD.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HERAD.swift; sourceTree = "<group>"; };
 		06FC4EF52E66C6A600F68119 /* CreativeVoice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreativeVoice.swift; sourceTree = "<group>"; };
@@ -237,9 +258,10 @@
 		0627796A2B9AF94A0046E068 /* Audio */ = {
 			isa = PBXGroup;
 			children = (
+				065F0C992F33C4B90032796E /* OPL3 */,
+				065F0C9A2F33C4B90032796E /* OPL3Fm.swift */,
 				06FC4EF52E66C6A600F68119 /* CreativeVoice.swift */,
 				06FC4EF22E657A0800F68119 /* HERAD.swift */,
-				06EBFA062E39F6CC00AB510B /* OPL3.swift */,
 				06A023432A9FC5BA0091D581 /* AudioPlayer.swift */,
 			);
 			path = Audio;
@@ -309,6 +331,20 @@
 				0699D26D2A93C685006287E0 /* SwiftDune.entitlements */,
 			);
 			path = Game;
+			sourceTree = "<group>";
+		};
+		065F0C992F33C4B90032796E /* OPL3 */ = {
+			isa = PBXGroup;
+			children = (
+				065F0C922F33C4B90032796E /* OPL3Channel.swift */,
+				065F0C932F33C4B90032796E /* OPL3Chip.swift */,
+				065F0C942F33C4B90032796E /* OPL3Envelope.swift */,
+				065F0C952F33C4B90032796E /* OPL3Lfo.swift */,
+				065F0C962F33C4B90032796E /* OPL3Operator.swift */,
+				065F0C972F33C4B90032796E /* OPL3SignalSource.swift */,
+				065F0C982F33C4B90032796E /* OPL3Tables.swift */,
+			);
+			path = OPL3;
 			sourceTree = "<group>";
 		};
 		06892D552C3031E000B08B22 /* Rendering */ = {
@@ -535,7 +571,6 @@
 				0682820E2B3E06C5009C9FF7 /* Sunrise.swift in Sources */,
 				061725EB2B77AA8400254635 /* Kiss.swift in Sources */,
 				062A77682B53FE9C001CA514 /* Types.swift in Sources */,
-				06EBFA072E39F6CF00AB510B /* OPL3.swift in Sources */,
 				066D9D3D2B4AA0510003ADD3 /* Stars.swift in Sources */,
 				065AEE8B2B93B2B000547487 /* Logger.swift in Sources */,
 				062A776A2B53FEB8001CA514 /* Node.swift in Sources */,
@@ -572,6 +607,14 @@
 				0603BFC02B30BA630022CA3B /* Intro.swift in Sources */,
 				061725F12B8B559900254635 /* Sietch.swift in Sources */,
 				0601F8772CD20E0500581B49 /* Character.swift in Sources */,
+				065F0CA42F33C4B90032796E /* OPL3Tables.swift in Sources */,
+				065F0CA52F33C4B90032796E /* OPL3Channel.swift in Sources */,
+				065F0CA62F33C4B90032796E /* OPL3Lfo.swift in Sources */,
+				065F0CA72F33C4B90032796E /* OPL3Fm.swift in Sources */,
+				065F0CA82F33C4B90032796E /* OPL3Operator.swift in Sources */,
+				065F0CA92F33C4B90032796E /* OPL3SignalSource.swift in Sources */,
+				065F0CAA2F33C4B90032796E /* OPL3Envelope.swift in Sources */,
+				065F0CAC2F33C4B90032796E /* OPL3Chip.swift in Sources */,
 				06A023442A9FC5BA0091D581 /* Video.swift in Sources */,
 				06CA2B892C7A647400B47D13 /* Book.swift in Sources */,
 				06892D592C31CAE700B08B22 /* Shaders.metal in Sources */,
@@ -603,6 +646,14 @@
 				06CA2BAB2C7B350F00B47D13 /* EditorViewModel.swift in Sources */,
 				0600C9E02C82EEE600E552DD /* VideoListView.swift in Sources */,
 				06CA2BAC2C7B350F00B47D13 /* DuneEditorApp.swift in Sources */,
+				065F0C9B2F33C4B90032796E /* OPL3Tables.swift in Sources */,
+				065F0C9C2F33C4B90032796E /* OPL3Channel.swift in Sources */,
+				065F0C9D2F33C4B90032796E /* OPL3Lfo.swift in Sources */,
+				065F0C9E2F33C4B90032796E /* OPL3Fm.swift in Sources */,
+				065F0C9F2F33C4B90032796E /* OPL3Operator.swift in Sources */,
+				065F0CA02F33C4B90032796E /* OPL3SignalSource.swift in Sources */,
+				065F0CA12F33C4B90032796E /* OPL3Envelope.swift in Sources */,
+				065F0CA32F33C4B90032796E /* OPL3Chip.swift in Sources */,
 				06CA2BAD2C7B350F00B47D13 /* Renderer.swift in Sources */,
 				06CA2BAE2C7B350F00B47D13 /* Shaders.metal in Sources */,
 				06CA2BAF2C7B350F00B47D13 /* Keyboard.swift in Sources */,
@@ -610,7 +661,6 @@
 				06CA2BB12C7B350F00B47D13 /* AudioPlayer.swift in Sources */,
 				06CA2BB22C7B350F00B47D13 /* PixelBuffer.swift in Sources */,
 				06CA2BB32C7B350F00B47D13 /* Effects.swift in Sources */,
-				06EBFA082E39F6CF00AB510B /* OPL3.swift in Sources */,
 				069B747A2D1822660071E68C /* Event.swift in Sources */,
 				06CA2BB42C7B350F00B47D13 /* Primitives.swift in Sources */,
 				06CA2BB52C7B350F00B47D13 /* Resource.swift in Sources */,
@@ -848,9 +898,10 @@
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 1.0;
+				OPL_ENABLE_STEREOEXT = 1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.codingstyle.DuneEditor;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG OPL_ENABLE_STEREOEXT $(inherited)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 			};
@@ -885,8 +936,10 @@
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 1.0;
+				OPL_ENABLE_STEREOEXT = 1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.codingstyle.DuneEditor;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = OPL_ENABLE_STEREOEXT;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 			};

@@ -54,6 +54,7 @@ enum VOCAudioCodec: UInt8 {
  Creative Voice (VOC) file format
  @see https://wiki.multimedia.cx/index.php/Creative_Voice
  @see https://wiki.multimedia.cx/index.php/Creative_8_bits_ADPCM
+ @see https://github.com/scummvm/scummvm/blob/master/audio/decoders/voc.cpp
  @see https://fabiensanglard.net/reverse_engineering_strike_commander/docs/Creative%20Voice%20(VOC)%20file%20format.txt
  */
 public final class CreativeVoice {
