@@ -97,17 +97,17 @@ struct EditorView: View {
                 SceneryDetailsView(viewModel: viewModel)
             } else if selection?.resourceType == .globe {
                 GlobeDetailsView(viewModel: viewModel)
-            /*} else if selection?.resourceType == .music {
-                MusicDetailsView(viewModel: viewModel)*/
+            } else if selection?.resourceType == .music {
+                MusicDetailsView(viewModel: viewModel)
             } else {
                 Text("No content selected")
             }
         }
         .navigationTitle("Dune Editor")
-        .onChange(of: selection) { newValue in
-            if let resource = newValue {
-                viewModel.loadResource(resource)
-            }
-        }
+        .onChange(of: selection, initial: false, { oldValue, newValue in
+          if let resource = newValue {
+            viewModel.loadResource(resource)
+          }
+        })
     }
 }

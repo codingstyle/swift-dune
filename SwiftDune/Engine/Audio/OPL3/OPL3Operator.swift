@@ -117,10 +117,10 @@ public final class OPL3Operator {
     // MARK: - References
     
     /// Back-reference to the owning channel this operator belongs to
-    weak var channel: OPL3Channel?
+    unowned(unsafe)  var channel: OPL3Channel!
     
     /// Back-reference to the parent chip instance
-    weak var chip: OPL3Chip?
+    unowned(unsafe)  var chip: OPL3Chip!
     
     /// Indicates whether the tremolo LFO is applied to this operator
     var tremoloEnabled: Bool = false

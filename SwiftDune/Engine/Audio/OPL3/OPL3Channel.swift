@@ -31,13 +31,17 @@ final class OPL3Channel {
     var slotz: [OPL3Operator] = [OPL3Operator(), OPL3Operator()]
     
     /// Paired channel for 4-op mode
-    weak var pair: OPL3Channel?
+    unowned(unsafe)  var pair: OPL3Channel?
     
     /// Back-reference to parent chip
-    weak var chip: OPL3Chip?
+    unowned(unsafe)  var chip: OPL3Chip!
     
     /// Output signal sources (4 outputs for stereo extension support)
-    var out: [OPL3SignalSource] = [.zero, .zero, .zero, .zero]
+    //var out: [OPL3SignalSource] = [.zero, .zero, .zero, .zero]
+    var outSlot0: Int8 = -1   // -1 = zero/inactive, >=0 = index into chip.slots
+    var outSlot1: Int8 = -1
+    var outSlot2: Int8 = -1
+    var outSlot3: Int8 = -1
     
     /// Channel type (2-op, 4-op, 4-op pair, drum)
     var channelType: OPL3ChannelType = .twoOp

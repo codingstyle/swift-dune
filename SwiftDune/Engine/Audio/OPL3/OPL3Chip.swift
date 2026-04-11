@@ -50,8 +50,12 @@ public final class OPL3Chip {
     var noise: UInt32 = 1
     var zeroMod: Int16 = 0
     
-    private var mixBuffer: [Int32] = [0, 0, 0, 0]
-    
+    /// 4-channel mix accumulator (used only by generate4ChCore)
+    private var mixBuf0: Int32 = 0
+    private var mixBuf1: Int32 = 0
+    private var mixBuf2: Int32 = 0
+    private var mixBuf3: Int32 = 0
+
     var rhythmHihatBit2: UInt8 = 0
     var rhythmHihatBit3: UInt8 = 0
     var rhythmHihatBit7: UInt8 = 0
@@ -60,11 +64,21 @@ public final class OPL3Chip {
     var rhythmTomBit5: UInt8 = 0
     
     var rateRatio: Int32 = 0
+    /// log2(rateRatio) when rateRatio is an exact power of 2 (e.g. 10 for 49716 Hz → ratio 1024),
+    /// or -1 when it is not. Used to replace the two integer divisions per output sample with
+    /// a single arithmetic right-shift, which is significantly cheaper in debug builds.
+    var rateRatioShift: Int32 = -1
     var sampleCounter: Int32 = 0
     
-    private var oldSamples: [Int16] = [0, 0, 0, 0]
-    private var samples: [Int16] = [0, 0, 0, 0]
-    private var coreTemp: [Int16] = [0, 0, 0, 0]
+    /// Stereo resampler state — previous and current computed OPL3 sample (no heap, no ARC)
+    private var sampleL: Int16 = 0
+    private var sampleR: Int16 = 0
+    private var oldSampleL: Int16 = 0
+    private var oldSampleR: Int16 = 0
+
+    /// 4-channel resampler state (heap arrays; only used by the non-audio-playback 4ch path)
+    private var samples4ch: [Int16] = [0, 0, 0, 0]
+    private var oldSamples4ch: [Int16] = [0, 0, 0, 0]
     
     var writeBufferSampleCounter: UInt64 = 0
     var writeBufferCurrent: UInt32 = 0
@@ -152,7 +166,7 @@ public final class OPL3Chip {
     
     @inline(__always)
     private func phaseGenerate(_ slot: OPL3Operator) {
-        guard let channel = slot.channel else { return }
+        let channel = slot.channel!
         
         var fNum = Int(channel.fNumber)
         
@@ -277,14 +291,15 @@ public final class OPL3Chip {
     
     @inline(__always)
     private func slotCalcFeedback(_ slot: OPL3Operator) {
-        guard let channel = slot.channel else { return }
+        let channel = slot.channel!
         
         if channel.feedback != 0 {
             slot.feedbackModifiedSignal = (slot.previousOutputSample &+ slot.out) >> (0x09 - Int(channel.feedback))
         } else {
             slot.feedbackModifiedSignal = 0
         }
-        slot.previousOutputSample = slot.out
+        
+      slot.previousOutputSample = slot.out
     }
     
     @inline(__always)
@@ -327,10 +342,10 @@ public final class OPL3Chip {
         if (channel.algorithm & 0x04) != 0 {
             guard let pair = channel.pair else { return }
             
-            pair.out[0] = .zero
-            pair.out[1] = .zero
-            pair.out[2] = .zero
-            pair.out[3] = .zero
+            pair.outSlot0 = -1
+            pair.outSlot1 = -1
+            pair.outSlot2 = -1
+            pair.outSlot3 = -1
             
             switch channel.algorithm & 0x03 {
             case 0x00:
@@ -338,37 +353,37 @@ public final class OPL3Chip {
                 pair.slotz[1].modulationSource = pair.slotz[0].outputSignal
                 channel.slotz[0].modulationSource = pair.slotz[1].outputSignal
                 channel.slotz[1].modulationSource = channel.slotz[0].outputSignal
-                channel.out[0] = channel.slotz[1].outputSignal
-                channel.out[1] = .zero
-                channel.out[2] = .zero
-                channel.out[3] = .zero
+                channel.outSlot0 = Int8(channel.slotz[1].slotIndex)
+                channel.outSlot1 = -1
+                channel.outSlot2 = -1
+                channel.outSlot3 = -1
             case 0x01:
                 pair.slotz[0].modulationSource = pair.slotz[0].feedbackSignal
                 pair.slotz[1].modulationSource = pair.slotz[0].outputSignal
                 channel.slotz[0].modulationSource = .zero
                 channel.slotz[1].modulationSource = channel.slotz[0].outputSignal
-                channel.out[0] = pair.slotz[1].outputSignal
-                channel.out[1] = channel.slotz[1].outputSignal
-                channel.out[2] = .zero
-                channel.out[3] = .zero
+                channel.outSlot0 = Int8(pair.slotz[1].slotIndex)
+                channel.outSlot1 = Int8(channel.slotz[1].slotIndex)
+                channel.outSlot2 = -1
+                channel.outSlot3 = -1
             case 0x02:
                 pair.slotz[0].modulationSource = pair.slotz[0].feedbackSignal
                 pair.slotz[1].modulationSource = .zero
                 channel.slotz[0].modulationSource = pair.slotz[1].outputSignal
                 channel.slotz[1].modulationSource = channel.slotz[0].outputSignal
-                channel.out[0] = pair.slotz[0].outputSignal
-                channel.out[1] = channel.slotz[1].outputSignal
-                channel.out[2] = .zero
-                channel.out[3] = .zero
+                channel.outSlot0 = Int8(pair.slotz[0].slotIndex)
+                channel.outSlot1 = Int8(channel.slotz[1].slotIndex)
+                channel.outSlot2 = -1
+                channel.outSlot3 = -1
             case 0x03:
                 pair.slotz[0].modulationSource = pair.slotz[0].feedbackSignal
                 pair.slotz[1].modulationSource = .zero
                 channel.slotz[0].modulationSource = pair.slotz[1].outputSignal
                 channel.slotz[1].modulationSource = .zero
-                channel.out[0] = pair.slotz[0].outputSignal
-                channel.out[1] = channel.slotz[0].outputSignal
-                channel.out[2] = channel.slotz[1].outputSignal
-                channel.out[3] = .zero
+                channel.outSlot0 = Int8(pair.slotz[0].slotIndex)
+                channel.outSlot1 = Int8(channel.slotz[0].slotIndex)
+                channel.outSlot2 = Int8(channel.slotz[1].slotIndex)
+                channel.outSlot3 = -1
             default:
                 break
             }
@@ -377,17 +392,17 @@ public final class OPL3Chip {
             case 0x00:
                 channel.slotz[0].modulationSource = channel.slotz[0].feedbackSignal
                 channel.slotz[1].modulationSource = channel.slotz[0].outputSignal
-                channel.out[0] = channel.slotz[1].outputSignal
-                channel.out[1] = .zero
-                channel.out[2] = .zero
-                channel.out[3] = .zero
+                channel.outSlot0 = Int8(channel.slotz[1].slotIndex)
+                channel.outSlot1 = -1
+                channel.outSlot2 = -1
+                channel.outSlot3 = -1
             case 0x01:
                 channel.slotz[0].modulationSource = channel.slotz[0].feedbackSignal
                 channel.slotz[1].modulationSource = .zero
-                channel.out[0] = channel.slotz[0].outputSignal
-                channel.out[1] = channel.slotz[1].outputSignal
-                channel.out[2] = .zero
-                channel.out[3] = .zero
+                channel.outSlot0 = Int8(channel.slotz[0].slotIndex)
+                channel.outSlot1 = Int8(channel.slotz[1].slotIndex)
+                channel.outSlot2 = -1
+                channel.outSlot3 = -1
             default:
                 break
             }
@@ -404,20 +419,20 @@ public final class OPL3Chip {
             let channel7 = channels[7]
             let channel8 = channels[8]
             
-            channel6.out[0] = channel6.slotz[1].outputSignal
-            channel6.out[1] = channel6.slotz[1].outputSignal
-            channel6.out[2] = .zero
-            channel6.out[3] = .zero
+            channel6.outSlot0 = Int8(channel6.slotz[1].slotIndex)
+            channel6.outSlot1 = Int8(channel6.slotz[1].slotIndex)
+            channel6.outSlot2 = -1
+            channel6.outSlot3 = -1
             
-            channel7.out[0] = channel7.slotz[0].outputSignal
-            channel7.out[1] = channel7.slotz[0].outputSignal
-            channel7.out[2] = channel7.slotz[1].outputSignal
-            channel7.out[3] = channel7.slotz[1].outputSignal
+            channel7.outSlot0 = Int8(channel7.slotz[0].slotIndex)
+            channel7.outSlot1 = Int8(channel7.slotz[0].slotIndex)
+            channel7.outSlot2 = Int8(channel7.slotz[1].slotIndex)
+            channel7.outSlot3 = Int8(channel7.slotz[1].slotIndex)
             
-            channel8.out[0] = channel8.slotz[0].outputSignal
-            channel8.out[1] = channel8.slotz[0].outputSignal
-            channel8.out[2] = channel8.slotz[1].outputSignal
-            channel8.out[3] = channel8.slotz[1].outputSignal
+            channel8.outSlot0 = Int8(channel8.slotz[0].slotIndex)
+            channel8.outSlot1 = Int8(channel8.slotz[0].slotIndex)
+            channel8.outSlot2 = Int8(channel8.slotz[1].slotIndex)
+            channel8.outSlot3 = Int8(channel8.slotz[1].slotIndex)
             
             var ch = 6
             while ch < 9 {
@@ -470,10 +485,10 @@ public final class OPL3Chip {
             while ch < 9 {
                 let channel = channels[ch]
                 channel.channelType = .twoOp
-                channel.out[0] = .zero
-                channel.out[1] = .zero
-                channel.out[2] = .zero
-                channel.out[3] = .zero
+                channel.outSlot0 = -1
+                channel.outSlot1 = -1
+                channel.outSlot2 = -1
+                channel.outSlot3 = -1
                 channelSetupAlgorithm(channel)
                 ch += 1
             }
@@ -640,10 +655,14 @@ public final class OPL3Chip {
     
     @inline(__always)
     private func sumChannelOutputs(_ channel: OPL3Channel) -> Int {
-        return Int(channel.out[0].read()) +
-               Int(channel.out[1].read()) +
-               Int(channel.out[2].read()) +
-               Int(channel.out[3].read())
+        var sum = 0
+      
+        if channel.outSlot0 >= 0 { sum &+= Int(slots[Int(channel.outSlot0)].out) }
+        if channel.outSlot1 >= 0 { sum &+= Int(slots[Int(channel.outSlot1)].out) }
+        if channel.outSlot2 >= 0 { sum &+= Int(slots[Int(channel.outSlot2)].out) }
+        if channel.outSlot3 >= 0 { sum &+= Int(slots[Int(channel.outSlot3)].out) }
+      
+        return sum
     }
     
     // MARK: - Generation Core
@@ -652,59 +671,73 @@ public final class OPL3Chip {
     private func generate4ChCore(_ buffer: inout [Int16]) {
         guard buffer.count >= 4 else { return }
 
-        buffer[1] = clipSample(mixBuffer[1])
-        buffer[3] = clipSample(mixBuffer[3])
+        buffer[1] = clipSample(mixBuf1)
+        buffer[3] = clipSample(mixBuf3)
 
-        // First half-cycle: process all 36 slots
-        var slotIdx = 0
-        while slotIdx < 36 {
-            processSlot(slots[slotIdx])
-            slotIdx += 1
+        slots.withUnsafeBufferPointer { slotsPtr in
+            // First half-cycle: process all 36 slots
+            var slotIdx = 0
+            while slotIdx < 36 {
+                processSlot(slotsPtr[slotIdx])
+                slotIdx += 1
+            }
+
+            // First mix pass (cha/chc)
+            var mix0: Int32 = 0
+            var mix1: Int32 = 0
+
+            channels.withUnsafeBufferPointer { channelsPtr in
+                var chIdx = 0
+                while chIdx < 18 {
+                    let ch = channelsPtr[chIdx]
+                    var accm = 0
+                    if ch.outSlot0 >= 0 { accm &+= Int(slotsPtr[Int(ch.outSlot0)].out) }
+                    if ch.outSlot1 >= 0 { accm &+= Int(slotsPtr[Int(ch.outSlot1)].out) }
+                    if ch.outSlot2 >= 0 { accm &+= Int(slotsPtr[Int(ch.outSlot2)].out) }
+                    if ch.outSlot3 >= 0 { accm &+= Int(slotsPtr[Int(ch.outSlot3)].out) }
+                    mix0 = mix0 &+ Int32(Int16(truncatingIfNeeded: accm & Int(ch.cha)))
+                    mix1 = mix1 &+ Int32(Int16(truncatingIfNeeded: accm & Int(ch.chc)))
+                    chIdx += 1
+                }
+            }
+
+            mixBuf0 = mix0
+            mixBuf2 = mix1
+
+            buffer[0] = clipSample(mixBuf0)
+            buffer[2] = clipSample(mixBuf2)
+
+            // Second half-cycle: process all 36 slots again
+            slotIdx = 0
+            while slotIdx < 36 {
+                processSlot(slotsPtr[slotIdx])
+                slotIdx += 1
+            }
+
+            // Second mix pass (chb/chd) - uses updated operator outputs from second half-cycle
+            mix0 = 0
+            mix1 = 0
+
+            channels.withUnsafeBufferPointer { channelsPtr in
+                var chIdx = 0
+                while chIdx < 18 {
+                    let ch = channelsPtr[chIdx]
+                    var accm = 0
+                    if ch.outSlot0 >= 0 { accm &+= Int(slotsPtr[Int(ch.outSlot0)].out) }
+                    if ch.outSlot1 >= 0 { accm &+= Int(slotsPtr[Int(ch.outSlot1)].out) }
+                    if ch.outSlot2 >= 0 { accm &+= Int(slotsPtr[Int(ch.outSlot2)].out) }
+                    if ch.outSlot3 >= 0 { accm &+= Int(slotsPtr[Int(ch.outSlot3)].out) }
+                    mix0 = mix0 &+ Int32(Int16(truncatingIfNeeded: accm & Int(ch.chb)))
+                    mix1 = mix1 &+ Int32(Int16(truncatingIfNeeded: accm & Int(ch.chd)))
+                    chIdx += 1
+                }
+            }
+
+            // Store for output at the START of the next call (one-sample delay on B/D channels,
+            // matching the original NukedOPL3 hardware behavior)
+            mixBuf1 = mix0
+            mixBuf3 = mix1
         }
-
-        // First mix pass (cha/chc)
-        var mix0: Int32 = 0
-        var mix1: Int32 = 0
-
-        var chIdx = 0
-        while chIdx < 18 {
-            let channel = channels[chIdx]
-            let accm = sumChannelOutputs(channel)
-            mix0 = mix0 &+ Int32(Int16(truncatingIfNeeded: accm & Int(channel.cha)))
-            mix1 = mix1 &+ Int32(Int16(truncatingIfNeeded: accm & Int(channel.chc)))
-            chIdx += 1
-        }
-
-        mixBuffer[0] = mix0
-        mixBuffer[2] = mix1
-
-        buffer[0] = clipSample(mixBuffer[0])
-        buffer[2] = clipSample(mixBuffer[2])
-
-        // Second half-cycle: process all 36 slots again
-        slotIdx = 0
-        while slotIdx < 36 {
-            processSlot(slots[slotIdx])
-            slotIdx += 1
-        }
-
-        // Second mix pass (chb/chd) - uses updated operator outputs from second half-cycle
-        mix0 = 0
-        mix1 = 0
-
-        chIdx = 0
-        while chIdx < 18 {
-            let channel = channels[chIdx]
-            let accm = sumChannelOutputs(channel)
-            mix0 = mix0 &+ Int32(Int16(truncatingIfNeeded: accm & Int(channel.chb)))
-            mix1 = mix1 &+ Int32(Int16(truncatingIfNeeded: accm & Int(channel.chd)))
-            chIdx += 1
-        }
-
-        // Store for output at the START of the next call (one-sample delay on B/D channels,
-        // matching the original NukedOPL3 hardware behavior)
-        mixBuffer[1] = mix0
-        mixBuffer[3] = mix1
         
         // LFO advance
         OPL3Lfo.advance(self)
@@ -739,26 +772,127 @@ public final class OPL3Chip {
         
         egState ^= 1
         
-        // Process write buffer
-        while true {
-            let entry = writeBuffer[Int(writeBufferCurrent)]
-            if entry.time > writeBufferSampleCounter {
-                break
-            }
-            if (entry.register & 0x200) == 0 {
-                break
-            }
+        // Process write buffer — skip the heap load entirely when the ring is empty.
+        // The ring is empty when current has caught up to (last + 1). writeBufferSize is a
+        // power of 2 (1024), so the wrap uses a cheap bitwise mask instead of a modulo.
+        if writeBufferCurrent != (writeBufferLast &+ 1) & UInt32(Self.writeBufferSize - 1) {
+            while true {
+                let entry = writeBuffer[Int(writeBufferCurrent)]
+                if entry.time > writeBufferSampleCounter {
+                    break
+                }
+                if (entry.register & 0x200) == 0 {
+                    break
+                }
 
-            let reg = entry.register & 0x1FF
+                let reg = entry.register & 0x1FF
 
-            writeBuffer[Int(writeBufferCurrent)].register = reg
-            writeRegisterInternal(reg, entry.data)
-            writeBufferCurrent = (writeBufferCurrent + 1) % UInt32(Self.writeBufferSize)
+                writeBuffer[Int(writeBufferCurrent)].register = reg
+                writeRegisterInternal(reg, entry.data)
+                writeBufferCurrent = (writeBufferCurrent + 1) % UInt32(Self.writeBufferSize)
+            }
         }
 
         writeBufferSampleCounter += 1
     }
     
+    /// Core stereo compute step: processes all 36 slots, mixes, and stores the result
+    /// into the `sampleL`/`sampleR` scalar fields. Advances LFO, EG, and write-buffer state.
+    /// Called by both `generateCore` (external buffer path) and `generateResampledCore`
+    /// (resampler path). Using scalar output fields avoids passing an inout heap array
+    /// through the resampler, eliminating COW checks and bounds-checked subscripts.
+    @inline(__always)
+    private func generateCoreCompute() {
+        slots.withUnsafeBufferPointer { slotsPtr in
+            var slotIdx = 0
+
+            while slotIdx < 36 {
+                processSlot(slotsPtr[slotIdx])
+                slotIdx += 1
+            }
+
+            var mixL: Int32 = 0
+            var mixR: Int32 = 0
+
+            channels.withUnsafeBufferPointer { channelsPtr in
+                var chIdx = 0
+
+                while chIdx < 18 {
+                    let ch = channelsPtr[chIdx]
+
+                    var accm = 0
+                    if ch.outSlot0 >= 0 { accm &+= Int(slotsPtr[Int(ch.outSlot0)].out) }
+                    if ch.outSlot1 >= 0 { accm &+= Int(slotsPtr[Int(ch.outSlot1)].out) }
+                    if ch.outSlot2 >= 0 { accm &+= Int(slotsPtr[Int(ch.outSlot2)].out) }
+                    if ch.outSlot3 >= 0 { accm &+= Int(slotsPtr[Int(ch.outSlot3)].out) }
+
+                    mixL = mixL &+ Int32(Int16(truncatingIfNeeded: accm & Int(ch.cha)))
+                    mixR = mixR &+ Int32(Int16(truncatingIfNeeded: accm & Int(ch.chb)))
+                    chIdx += 1
+                }
+            }
+
+            sampleL = clipSample(mixL)
+            sampleR = clipSample(mixR)
+        }
+
+        // LFO advance
+        OPL3Lfo.advance(self)
+
+        timer = timer &+ 1
+
+        // Envelope generator timing
+        if egState != 0 {
+            var shift: UInt8 = 0
+            while shift < 13 && ((egTimer >> shift) & 1) == 0 {
+                shift += 1
+            }
+
+            if shift > 12 {
+                egAdd = 0
+            } else {
+                egAdd = shift + 1
+            }
+
+            egTimerLow = UInt8(egTimer & 0x03)
+        }
+
+        if egTimerRem != 0 || egState != 0 {
+            if egTimer == 0x0FFFFFFFF {
+                egTimer = 0
+                egTimerRem = 1
+            } else {
+                egTimer += 1
+                egTimerRem = 0
+            }
+        }
+
+        egState ^= 1
+
+        // Process write buffer — skip the heap load entirely when the ring is empty.
+        // The ring is empty when current has caught up to (last + 1). writeBufferSize is a
+        // power of 2 (1024), so the wrap uses a cheap bitwise mask instead of a modulo.
+        if writeBufferCurrent != (writeBufferLast &+ 1) & UInt32(Self.writeBufferSize - 1) {
+            while true {
+                let entry = writeBuffer[Int(writeBufferCurrent)]
+                if entry.time > writeBufferSampleCounter {
+                    break
+                }
+                if (entry.register & 0x200) == 0 {
+                    break
+                }
+
+                let reg = entry.register & 0x1FF
+
+                writeBuffer[Int(writeBufferCurrent)].register = reg
+                writeRegisterInternal(reg, entry.data)
+                writeBufferCurrent = (writeBufferCurrent + 1) % UInt32(Self.writeBufferSize)
+            }
+        }
+
+        writeBufferSampleCounter += 1
+    }
+
     /// Stereo generation matching OPL3_Generate: each slot processed ONCE per output sample.
     /// This is the correct path for standard stereo output. OPL3_Generate4Ch processes each
     /// slot TWICE (for 4-channel output), which doubles the phase advance and shifts all
@@ -766,81 +900,9 @@ public final class OPL3Chip {
     @inline(__always)
     private func generateCore(_ buffer: inout [Int16]) {
         guard buffer.count >= 2 else { return }
-
-        // Process all 36 slots ONCE
-        var slotIdx = 0
-        while slotIdx < 36 {
-            processSlot(slots[slotIdx])
-            slotIdx += 1
-        }
-
-        // Mix left (cha) and right (chb) channels
-        var mixL: Int32 = 0
-        var mixR: Int32 = 0
-
-        var chIdx = 0
-        while chIdx < 18 {
-            let channel = channels[chIdx]
-            let accm = sumChannelOutputs(channel)
-            mixL = mixL &+ Int32(Int16(truncatingIfNeeded: accm & Int(channel.cha)))
-            mixR = mixR &+ Int32(Int16(truncatingIfNeeded: accm & Int(channel.chb)))
-            chIdx += 1
-        }
-
-        buffer[0] = clipSample(mixL)
-        buffer[1] = clipSample(mixR)
-
-        // LFO advance
-        OPL3Lfo.advance(self)
-
-        timer = timer &+ 1
-
-        // Envelope generator timing
-        if egState != 0 {
-            var shift: UInt8 = 0
-            while shift < 13 && ((egTimer >> shift) & 1) == 0 {
-                shift += 1
-            }
-
-            if shift > 12 {
-                egAdd = 0
-            } else {
-                egAdd = shift + 1
-            }
-
-            egTimerLow = UInt8(egTimer & 0x03)
-        }
-
-        if egTimerRem != 0 || egState != 0 {
-            if egTimer == 0x0FFFFFFFF {
-                egTimer = 0
-                egTimerRem = 1
-            } else {
-                egTimer += 1
-                egTimerRem = 0
-            }
-        }
-
-        egState ^= 1
-
-        // Process write buffer
-        while true {
-            let entry = writeBuffer[Int(writeBufferCurrent)]
-            if entry.time > writeBufferSampleCounter {
-                break
-            }
-            if (entry.register & 0x200) == 0 {
-                break
-            }
-
-            let reg = entry.register & 0x1FF
-
-            writeBuffer[Int(writeBufferCurrent)].register = reg
-            writeRegisterInternal(reg, entry.data)
-            writeBufferCurrent = (writeBufferCurrent + 1) % UInt32(Self.writeBufferSize)
-        }
-
-        writeBufferSampleCounter += 1
+        generateCoreCompute()
+        buffer[0] = sampleL
+        buffer[1] = sampleR
     }
     
     @inline(__always)
@@ -848,57 +910,105 @@ public final class OPL3Chip {
         guard buffer.count >= 4 else { return }
         
         while rateRatio != 0 && sampleCounter >= rateRatio {
-            oldSamples[0] = samples[0]
-            oldSamples[1] = samples[1]
-            oldSamples[2] = samples[2]
-            oldSamples[3] = samples[3]
+            oldSamples4ch[0] = samples4ch[0]
+            oldSamples4ch[1] = samples4ch[1]
+            oldSamples4ch[2] = samples4ch[2]
+            oldSamples4ch[3] = samples4ch[3]
             
-            generate4ChCore(&samples)
+            generate4ChCore(&samples4ch)
             sampleCounter -= rateRatio
         }
         
         if rateRatio != 0 {
-            buffer[0] = Int16(((Int32(oldSamples[0]) * (rateRatio - sampleCounter)) + (Int32(samples[0]) * sampleCounter)) / rateRatio)
-            buffer[1] = Int16(((Int32(oldSamples[1]) * (rateRatio - sampleCounter)) + (Int32(samples[1]) * sampleCounter)) / rateRatio)
-            buffer[2] = Int16(((Int32(oldSamples[2]) * (rateRatio - sampleCounter)) + (Int32(samples[2]) * sampleCounter)) / rateRatio)
-            buffer[3] = Int16(((Int32(oldSamples[3]) * (rateRatio - sampleCounter)) + (Int32(samples[3]) * sampleCounter)) / rateRatio)
+            let num0 = Int32(oldSamples4ch[0]) * (rateRatio - sampleCounter) + Int32(samples4ch[0]) * sampleCounter
+            let num1 = Int32(oldSamples4ch[1]) * (rateRatio - sampleCounter) + Int32(samples4ch[1]) * sampleCounter
+            let num2 = Int32(oldSamples4ch[2]) * (rateRatio - sampleCounter) + Int32(samples4ch[2]) * sampleCounter
+            let num3 = Int32(oldSamples4ch[3]) * (rateRatio - sampleCounter) + Int32(samples4ch[3]) * sampleCounter
+            if rateRatioShift >= 0 {
+                buffer[0] = Int16(num0 >> rateRatioShift)
+                buffer[1] = Int16(num1 >> rateRatioShift)
+                buffer[2] = Int16(num2 >> rateRatioShift)
+                buffer[3] = Int16(num3 >> rateRatioShift)
+            } else {
+                buffer[0] = Int16(num0 / rateRatio)
+                buffer[1] = Int16(num1 / rateRatio)
+                buffer[2] = Int16(num2 / rateRatio)
+                buffer[3] = Int16(num3 / rateRatio)
+            }
         } else {
-            buffer[0] = samples[0]
-            buffer[1] = samples[1]
-            buffer[2] = samples[2]
-            buffer[3] = samples[3]
+            buffer[0] = samples4ch[0]
+            buffer[1] = samples4ch[1]
+            buffer[2] = samples4ch[2]
+            buffer[3] = samples4ch[3]
         }
         
         sampleCounter += 1 << Self.resampleFractionBits
     }
     
-    /// Stereo resampled generation using generateCore (each slot processed once).
-    /// This avoids the 4-channel path which doubles the phase advance.
+    /// Stereo resampled generation: uses scalar `sampleL`/`sampleR`/`oldSampleL`/`oldSampleR`
+    /// instead of heap-allocated arrays, eliminating COW checks and subscript bounds checks
+    /// on the hot interpolation path.
     @inline(__always)
     private func generateResampledCore(_ buffer: inout [Int16]) {
         guard buffer.count >= 2 else { return }
 
         while rateRatio != 0 && sampleCounter >= rateRatio {
-            oldSamples[0] = samples[0]
-            oldSamples[1] = samples[1]
+            oldSampleL = sampleL
+            oldSampleR = sampleR
 
-            generateCore(&samples)
+            generateCoreCompute()
             sampleCounter -= rateRatio
         }
 
         if rateRatio != 0 {
-            buffer[0] = Int16(((Int32(oldSamples[0]) * (rateRatio - sampleCounter))
-                + (Int32(samples[0]) * sampleCounter)) / rateRatio)
-            buffer[1] = Int16(((Int32(oldSamples[1]) * (rateRatio - sampleCounter))
-                + (Int32(samples[1]) * sampleCounter)) / rateRatio)
+            let numL = Int32(oldSampleL) * (rateRatio - sampleCounter) + Int32(sampleL) * sampleCounter
+            let numR = Int32(oldSampleR) * (rateRatio - sampleCounter) + Int32(sampleR) * sampleCounter
+            if rateRatioShift >= 0 {
+                buffer[0] = Int16(numL >> rateRatioShift)
+                buffer[1] = Int16(numR >> rateRatioShift)
+            } else {
+                buffer[0] = Int16(numL / rateRatio)
+                buffer[1] = Int16(numR / rateRatio)
+            }
         } else {
-            buffer[0] = samples[0]
-            buffer[1] = samples[1]
+            buffer[0] = sampleL
+            buffer[1] = sampleR
         }
 
         sampleCounter += 1 << Self.resampleFractionBits
     }
-    
+
+    /// Resampled stereo generation that writes directly to two scalar `inout` params instead of
+    /// an `inout [Int16]` buffer. Eliminates the COW uniqueness check and two bounds-checked
+    /// subscripts that occur every call when writing through a heap-allocated array.
+    /// Called by `OPL3Fm.generateFrames` — the audio playback hot path.
+    @inline(__always)
+    func generateResampledDirect(left: inout Int16, right: inout Int16) {
+        while rateRatio != 0 && sampleCounter >= rateRatio {
+            oldSampleL = sampleL
+            oldSampleR = sampleR
+            generateCoreCompute()
+            sampleCounter -= rateRatio
+        }
+
+        if rateRatio != 0 {
+            let numL = Int32(oldSampleL) * (rateRatio - sampleCounter) + Int32(sampleL) * sampleCounter
+            let numR = Int32(oldSampleR) * (rateRatio - sampleCounter) + Int32(sampleR) * sampleCounter
+            if rateRatioShift >= 0 {
+                left = Int16(numL >> rateRatioShift)
+                right = Int16(numR >> rateRatioShift)
+            } else {
+                left = Int16(numL / rateRatio)
+                right = Int16(numR / rateRatio)
+            }
+        } else {
+            left = sampleL
+            right = sampleR
+        }
+
+        sampleCounter += 1 << Self.resampleFractionBits
+    }
+
     // MARK: - Reset
     
     private func resetInternal(_ sampleRate: UInt32) {
@@ -916,7 +1026,10 @@ public final class OPL3Chip {
         
         noise = 1
         zeroMod = 0
-        mixBuffer = [0, 0, 0, 0]
+        mixBuf0 = 0
+        mixBuf1 = 0
+        mixBuf2 = 0
+        mixBuf3 = 0
         
         rhythmHihatBit2 = 0
         rhythmHihatBit3 = 0
@@ -929,10 +1042,24 @@ public final class OPL3Chip {
         if rateRatio == 0 {
             rateRatio = 1
         }
+        // Precompute log2(rateRatio) for the common power-of-2 case (e.g. 49716 Hz → 1024 = 2^10).
+        // A bit-shift replaces the two integer divisions per output sample in the hot resampler path.
+        if rateRatio > 0 && (rateRatio & (rateRatio - 1)) == 0 {
+            var shift: Int32 = 0
+            var tmp = rateRatio
+            while tmp > 1 { tmp >>= 1; shift += 1 }
+            rateRatioShift = shift
+        } else {
+            rateRatioShift = -1
+        }
         
         sampleCounter = 0
-        oldSamples = [0, 0, 0, 0]
-        samples = [0, 0, 0, 0]
+        sampleL = 0
+        sampleR = 0
+        oldSampleL = 0
+        oldSampleR = 0
+        samples4ch = [0, 0, 0, 0]
+        oldSamples4ch = [0, 0, 0, 0]
         
         writeBufferSampleCounter = 0
         // Both start at 0; first write goes to index 1
@@ -1007,7 +1134,10 @@ public final class OPL3Chip {
             }
             
             channel.chip = self
-            channel.out = [.zero, .zero, .zero, .zero]
+            channel.outSlot0 = -1
+            channel.outSlot1 = -1
+            channel.outSlot2 = -1
+            channel.outSlot3 = -1
             channel.channelType = .twoOp
             channel.fNumber = 0
             channel.block = 0
@@ -1063,7 +1193,7 @@ public final class OPL3Chip {
             let slotIndex = OPL3Tables.readAddressDecodeSlot(Int(regm) & 0x1F)
             if slotIndex >= 0 {
                 let slot = slots[slotBase + Int(slotIndex)]
-                let tl = value & 0x3F
+                let _ = value & 0x3F // tl
                 slotWrite40(slot, value)
             }
             
@@ -1189,11 +1319,12 @@ public final class OPL3Chip {
         let frames = stream.count / 2
         if frames == 0 { return }
         
-        var temp: [Int16] = [0, 0, 0, 0]
+        //var temp: [Int16] = [0, 0, 0, 0]
+        var temp: [Int16] = [0, 0]
         
         var idx = 0
         while idx < frames {
-            generate4ChResampledCore(&temp)
+            generateResampledCore(&temp)
             let offset = idx * 2
             stream[offset] = temp[0]
             stream[offset + 1] = temp[1]

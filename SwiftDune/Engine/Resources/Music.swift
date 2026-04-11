@@ -23,7 +23,8 @@ final class Music: AudioPlayerItem {
   private var player: AudioPlayer
   
   private var currentHeradTicks: Int = 0
-  private var isPlaying: Bool = false
+  private(set) var isPlaying: Bool = false
+  private var trackMuteMask: UInt32 = 0
   
   init(_ fileName: String, player: AudioPlayer) {
     self.player = player
@@ -104,6 +105,62 @@ final class Music: AudioPlayerItem {
   }
   
   
+  // MARK: - Track info
+  
+  var currentTick: Int {
+    return currentHeradTicks
+  }
+
+  var trackCount: Int {
+    return herad.tracks.count
+  }
+  
+  var totalTicks: UInt32 {
+    return herad.maxTicks
+  }
+  
+  func trackEvents(at index: Int) -> [HeradEvent] {
+    return herad.tracks[index].events
+  }
+
+  /// Returns the instrument associated with a track by looking at its first programChange event.
+  /// Falls back to instrument at track index if no programChange is found.
+  func trackInstrument(at index: Int) -> (programNumber: Int, instrument: HeradInstrument)? {
+    let events = herad.tracks[index].events
+
+    // Look for the first programChange event in this track
+    var eventIdx = 0
+    while eventIdx < events.count {
+      if case .programChange(let programNumber, _) = events[eventIdx].type {
+        let progIdx = Int(programNumber)
+        if progIdx < herad.instruments.count {
+          return (progIdx, herad.instruments[progIdx])
+        }
+      }
+      eventIdx += 1
+    }
+
+    // Fall back to instrument at track index if available
+    if index < herad.instruments.count {
+      return (index, herad.instruments[index])
+    }
+
+    return nil
+  }
+  
+  func isTrackMuted(_ index: Int) -> Bool {
+    return (trackMuteMask & (UInt32(1) << index)) != 0
+  }
+  
+  func setTrackMuted(_ index: Int, _ muted: Bool) {
+    if muted {
+      trackMuteMask |= (UInt32(1) << index)
+    } else {
+      trackMuteMask &= ~(UInt32(1) << index)
+    }
+  }
+  
+  
   private func processEvents() {
     let tick = self.currentHeradTicks
 
@@ -119,6 +176,17 @@ final class Music: AudioPlayerItem {
     var trackIdx = 0
 
     while trackIdx < herad.tracks.count {
+      // Skip muted tracks but advance cursor to stay in sync
+      if (trackMuteMask & (UInt32(1) << trackIdx)) != 0 {
+        while herad.tracks[trackIdx].eventCursor < herad.tracks[trackIdx].events.count {
+          let event = herad.tracks[trackIdx].events[herad.tracks[trackIdx].eventCursor]
+          if event.ticks > tick { break }
+          herad.tracks[trackIdx].eventCursor += 1
+        }
+        trackIdx += 1
+        continue
+      }
+
       // Use cursor to avoid re-scanning from the start every tick
       while herad.tracks[trackIdx].eventCursor < herad.tracks[trackIdx].events.count {
         let event = herad.tracks[trackIdx].events[herad.tracks[trackIdx].eventCursor]
@@ -484,9 +552,6 @@ final class Music: AudioPlayerItem {
   /// Sets frequency on the specified octave
   ///
   private func setFrequency(_ channel: UInt8, _ octave: UInt8, _ frequency: UInt16, _ isOn: Bool) {
-    let engine = DuneEngine.shared
-    //engine.logger.log(.debug, "setFrequency: channel=\(channel), octave=\(octave), frequency=\(frequency), isOn=\(isOn)")
-    
     var reg: UInt16 = 0
     var val: UInt8 = 0
     
@@ -677,8 +742,8 @@ extension AVAudioUnitSampler {
       case .controlChange(let controlNumber, let value, let channel):
         self.sendController(UInt8(controlNumber), withValue: UInt8(value), onChannel: channel)
         break
-      case .aftertouch(let note, let value, let channel):
-        break
+      /*case .aftertouch(let note, let value, let channel):
+        break*/
       default:
         break
     }

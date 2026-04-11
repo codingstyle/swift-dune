@@ -28,7 +28,11 @@ struct OPL3Lfo {
     static func advance(_ chip: OPL3Chip) {
         // Tremolo update (every 64 samples)
         if (chip.timer & 0x3F) == 0x3F {
-            chip.tremoloPosition = (chip.tremoloPosition + 1) % 210
+            chip.tremoloPosition += 1
+
+            if chip.tremoloPosition >= 210 { 
+                chip.tremoloPosition = 0 
+            }
         }
         
         // Calculate tremolo value based on position

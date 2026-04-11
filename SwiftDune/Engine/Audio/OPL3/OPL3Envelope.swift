@@ -31,7 +31,7 @@ struct OPL3Envelope {
     @inline(__always)
     private static func envelopeCalcSin0(_ phase: UInt16, _ envelope: UInt16) -> Int16 {
         var neg: UInt16 = 0
-        var phase = phase & 0x3FF
+        let phase = phase & 0x3FF
         
         if (phase & 0x200) != 0 {
             neg = 0xFFFF
@@ -48,7 +48,7 @@ struct OPL3Envelope {
     @inline(__always)
     private static func envelopeCalcSin1(_ phase: UInt16, _ envelope: UInt16) -> Int16 {
         var output: UInt16
-        var phase = phase & 0x3FF
+        let phase = phase & 0x3FF
         
         if (phase & 0x200) != 0 {
             output = 0x1000
@@ -64,7 +64,7 @@ struct OPL3Envelope {
     @inline(__always)
     private static func envelopeCalcSin2(_ phase: UInt16, _ envelope: UInt16) -> Int16 {
         let neg: UInt16 = 0xFFFF
-        var phase = phase & 0x3FF
+        let phase = phase & 0x3FF
         
         let output: UInt16 = (phase & 0x100) != 0
             ? OPL3Tables.readLogSin(Int(phase & 0xFF) ^ 0xFF)
@@ -78,7 +78,7 @@ struct OPL3Envelope {
     private static func envelopeCalcSin3(_ phase: UInt16, _ envelope: UInt16) -> Int16 {
         var output: UInt16
         let neg: UInt16 = 0xFFFF
-        var phase = phase & 0x3FF
+        let phase = phase & 0x3FF
         
         if (phase & 0x200) != 0 {
             output = 0x1000
@@ -96,7 +96,7 @@ struct OPL3Envelope {
     private static func envelopeCalcSin4(_ phase: UInt16, _ envelope: UInt16) -> Int16 {
         var output: UInt16
         let neg: UInt16 = 0xFFFF
-        var phase = phase & 0x3FF
+        let phase = phase & 0x3FF
         
         if (phase & 0x100) != 0 {
             output = UInt16(((Int(phase) & 0xFF) ^ 0xFF) << 4)
@@ -192,12 +192,13 @@ struct OPL3Envelope {
     
     /// Updates the key scale level for an operator
     static func envelopeUpdateKsl(_ slot: OPL3Operator) {
-        guard let channel = slot.channel else { return }
-        
+        let channel = slot.channel!
         var value = Int16(OPL3Tables.readKeyScaleLevel(Int(channel.fNumber) >> 6) << 2) - Int16((0x08 - Int(channel.block)) << 5)
+      
         if value < 0 {
             value = 0
         }
+      
         slot.effectiveKeyScaleLevel = UInt8(value)
     }
     
@@ -206,8 +207,9 @@ struct OPL3Envelope {
     /// Calculates envelope for the given operator
     @inline(__always)
     static func envelopeCalc(_ slot: OPL3Operator) {
-        guard let chip = slot.chip, let channel = slot.channel else { return }
-        
+        let chip = slot.chip!
+        let channel = slot.channel!
+
         var regRate: UInt8 = 0
         var shift: UInt8 = 0
         var egIncrement: Int = 0
@@ -225,16 +227,16 @@ struct OPL3Envelope {
             reset = 1
             regRate = slot.regAttackRate
         } else {
-            switch OPL3EnvelopeGeneratorStage(rawValue: slot.envelopeGeneratorState) ?? .release {
-            case .attack:
+            switch slot.envelopeGeneratorState {
+            case OPL3EnvelopeGeneratorStage.attack.rawValue:
                 regRate = slot.regAttackRate
-            case .decay:
+            case OPL3EnvelopeGeneratorStage.decay.rawValue:
                 regRate = slot.regDecayRate
-            case .sustain:
+            case OPL3EnvelopeGeneratorStage.sustain.rawValue:
                 if slot.regOperatorType == 0 {
                     regRate = slot.regReleaseRate
                 }
-            case .release:
+            default: // Release
                 regRate = slot.regReleaseRate
             }
         }
@@ -294,24 +296,28 @@ struct OPL3Envelope {
             egRout = 0x1FF
         }
         
-        switch OPL3EnvelopeGeneratorStage(rawValue: slot.envelopeGeneratorState) ?? .release {
-        case .attack:
+        switch slot.envelopeGeneratorState {
+        case OPL3EnvelopeGeneratorStage.attack.rawValue:
             if slot.envelopeGeneratorOutput == 0 {
                 slot.envelopeGeneratorState = OPL3EnvelopeGeneratorStage.decay.rawValue
             } else if slot.regKeyState != 0 && shift > 0 && rateHi != 0x0F {
                 egIncrement = ~Int(slot.envelopeGeneratorOutput) >> (4 - Int(shift))
             }
             
-        case .decay:
+        case OPL3EnvelopeGeneratorStage.decay.rawValue:
             if slot.envelopeGeneratorOutput >> 4 == UInt16(slot.regSustainLevel) {
                 slot.envelopeGeneratorState = OPL3EnvelopeGeneratorStage.sustain.rawValue
             } else if egOff == 0 && reset == 0 && shift > 0 {
                 egIncrement = 1 << (shift - 1)
             }
             
-        case .sustain, .release:
+        case OPL3EnvelopeGeneratorStage.sustain.rawValue, OPL3EnvelopeGeneratorStage.release.rawValue:
             if egOff == 0 && reset == 0 && shift > 0 {
                 egIncrement = 1 << (shift - 1)
+            }
+        default:
+            if egOff == 0 && reset == 0 && shift > 0 {
+              egIncrement = 1 << (shift - 1)
             }
         }
         

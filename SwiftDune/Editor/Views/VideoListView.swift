@@ -49,7 +49,7 @@ struct VideoListView: View {
                 }
             }
         }
-        .onChange(of: selection) { newValue in
+        .onChange(of: selection, initial: false) { oldValue, newValue in
             guard let value = newValue else {
                 return
             }

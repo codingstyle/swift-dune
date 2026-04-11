@@ -191,11 +191,11 @@ public final class OPL3Fm {
                                scale: Float) {
         var idx = 0
         while idx < count {
-            frameSampleBuffer[0] = 0
-            frameSampleBuffer[1] = 0
-            chip.generateResampled(&frameSampleBuffer)
-            leftChannel[offset + idx] = Float(frameSampleBuffer[0]) * scale
-            rightChannel[offset + idx] = Float(frameSampleBuffer[1]) * scale
+            var frameL: Int16 = 0
+            var frameR: Int16 = 0
+            chip.generateResampledDirect(left: &frameL, right: &frameR)
+            leftChannel[offset + idx] = Float(frameL) * scale
+            rightChannel[offset + idx] = Float(frameR) * scale
             idx += 1
         }
     }
