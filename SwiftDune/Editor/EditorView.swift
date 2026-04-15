@@ -22,55 +22,55 @@ struct EditorView: View {
             List(selection: $selection) {
                 Section("Music") {
                     ForEach(ResourceType.music.files, id: \.self) { r in
-                        NavigationLink(r, value: EditorSelection(resourceName: r, resourceType: .music))
+                        NavigationLink("🎵 \(r)", value: EditorSelection(resourceName: r, resourceType: .music))
                     }
                 }
 
                 Section("Globe") {
                     ForEach(ResourceType.globe.files, id: \.self) { r in
-                        NavigationLink(r, value: EditorSelection(resourceName: r, resourceType: .globe))
+                        NavigationLink("🌍 \(r)", value: EditorSelection(resourceName: r, resourceType: .globe))
                     }
                 }
 
                 Section("Scenes") {
                     ForEach(ResourceType.scene.files, id: \.self) { r in
-                        NavigationLink(r, value: EditorSelection(resourceName: r, resourceType: .scene))
+                        NavigationLink("🖼️ \(r)", value: EditorSelection(resourceName: r, resourceType: .scene))
                     }
                 }
                 
                 Section("Videos") {
                     ForEach(ResourceType.video.files, id: \.self) { r in
-                        NavigationLink(r, value: EditorSelection(resourceName: r, resourceType: .video))
+                        NavigationLink("📺 \(r)", value: EditorSelection(resourceName: r, resourceType: .video))
                     }
                 }
 
                 Section("Sprites") {
                     ForEach(ResourceType.sprite.files, id: \.self) { r in
-                        NavigationLink(r, value: EditorSelection(resourceName: r, resourceType: .sprite))
+                        NavigationLink("👾 \(r)", value: EditorSelection(resourceName: r, resourceType: .sprite))
                     }
                 }
 
                 Section("Sprites - No palette") {
                     ForEach(ResourceType.spriteWithoutPalette.files, id: \.self) { r in
-                        NavigationLink(r, value: EditorSelection(resourceName: r, resourceType: .spriteWithoutPalette))
+                        NavigationLink("👾 \(r)", value: EditorSelection(resourceName: r, resourceType: .spriteWithoutPalette))
                     }
                 }
 
                 Section("Sounds") {
                     ForEach(ResourceType.sound.files, id: \.self) { r in
-                        NavigationLink(r, value: EditorSelection(resourceName: r, resourceType: .sound))
+                        NavigationLink("🔈 \(r)", value: EditorSelection(resourceName: r, resourceType: .sound))
                     }
                 }
 
                 Section("Dialogue") {
                     ForEach(ResourceType.sentence.files, id: \.self) { r in
-                        NavigationLink(r, value: EditorSelection(resourceName: r, resourceType: .sentence))
+                        NavigationLink("💬 \(r)", value: EditorSelection(resourceName: r, resourceType: .sentence))
                     }
                 }
 
                 Section("Fonts") {
                     ForEach(ResourceType.font.files, id: \.self) { r in
-                        NavigationLink(r, value: EditorSelection(resourceName: r, resourceType: .font))
+                        NavigationLink("🔠 \(r)", value: EditorSelection(resourceName: r, resourceType: .font))
                     }
                 }
             }
@@ -81,6 +81,8 @@ struct EditorView: View {
                 SceneryListView(viewModel: viewModel)
             } else if selection?.resourceType == .video {
                 VideoListView(viewModel: viewModel)
+            } else if selection?.resourceType == .music {
+                MusicListView(viewModel: viewModel)
             } else {
                 Text("No content selected")
             }

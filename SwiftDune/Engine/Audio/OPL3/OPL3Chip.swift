@@ -490,6 +490,8 @@ public final class OPL3Chip {
                 channel.outSlot2 = -1
                 channel.outSlot3 = -1
                 channelSetupAlgorithm(channel)
+                OPL3Envelope.envelopeKeyOff(channel.slotz[0], .drum)
+                OPL3Envelope.envelopeKeyOff(channel.slotz[1], .drum)
                 ch += 1
             }
         }
@@ -519,6 +521,10 @@ public final class OPL3Chip {
     }
     
     private func channelWriteB0(_ channel: OPL3Channel, _ data: UInt8) {
+        if newM != 0 && channel.channelType == .fourOpPair {
+            return
+        }
+
         // Convert to UInt16 BEFORE shifting, otherwise shifting UInt8 by 8 bits = 0
         channel.fNumber = (channel.fNumber & 0xFF) | (UInt16(data & 0x03) << 8)
         channel.block = (data >> 2) & 0x07
@@ -570,9 +576,8 @@ public final class OPL3Chip {
         if newM != 0 {
             channel.cha = ((data >> 4) & 0x01) != 0 ? 0xFFFF : 0
             channel.chb = ((data >> 5) & 0x01) != 0 ? 0xFFFF : 0
-            // chc and chd are always 0 in the original NukedOPL3
-            channel.chc = 0
-            channel.chd = 0
+            channel.chc = ((data >> 6) & 0x01) != 0 ? 0xFFFF : 0
+            channel.chd = ((data >> 7) & 0x01) != 0 ? 0xFFFF : 0
         } else {
             channel.cha = 0xFFFF
             channel.chb = 0xFFFF

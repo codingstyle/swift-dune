@@ -16,6 +16,7 @@
 		061725ED2B7968DA00254635 /* Palace.swift in Sources */ = {isa = PBXBuildFile; fileRef = 061725EC2B7968DA00254635 /* Palace.swift */; };
 		061725EF2B8542A400254635 /* Ornithopter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 061725EE2B8542A400254635 /* Ornithopter.swift */; };
 		061725F12B8B559900254635 /* Sietch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 061725F02B8B559900254635 /* Sietch.swift */; };
+		061C19592F8FCCA400C531EE /* MusicListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 061C19582F8FCCA400C531EE /* MusicListView.swift */; };
 		062439FA2A97E5A200981BCC /* Sprite.swift in Sources */ = {isa = PBXBuildFile; fileRef = 062439F92A97E5A200981BCC /* Sprite.swift */; };
 		06243A1C2A9B6E8800981BCC /* Palette.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06243A1B2A9B6E8800981BCC /* Palette.swift */; };
 		06243A1E2A9B798300981BCC /* Sentence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06243A1D2A9B798300981BCC /* Sentence.swift */; };
@@ -145,6 +146,7 @@
 		061725EC2B7968DA00254635 /* Palace.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Palace.swift; sourceTree = "<group>"; };
 		061725EE2B8542A400254635 /* Ornithopter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Ornithopter.swift; sourceTree = "<group>"; };
 		061725F02B8B559900254635 /* Sietch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sietch.swift; sourceTree = "<group>"; };
+		061C19582F8FCCA400C531EE /* MusicListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MusicListView.swift; sourceTree = "<group>"; };
 		062439F92A97E5A200981BCC /* Sprite.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sprite.swift; sourceTree = "<group>"; };
 		06243A1B2A9B6E8800981BCC /* Palette.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Palette.swift; sourceTree = "<group>"; };
 		06243A1D2A9B798300981BCC /* Sentence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sentence.swift; sourceTree = "<group>"; };
@@ -436,6 +438,7 @@
 		06CA2B8C2C7B2F8600B47D13 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				061C19582F8FCCA400C531EE /* MusicListView.swift */,
 				065F0CAD2F3656E80032796E /* MusicDetailsView.swift */,
 				06A7E8862AD700910042D878 /* SpriteListView.swift */,
 				06A7E8882AD700AD0042D878 /* SpriteDetailsView.swift */,
@@ -656,6 +659,7 @@
 				065F0C9F2F33C4B90032796E /* OPL3Operator.swift in Sources */,
 				065F0CA02F33C4B90032796E /* OPL3SignalSource.swift in Sources */,
 				065F0CA12F33C4B90032796E /* OPL3Envelope.swift in Sources */,
+				061C19592F8FCCA400C531EE /* MusicListView.swift in Sources */,
 				065F0CA32F33C4B90032796E /* OPL3Chip.swift in Sources */,
 				065F0CAE2F3656E80032796E /* MusicDetailsView.swift in Sources */,
 				06CA2BAD2C7B350F00B47D13 /* Renderer.swift in Sources */,

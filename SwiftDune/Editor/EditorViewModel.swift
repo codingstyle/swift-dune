@@ -40,6 +40,7 @@ class EditorViewModel: ObservableObject {
     @Published var isMusicPlaying: Bool = false
     @Published var musicPlaybackTick: Int = 0
     @Published var trackMuteStates: [Bool] = []
+    @Published var selectedTrackIndex: Int = 0
     
     private var timer: Timer?
     private var currentTime: Double = 0.0
@@ -119,6 +120,7 @@ class EditorViewModel: ObservableObject {
             music = Music(selection.resourceName, player: engine.audioPlayer)
             music!.dumpInfo()
             trackMuteStates = [Bool](repeating: false, count: music!.trackCount)
+            selectedTrackIndex = 0
             engine.audioPlayer.play(music!)
             isMusicPlaying = true
         } else if selection.resourceType == .scene {
