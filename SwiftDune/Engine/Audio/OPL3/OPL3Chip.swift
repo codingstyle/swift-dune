@@ -498,14 +498,24 @@ public final class OPL3Chip {
     // MARK: - Channel Register Writes
     
     private func channelWriteA0(_ channel: OPL3Channel, _ data: UInt8) {
+        if newM != 0 && channel.channelType == .fourOpPair {
+            return
+        }
+
         channel.fNumber = (channel.fNumber & 0x300) | UInt16(data)
-        
+        channel.keyScaleValue = (channel.block << 1) | UInt8((channel.fNumber >> (0x09 - Int(nts))) & 0x01)
+        OPL3Envelope.envelopeUpdateKsl(channel.slotz[0])
+        OPL3Envelope.envelopeUpdateKsl(channel.slotz[1])
+
         if newM == 0 || channel.channelType != .fourOp {
             return
         }
-        
+
         guard let pair = channel.pair else { return }
         pair.fNumber = channel.fNumber
+        pair.keyScaleValue = channel.keyScaleValue
+        OPL3Envelope.envelopeUpdateKsl(pair.slotz[0])
+        OPL3Envelope.envelopeUpdateKsl(pair.slotz[1])
     }
     
     private func channelWriteB0(_ channel: OPL3Channel, _ data: UInt8) {
@@ -1233,23 +1243,12 @@ public final class OPL3Chip {
                 let wasKeyOn = channel.previousKeyOn
                 channelWriteB0(channel, value)
                 
-                // Handle key-on/key-off with envelope reset for proper attack triggering
                 if keyOn {
-                    // Always reset envelope to release state so attack can trigger
-                    // This handles both fresh key-on and retriggering
-                    var slotIdx = 0
-                    while slotIdx < channel.slotz.count {
-                        channel.slotz[slotIdx].envelopeGeneratorState = OPL3EnvelopeGeneratorStage.release.rawValue
-                        // Reset envelope output to max attenuation for clean attack start
-                        channel.slotz[slotIdx].envelopeGeneratorOutput = 0x1FF
-                        slotIdx += 1
-                    }
                     channelKeyOn(channel)
-                } else if wasKeyOn {
-                    // Key-off: trigger release
+                } else {
                     channelKeyOff(channel)
                 }
-                
+
                 channel.previousKeyOn = keyOn
             }
             

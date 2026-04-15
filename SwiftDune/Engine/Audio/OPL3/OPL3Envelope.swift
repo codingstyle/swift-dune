@@ -63,33 +63,27 @@ struct OPL3Envelope {
     
     @inline(__always)
     private static func envelopeCalcSin2(_ phase: UInt16, _ envelope: UInt16) -> Int16 {
-        let neg: UInt16 = 0xFFFF
         let phase = phase & 0x3FF
         
         let output: UInt16 = (phase & 0x100) != 0
             ? OPL3Tables.readLogSin(Int(phase & 0xFF) ^ 0xFF)
             : OPL3Tables.readLogSin(Int(phase & 0xFF))
         
-        let sample = UInt16(truncatingIfNeeded: envelopeCalcExp(UInt32(output) + (UInt32(envelope) << 3)))
-        return Int16(bitPattern: sample ^ neg)
+        return envelopeCalcExp(UInt32(output) + (UInt32(envelope) << 3))
     }
     
     @inline(__always)
     private static func envelopeCalcSin3(_ phase: UInt16, _ envelope: UInt16) -> Int16 {
         var output: UInt16
-        let neg: UInt16 = 0xFFFF
         let phase = phase & 0x3FF
         
-        if (phase & 0x200) != 0 {
+        if (phase & 0x100) != 0 {
             output = 0x1000
-        } else if (phase & 0x100) != 0 {
-            output = OPL3Tables.readLogSin(Int(phase & 0xFF) ^ 0xFF)
         } else {
             output = OPL3Tables.readLogSin(Int(phase & 0xFF))
         }
         
-        let sample = UInt16(truncatingIfNeeded: envelopeCalcExp(UInt32(output) + (UInt32(envelope) << 3)))
-        return Int16(bitPattern: sample ^ neg)
+        return envelopeCalcExp(UInt32(output) + (UInt32(envelope) << 3))
     }
     
     @inline(__always)
