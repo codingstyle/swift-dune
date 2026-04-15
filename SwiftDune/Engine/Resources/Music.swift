@@ -315,7 +315,7 @@ final class Music: AudioPlayerItem {
       macroModOutput(channel, instrument, instrument.modOutputLevelAftertouchScaling, Int8(velocity))
     }
     
-    if instrument.carrierOutputLevelAftertouchScaling != 0 && instrument.carrierOutputLevelScaling != 0 {
+    if instrument.carrierOutputLevelAftertouchScaling != 0 {
       macroCarrierOutput(channel, instrument, instrument.carrierOutputLevelAftertouchScaling, Int8(velocity))
     }
     

@@ -1,5 +1,10 @@
 ---
+description: Use this rule to ensure performance best practices are applied on Swift code. Apply it every time after Swift files are edited.
+globs: ["**/*.{swift}] 
 alwaysApply: true
 ---
 - Do no use for/in loops which use an iterator and can be slow on debug and release mode. Favor "while" loops using an numeric variable that you increment whenever possible.
-- Rely on [Swift language official performance tips](https://github.com/swiftlang/swift/blob/main/docs/OptimizationTips.rst) to apply good practices
+- Mark a class or a var as final if they are not overriden
+- Use `private` and `fileprivate` keywords accordingly when declaration does not need to be accessed outside of file
+- Use ContiguousArray with reference types when NSArray bridging is unnecessary
+- More generally rely on [Swift language official performance tips](https://github.com/swiftlang/swift/blob/main/docs/OptimizationTips.rst) to apply good practices

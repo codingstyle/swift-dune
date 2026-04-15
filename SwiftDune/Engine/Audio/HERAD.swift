@@ -256,8 +256,8 @@ public final class HERAD: CustomDebugStringConvertible {
           continue
         } else {
           let eventType = track.data[n] & 0xF0
-          var trackIndex = UInt8(tracks.count + 1)
-          
+          var trackIndex = UInt8(i)
+
           switch eventType {
             case 0x80:
               // NOTE: velocity is ignored
