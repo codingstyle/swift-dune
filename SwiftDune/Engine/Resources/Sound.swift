@@ -45,10 +45,15 @@ final class Sound: AudioPlayerItem {
     return .sound
   }
   
+  var fileName: String {
+    return resource.fileName
+  }
+  
   private let engine = DuneEngine.shared
   private var creativeVoice: CreativeVoice
   private var resource: Resource
   private var player: AudioPlayer
+  var skipRepeat = false
   
   init(_ fileName: String, player: AudioPlayer) {
     self.player = player
@@ -96,7 +101,7 @@ final class Sound: AudioPlayerItem {
           break
       }
       
-      if isRepeating {
+      if isRepeating && !skipRepeat {
         i += 1
         continue
       }

@@ -81,6 +81,9 @@ final class Credits: DuneNode {
         creditsSprite = Sprite("CREDITS.HSQ")
 
         scrollAnimation = DuneAnimation<Int16>(from: 0, to: 1936, startTime: 2.0, endTime: 54.0)
+      
+        let music = Music("WORMSUIT.HSQ", player: engine.audioPlayer)
+        engine.audioPlayer.play(music)
     }
     
     

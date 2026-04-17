@@ -28,9 +28,9 @@ final class Main: DuneNode {
             self.onNodeEvent(nodeData)
         }
         
-        queue.enqueue("Logo")
+        //queue.enqueue("Logo")
         queue.enqueue("Intro")
-        queue.enqueue("Credits")
+        //queue.enqueue("Credits")
         queue.enqueue("Prologue")
         queue.enqueue("CopyProtection")
         queue.enqueue("Game")

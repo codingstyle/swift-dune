@@ -10,6 +10,7 @@ import AVFoundation
 
 protocol AudioPlayerItem {
   var type: AudioPlayerItemType { get }
+  var fileName: String { get }
   
   init(_ fileName: String, player: AudioPlayer)
   func play()
@@ -25,7 +26,9 @@ enum AudioPlayerItemType {
 
 final class AudioPlayer {
     private let audioEngine = AVAudioEngine()
-    private var currentPlayerItem: AudioPlayerItem?
+
+    private var currentAudioItem: AudioPlayerItem?
+    private var currentMusicItem: AudioPlayerItem?
   
     private let soundFxNode = AVAudioPlayerNode()
     private let soundFxMixerNode = AVAudioMixerNode()
@@ -60,12 +63,13 @@ final class AudioPlayer {
       do {
           // Attach mixer
           let outputAudioFormat = audioEngine.mainMixerNode.outputFormat(forBus: 0)
-          audioEngine.mainMixerNode.outputVolume = 0.1  // Increased from 0.1 to 1.0
+          audioEngine.mainMixerNode.outputVolume = 1.0  // Increased from 0.1 to 1.0
           audioEngine.connect(audioEngine.mainMixerNode, to: audioEngine.outputNode, format: outputAudioFormat)
           
           // Sound FX nodes with 11500 Hz sample rate
           audioEngine.attach(soundFxNode)
           audioEngine.attach(soundFxMixerNode)
+          soundFxMixerNode.outputVolume = 0.05
           audioEngine.connect(soundFxNode, to: soundFxMixerNode, format: soundFxAudioFormat)
           audioEngine.connect(soundFxMixerNode, to: audioEngine.mainMixerNode, format: nil)
         
@@ -257,21 +261,36 @@ final class AudioPlayer {
   
   
     func play(_ item: AudioPlayerItem) {
-      if let currentPlayerItem = currentPlayerItem {
-        currentPlayerItem.stop()
+      if item.type == .sound {
+        if let currentAudioItem = currentAudioItem {
+          currentAudioItem.stop()
+        }
+        
+        self.currentAudioItem = item
+      } else if item.type == .music {
+        if let currentMusicItem = currentMusicItem {
+          currentMusicItem.stop()
+        }
+        
+        self.currentMusicItem = item
       }
-      
-      self.currentPlayerItem = item
+
       item.play()
     }
   
   
     func stop() {
-      if let currentPlayerItem = currentPlayerItem {
-        currentPlayerItem.stop()
+      if let currentAudioItem = currentAudioItem {
+        currentAudioItem.stop()
       }
       
-      self.currentPlayerItem = nil
+      self.currentAudioItem = nil
+
+      if let currentMusicItem = currentMusicItem {
+        currentMusicItem.stop()
+      }
+      
+      self.currentMusicItem = nil
     }
     
     

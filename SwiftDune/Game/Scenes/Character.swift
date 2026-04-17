@@ -122,7 +122,7 @@ final class Character: DuneNode {
   
   
   override func update(_ elapsedTime: TimeInterval) {
-    currentTime += elapsedTime
+      currentTime += elapsedTime
   }
   
   
@@ -148,6 +148,7 @@ final class Character: DuneNode {
       animationDuration = Double(animationInfo.frames.count) * 0.16
     }
     
+    characterSprite.setPalette()
     characterSprite.drawAnimation(UInt16(currentAnimation), buffer: buffer, time: animationTime, offset: characterOffset)
   }
 }

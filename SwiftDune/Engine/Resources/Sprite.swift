@@ -177,7 +177,7 @@ final class Sprite: Equatable {
                 
                 // Calculate a subtle delay effect by adjusting the blend per index
                 let colorBlend = blend
-                engine.logger.log(.debug, "colorBlend: \(colorBlend) - i: \(i) - paletteCount: \(paletteCount)")
+                //engine.logger.log(.debug, "colorBlend: \(colorBlend) - i: \(i) - paletteCount: \(paletteCount)")
               
                 let r = Math.lerp(r1, r2, colorBlend)
                 let g = Math.lerp(g1, g2, colorBlend)

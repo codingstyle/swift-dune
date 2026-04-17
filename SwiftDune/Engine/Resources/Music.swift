@@ -17,6 +17,10 @@ final class Music: AudioPlayerItem {
     return .music
   }
   
+  var fileName: String {
+    return resource.fileName
+  }
+  
   private let engine = DuneEngine.shared
   private var herad: HERAD
   private var resource: Resource

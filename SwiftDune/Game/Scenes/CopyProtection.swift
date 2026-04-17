@@ -64,6 +64,8 @@ final class CopyProtection: DuneNode {
 
         selectedFrameIndex = Math.random(0, 28)
         thumbnails?.setFrameIndex(selectedFrameIndex)
+      
+        engine.audioPlayer.stop()
     }
     
     
@@ -111,7 +113,7 @@ final class CopyProtection: DuneNode {
     
     
     private func verifyInput() {
-        let pageNumber = Int(input)!
+      let pageNumber = Int(input.replacing(/^[0-9]$/, with: ""))!
         
         if manualPages[selectedFrameIndex] != pageNumber {
             engine.exitProgram(errorMessage)

@@ -10,6 +10,7 @@ import Foundation
 final class WormCall: DuneNode {
     private var contextBuffer = PixelBuffer(width: 320, height: 152)
 
+    private var wormSound: Sound?
     private var wormSprite: Sprite?
     private var sky: Sky?
     
@@ -23,19 +24,27 @@ final class WormCall: DuneNode {
         
         let worm2Sprite = Sprite("SHAI2.HSQ")
         wormSprite!.mergeFrames(with: worm2Sprite)
-        
+
+        wormSound = Sound("SD8.HSQ", player: engine.audioPlayer)
+        wormSound!.skipRepeat = true
+
         sky = Sky()
     }
     
     
     override func onDisable() {
         wormSprite = nil
+        wormSound = nil
         sky = nil
         currentTime = 0.0
     }
     
     
     override func update(_ elapsedTime: TimeInterval) {
+        if currentTime == 0.0 {
+            engine.audioPlayer.play(wormSound!)
+        }
+      
         currentTime += elapsedTime
     }
     

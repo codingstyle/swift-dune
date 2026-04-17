@@ -167,6 +167,7 @@ class DuneNode: Comparable {
         return lhs.renderPriority.rawValue < rhs.renderPriority.rawValue
     }
     
+  
     static func == (lhs: DuneNode, rhs: DuneNode) -> Bool {
         return lhs.name == rhs.name
     }
