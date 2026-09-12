@@ -112,7 +112,7 @@ final class Sietch: DuneNode {
     
     
     override func update(_ elapsedTime: TimeInterval) {
-        if currentRoom == .water && currentTime == 0.0 {
+        if currentRoom == .water && currentTime == 0.0 && !(waterDropSound!.isPlaying) {
             engine.audioPlayer.play(waterDropSound!)
         }
       

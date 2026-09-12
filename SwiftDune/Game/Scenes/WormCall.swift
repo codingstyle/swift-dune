@@ -41,7 +41,7 @@ final class WormCall: DuneNode {
     
     
     override func update(_ elapsedTime: TimeInterval) {
-        if currentTime == 0.0 {
+        if currentTime == 0.0 && !(wormSound!.isPlaying) {
             engine.audioPlayer.play(wormSound!)
         }
       
@@ -66,13 +66,7 @@ final class WormCall: DuneNode {
             contextBuffer.tag = 0x0001
         }
         
-        let intermediateFrameBuffer = engine.intermediateFrameBuffer
-
-        intermediateFrameBuffer.clearBuffer()
-
-        contextBuffer.render(to: intermediateFrameBuffer)
-        wormSprite.drawAnimation(0, buffer: intermediateFrameBuffer, time: currentTime)
-        
-        intermediateFrameBuffer.render(to: buffer)
+        contextBuffer.render(to: buffer)
+        wormSprite.drawAnimation(0, buffer: buffer, time: currentTime)
     }
 }

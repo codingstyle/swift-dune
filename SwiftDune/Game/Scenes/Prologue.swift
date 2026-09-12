@@ -29,6 +29,7 @@ struct PrologueSteps {
 final class Prologue: DuneNode {
     private var buffer = PixelBuffer(width: 320, height: 200)
     private var queue = Queue<PrologueSteps>()
+    private var music: Music?
  
     init() {
         super.init("Prologue")
@@ -45,8 +46,8 @@ final class Prologue: DuneNode {
     
     
     override func onEnable() {
-        let music = Music("WORMSUIT.HSQ", player: engine.audioPlayer)
-        engine.audioPlayer.play(music)
+        music = Music("WORMSUIT.HSQ", player: engine.audioPlayer)
+        engine.audioPlayer.play(music!)
 
         queue.enqueue(PrologueSteps(
             background: DuneNodeParams("Stars", [ "mode": StarsMode.planets ]),

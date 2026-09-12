@@ -7,12 +7,37 @@
 
 import Foundation
 
+struct AttackParticle {
+  var spriteId: UInt16
+  var velocity: DunePoint
+  var flags: UInt8
+}
+
+
 final class Attack: DuneNode {
     private var contextBuffer = PixelBuffer(width: 320, height: 152)
     private var attackSprite: Sprite?
     
     private var transitionIn: TransitionEffect = .none
     private var transitionOut: TransitionEffect = .none
+  
+    private var maskedRandomSeed: UInt16 = 0x01d2
+    private var randomSeed: UInt16 = 0x0273
+    private var randomBits: UInt16 = 0x7302
+  
+    private let initialParticlePositions: [DunePoint] = [
+      DunePoint(125, 101),
+      DunePoint(100, 101),
+      DunePoint(239, 122),
+      DunePoint(271, 125)
+    ]
+  
+    private let initialParticleVelocities: [DunePoint] = [
+      DunePoint(-6, 4),
+      DunePoint(-4, 6),
+      DunePoint(-4, -6),
+      DunePoint(-6, -4)
+    ]
     
     init() {
         super.init("Attack")
@@ -29,6 +54,9 @@ final class Attack: DuneNode {
         currentTime = 0.0
         transitionIn = .none
         transitionOut = .none
+        maskedRandomSeed = 0x01d2
+        randomSeed = 0x0273
+        randomBits = 0x7302
     }
     
     override func onParamsChange() {        
@@ -104,6 +132,24 @@ final class Attack: DuneNode {
 
         attackSprite.drawFrame(49, x: 0, y: 76, buffer: contextBuffer)
         attackSprite.drawFrame(1, x: 0, y: 134, buffer: contextBuffer)
+    }
+  
+  
+    private func maskedRandomNumber(_ mask: UInt16) -> UInt16 {
+      let lcgPrime: UInt32 = 0x0E56D
+      let product = (UInt32(self.randomSeed) * lcgPrime) + 1
+      self.randomSeed = UInt16(product & 0xFF)
+      
+      return UInt16(product >> 8) & mask
+    }
+  
+  
+    private func randomNumber() -> UInt16 {
+      let lcgPrime: UInt32 = 0xCBD1
+      let product = (UInt32(self.maskedRandomSeed) * lcgPrime) + 1
+      self.maskedRandomSeed = UInt16(product & 0xFF)
+      
+      return UInt16(product >> 8)
     }
   
   

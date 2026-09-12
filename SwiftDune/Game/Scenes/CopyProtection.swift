@@ -90,7 +90,7 @@ final class CopyProtection: DuneNode {
             return
         }
         
-        let frame = thumbnails.frame(at: selectedFrameIndex)
+        // let frame = thumbnails.frame(at: selectedFrameIndex)
         // let frameWidth = frame.videoBlock!.width
         
         thumbnails.renderFrame(buffer, pt: thumbnailPosition)
@@ -102,8 +102,8 @@ final class CopyProtection: DuneNode {
     
     
     override func onKey(_ event: DuneKeyEvent) {
-        if !event.char.isEmpty && input.count < 2 {
-            input.append(event.char)
+        if let ch = event.char.first, ch.isNumber && input.count < 2 {
+            input.append(ch)
         }
         
         if event.specialKey == .keyReturn && input.count > 0 {
@@ -113,7 +113,9 @@ final class CopyProtection: DuneNode {
     
     
     private func verifyInput() {
-      let pageNumber = Int(input.replacing(/^[0-9]$/, with: ""))!
+        guard let pageNumber = Int(input.replacing(/[^0-9]+/, with: "")) else {
+            return
+        }
         
         if manualPages[selectedFrameIndex] != pageNumber {
             engine.exitProgram(errorMessage)

@@ -69,7 +69,7 @@ final class AudioPlayer {
           // Sound FX nodes with 11500 Hz sample rate
           audioEngine.attach(soundFxNode)
           audioEngine.attach(soundFxMixerNode)
-          soundFxMixerNode.outputVolume = 0.05
+          soundFxMixerNode.outputVolume = 0.5
           audioEngine.connect(soundFxNode, to: soundFxMixerNode, format: soundFxAudioFormat)
           audioEngine.connect(soundFxMixerNode, to: audioEngine.mainMixerNode, format: nil)
         

@@ -53,7 +53,9 @@ final class Sound: AudioPlayerItem {
   private var creativeVoice: CreativeVoice
   private var resource: Resource
   private var player: AudioPlayer
+
   var skipRepeat = false
+  var isPlaying = false
   
   init(_ fileName: String, player: AudioPlayer) {
     self.player = player
@@ -116,6 +118,7 @@ final class Sound: AudioPlayerItem {
     }
     
     // print("[AudioPlayer] Audio graph = \(audioEngine.debugDescription)")
+    isPlaying = true
   }
   
   
@@ -125,6 +128,8 @@ final class Sound: AudioPlayerItem {
     if node.isPlaying {
       node.stop()
     }
+    
+    isPlaying = false
   }
     
   
@@ -183,7 +188,7 @@ final class Sound: AudioPlayerItem {
     // Convert sample from unsigned 8-bit to Float32
     while i < eightBitData.count {
       let tempData = Int16(eightBitData[i]) - 0x80
-      let floatSample = Float32(tempData << 8) / 256.0
+      let floatSample = Float32(tempData) / 128.0
       floatData.append(floatSample)
       i += 1
     }
