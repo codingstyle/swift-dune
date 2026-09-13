@@ -24,6 +24,7 @@ final class DuneEngine {
     var isRunning: Bool = false
 
     let frameRate = 60.0
+    let expectedFrameTime: Double = 1.0 / 60.0
 
     private var gameTime: TimeInterval = 0.0
     private var currentTime: TimeInterval = 0.0
@@ -150,10 +151,10 @@ final class DuneEngine {
         lastTime = currentTime
         
         // Pause until next frame
-        let sleepTime = (1.0 / frameRate) - renderingTime
+        let sleepTime = expectedFrameTime - renderingTime
         
         if sleepTime > 0.0 {
-            usleep(useconds_t(sleepTime * 1000.0))
+            usleep(useconds_t(sleepTime * 1_000_000.0))
         }
         
         logger.addMetric(1.0 / (renderingTime + (sleepTime > 0.0 ? sleepTime : 0.0)), at: gameTime)

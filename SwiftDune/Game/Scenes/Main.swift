@@ -8,7 +8,7 @@
 import Foundation
 
 final class Main: DuneNode {
-    private var queue = Queue<String>()
+    private var queue = Queue<DuneNodeParams>()
 
     init() {
         super.init("Main")
@@ -28,19 +28,20 @@ final class Main: DuneNode {
             self.onNodeEvent(nodeData)
         }
         
-        queue.enqueue("Logo")
-        queue.enqueue("Intro")
-        queue.enqueue("Credits")
-        queue.enqueue("Prologue")
-        queue.enqueue("CopyProtection")
-        queue.enqueue("Game")
+        queue.enqueue(DuneNodeParams("Logo"))
+        queue.enqueue(DuneNodeParams("Intro"))
+        queue.enqueue(DuneNodeParams("Credits"))
+        queue.enqueue(DuneNodeParams("Prologue"))
+        queue.enqueue(DuneNodeParams("CopyProtection", [ "bypassProtection": true ]))
+        queue.enqueue(DuneNodeParams("Game"))
 
-        guard let itemName = queue.dequeueFirst() else {
+        guard let itemConfig = queue.dequeueFirst() else {
             return
         }
-
-        if let _ = findNode(itemName) {
-            setNodeActive(itemName, true)
+  
+        if let node = findNode(itemConfig.name) {
+            node.params = itemConfig.params
+            setNodeActive(itemConfig.name, true)
         }
     }
     
@@ -76,14 +77,15 @@ final class Main: DuneNode {
         
         setNodeActive(activeNode.name, false)
 
-        guard let nextItem = queue.dequeueFirst() else {
+        guard let nextItemConfig = queue.dequeueFirst() else {
             setNodeActive("Main", false)
             EventManager.nodeEndedEvent.notify(NodeEventData("Main"))
             return
         }
         
-        if let _ = findNode(nextItem) {
-            setNodeActive(nextItem, true)
+      if let nextItem = findNode(nextItemConfig.name) {
+            nextItem.params = nextItemConfig.params
+            setNodeActive(nextItemConfig.name, true)
         }
     }
     

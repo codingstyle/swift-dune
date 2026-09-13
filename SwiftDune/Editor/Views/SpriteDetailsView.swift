@@ -77,7 +77,7 @@ struct SpriteDetailsView: View {
             }
         }
         .padding()
-        .onChange(of: viewModel.selectedPaletteIndex) { newValue in
+        .onChange(of: viewModel.selectedPaletteIndex, initial: false) { oldValue, newValue in
             viewModel.updateSpritePalette(newValue)
         }
     }

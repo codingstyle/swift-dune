@@ -10,6 +10,7 @@ import Foundation
 final class WormCall: DuneNode {
     private var contextBuffer = PixelBuffer(width: 320, height: 152)
 
+    private var wormSound: Sound?
     private var wormSprite: Sprite?
     private var sky: Sky?
     
@@ -23,19 +24,32 @@ final class WormCall: DuneNode {
         
         let worm2Sprite = Sprite("SHAI2.HSQ")
         wormSprite!.mergeFrames(with: worm2Sprite)
-        
+
+        wormSound = Sound("SD8.HSQ", player: engine.audioPlayer)
+        wormSound!.skipRepeat = true
+
         sky = Sky()
     }
     
     
     override func onDisable() {
         wormSprite = nil
+      
+        if let sound = wormSound {
+          sound.stop()
+        }
+  
+        wormSound = nil
         sky = nil
         currentTime = 0.0
     }
     
     
     override func update(_ elapsedTime: TimeInterval) {
+        if currentTime == 0.0 && !(wormSound!.isPlaying) {
+            engine.audioPlayer.play(wormSound!)
+        }
+      
         currentTime += elapsedTime
     }
     
@@ -57,13 +71,7 @@ final class WormCall: DuneNode {
             contextBuffer.tag = 0x0001
         }
         
-        let intermediateFrameBuffer = engine.intermediateFrameBuffer
-
-        intermediateFrameBuffer.clearBuffer()
-
-        contextBuffer.render(to: intermediateFrameBuffer)
-        wormSprite.drawAnimation(0, buffer: intermediateFrameBuffer, time: currentTime)
-        
-        intermediateFrameBuffer.render(to: buffer)
+        contextBuffer.render(to: buffer)
+        wormSprite.drawAnimation(0, buffer: buffer, time: currentTime)
     }
 }

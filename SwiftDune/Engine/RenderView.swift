@@ -72,7 +72,7 @@ struct RenderView: NSViewRepresentable {
             return
         }
         
-        _ = memcpy(imageBuffer, buffer.rawPointer, 320 * 200 * 4)
+        _ = memcpy(imageBuffer, buffer.rawPointer, buffer.frameSizeInBytes)
 
         renderLayer.currentBitmapRep = bitmapRep
         renderLayer.setNeedsDisplay()

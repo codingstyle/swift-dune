@@ -164,7 +164,7 @@ final class Scenery {
 
         while i < roomCount {
             var room = Room(offset: resource.stream!.offset)
-            let markerCount = resource.stream!.readByte() // Room marker count
+            let _ = resource.stream!.readByte() // Room marker count
             var markerIndex = 0
             
             /*engine.logger.log(.debug, "--------------------------------------------------------------------------------------")

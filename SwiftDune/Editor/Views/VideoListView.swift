@@ -18,9 +18,12 @@ struct VideoListItem: View {
 
     var body: some View {
         VStack(alignment: .leading) {
-            Text("Frame #\(index)")
+          Text("Frame #\(index)")
+          
+          if frame.videoBlock != nil {
             Text("Size: \(frame.videoBlock!.width) x \(frame.videoBlock!.height)")
-                .font(.caption)
+              .font(.caption)
+          }
         }
     }
 }
@@ -46,7 +49,7 @@ struct VideoListView: View {
                 }
             }
         }
-        .onChange(of: selection) { newValue in
+        .onChange(of: selection, initial: false) { oldValue, newValue in
             guard let value = newValue else {
                 return
             }

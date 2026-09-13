@@ -23,6 +23,7 @@ final class Intro: DuneNode {
     private var currentStep: IntroStep?
   
     private var currentTransition: TransitionEffect?
+    private var currentTransitionStart: TimeInterval = 0.0
     private var needsTransition = false
     
     init() {
@@ -279,8 +280,10 @@ final class Intro: DuneNode {
           
             if currentTime < currentStep.transitionIn.duration {
                 currentTransition = currentStep.transitionIn
+                currentTransitionStart = 0.0
             } else if currentTime > currentStep.duration - currentStep.transitionOut.duration {
                 currentTransition = currentStep.transitionOut
+                currentTransitionStart = currentStep.duration - currentStep.transitionOut.duration
             }
 
             return
@@ -314,7 +317,7 @@ final class Intro: DuneNode {
 
         // Render transition
         if let transition = currentTransition {
-            buffer.render(to: screenBuffer, effect: transition.spriteEffect(start: 0.0, end: currentStep.duration, currentTime: currentTime), y: 24)
+            buffer.render(to: screenBuffer, effect: transition.spriteEffect(start: currentTransitionStart, end: currentStep.duration, currentTime: currentTime), y: 24)
             return
         }
       

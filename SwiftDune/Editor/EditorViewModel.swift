@@ -37,6 +37,11 @@ class EditorViewModel: ObservableObject {
     @Published var spriteImage: NSImage?
     @Published var tick: UInt64 = 0
     
+    @Published var isMusicPlaying: Bool = false
+    @Published var musicPlaybackTick: Int = 0
+    @Published var trackMuteStates: [Bool] = []
+    @Published var selectedTrackIndex: Int = 0
+    
     private var timer: Timer?
     private var currentTime: Double = 0.0
     
@@ -67,7 +72,9 @@ class EditorViewModel: ObservableObject {
     
     init() {
         self.timer = Timer.scheduledTimer(withTimeInterval: 1.0 / engine.frameRate, repeats: true) { [weak self] timer in
-            self?.updateLoop()
+            Task { @MainActor [weak self] in
+                self?.updateLoop()
+            }
         }
     }
     
@@ -79,15 +86,16 @@ class EditorViewModel: ObservableObject {
     
     
     func loadResource(_ selection: EditorSelection) {
+        self.stopAnimation()
+        self.stopVideo()
+        self.stopMusic()
+        
         music = nil
         sprite = nil
         dialogue = nil
         sound = nil
         spriteImage = nil
         globe = nil
-        
-        self.stopAnimation()
-        self.stopVideo()
         
         if selection.resourceType == .sprite || selection.resourceType == .spriteWithoutPalette {
             sprite = Sprite(selection.resourceName)
@@ -105,11 +113,16 @@ class EditorViewModel: ObservableObject {
         } else if selection.resourceType == .sentence {
             dialogue = Sentence(selection.resourceName)
         } else if selection.resourceType == .sound {
-            sound = Sound(selection.resourceName)
+            sound = Sound(selection.resourceName, player: engine.audioPlayer)
             sound!.dumpInfo()
             engine.audioPlayer.play(sound!)
         } else if selection.resourceType == .music {
-            music = Music(selection.resourceName)
+            music = Music(selection.resourceName, player: engine.audioPlayer)
+            music!.dumpInfo()
+            trackMuteStates = [Bool](repeating: false, count: music!.trackCount)
+            selectedTrackIndex = 0
+            engine.audioPlayer.play(music!)
+            isMusicPlaying = true
         } else if selection.resourceType == .scene {
             scenery = Scenery(selection.resourceName)
         } else if selection.resourceType == .video {
@@ -305,6 +318,39 @@ class EditorViewModel: ObservableObject {
         if let _ = self.globe {
             self.moveGlobe(.right)
         }
+        
+        // Update music playback state
+        if let music = self.music {
+            if isMusicPlaying && !music.isPlaying {
+                isMusicPlaying = false
+                musicPlaybackTick = 0
+            } else if isMusicPlaying {
+                musicPlaybackTick = music.currentTick
+            }
+        }
+    }
+    
+    
+    func playMusic() {
+        guard let music = music else { return }
+        engine.audioPlayer.play(music)
+        isMusicPlaying = true
+    }
+    
+    
+    func stopMusic() {
+        if isMusicPlaying {
+            engine.audioPlayer.stop()
+        }
+        isMusicPlaying = false
+        musicPlaybackTick = 0
+    }
+    
+    
+    func toggleTrackMute(_ index: Int) {
+        guard let music = music, index < trackMuteStates.count else { return }
+        trackMuteStates[index].toggle()
+        music.setTrackMuted(index, trackMuteStates[index])
     }
     
     

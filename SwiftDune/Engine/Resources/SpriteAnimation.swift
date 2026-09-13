@@ -391,7 +391,7 @@ struct SpriteAnimation {
         // TODO: fix animation parsing
         return animations
 
-        resource.stream!.seek(animationOffset)
+        /*resource.stream!.seek(animationOffset)
         resource.stream!.skip(2)
       
         var animWidth = resource.stream!.readUInt16LE()
@@ -427,6 +427,6 @@ struct SpriteAnimation {
 
         animations.append(animation)
 
-        return animations
+        return animations*/
     }
 }

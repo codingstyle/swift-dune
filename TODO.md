@@ -9,7 +9,6 @@
 
 ## Scenes
 
-- [ ] ADD: animated night attack scene w/ flash
 - [ ] ADD: Ornithopter flight animated dunes
 - [ ] ADD: flat planet map with interpolation
 - [ ] UPDATE: improve sun rise animation
@@ -22,8 +21,6 @@
 
 ## Animations
 
-- [ ] ADD: Reverse engineer animation for ATTACK
-
 - [ ] UPDATE: new animation system on Stars planet pan
 - [ ] ADD: Page flip transition on frame buffer
 - [ ] ADD: Move up transition on frame buffer
@@ -32,10 +29,6 @@
 ## Video
 
 - [ ] FIX: overlay circles and logo in last frames
-
-## Music
-
-- [ ] ADD: support for OPL2
 
 ## UI 
 
@@ -66,6 +59,11 @@
 - [ ] ADD: support PC-CD versions
 
 # Archive
+
+- [X] ADD: support for OPL3
+
+- [X] ADD: animated night attack scene w/ flash
+- [X] ADD: Reverse engineer animation for ATTACK
 
 - [X] FIX: Fade in Dune title (palette effect)
 - [X] FIX: Fade in on Palace stairs (palette effect)

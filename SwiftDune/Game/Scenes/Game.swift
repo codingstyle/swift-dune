@@ -11,13 +11,22 @@ final class Game: DuneNode {
     
     init() {
         super.init("Game")
-        
-        showRoom()
-        showUI()
+    }
+
+  
+    override func onEnable() {
+      engine.palette.clear()
+      
+      showRoom()
+      showUI()
     }
   
-  
     func showRoom() {
+        if currentTime == 0.0 {
+            let music = Music("ARRAKIS.HSQ", player: engine.audioPlayer)
+            engine.audioPlayer.play(music)
+        }
+
         let palaceNode = Palace()
         palaceNode.params = [
           "room": PalaceRoom.porch,

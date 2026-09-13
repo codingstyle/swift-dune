@@ -60,7 +60,8 @@ enum TransitionEffect {
         case .pixelate(let duration):
             return .pixelate(end: duration, duration: duration, current: currentTime)
         case .zoom(let duration, let from, let to):
-            return .zoom(start: end - duration, duration: duration, current: currentTime, from: from, to: to)
+            // Zoom has no in/out variant: the caller anchors it by passing the time the transition begins
+            return .zoom(start: start, duration: duration, current: currentTime, from: from, to: to)
         case .none:
             return .none
         }
@@ -120,18 +121,23 @@ struct Effects {
         let pixelCount = Int(round(16.0 * Math.clampf(progress, 0.0, 1.0)))
         
         var y = yOffset
-        let height = Int16(destBuffer.height - Int(yOffset))
+        let width = destBuffer.width
+        let height = destBuffer.height
 
         while y < height {
             var x: Int = 0
 
-            while x < destBuffer.width {
+            while x < width {
                 var n = 0
                 
                 while n < pixelCount {
                     let pt = pixelTransitionOffsets[n]
-                    let index = Int(320 * (y &+ Int(pt.y)) &+ (x &+ Int(pt.x)))
-                    destBuffer.rawPointer[index] = 0
+                    let pixelY = y &+ Int(pt.y)
+                    let pixelX = x &+ Int(pt.x)
+                    
+                    if pixelY < height && pixelX < width {
+                        destBuffer.rawPointer[(width &* pixelY) &+ pixelX] = 0
+                    }
                     
                     n += 1
                 }
@@ -146,17 +152,28 @@ struct Effects {
         
     static func flip(sourceBuffer: PixelBuffer, destBuffer: PixelBuffer, progress: CGFloat, offset: Int = 0) {
         let fHeight = CGFloat(sourceBuffer.height)
-        let rowSize = sourceBuffer.width
-        let rowSizeInBytes = sourceBuffer.rowSizeInBytes
-        let flipHeight = Int(fHeight * progress)
+        let rowSize = min(sourceBuffer.width, destBuffer.width)
+        let rowSizeInBytes = rowSize * MemoryLayout<UInt8>.size
+        let flipHeight = Int(fHeight * Math.clampf(progress, 0.0, 1.0))
+        
+        guard flipHeight > 0 else {
+            return
+        }
+        
         let y0 = (sourceBuffer.height - flipHeight) / 2
         let y1 = (y0 &+ flipHeight)
         
         var yDest = y0
         
         while yDest < y1 {
+            let destIndex = (yDest * destBuffer.width) &+ offset
+            
+            guard destIndex &+ rowSizeInBytes <= destBuffer.frameSizeInBytes else {
+                break
+            }
+            
             let ySrc = Int(fHeight * (Double(yDest - y0) / Double(flipHeight)))
-            _ = memcpy(destBuffer.rawPointer + (yDest * rowSize) + offset, sourceBuffer.rawPointer + (ySrc * rowSize), rowSizeInBytes)
+            _ = memcpy(destBuffer.rawPointer + destIndex, sourceBuffer.rawPointer + (ySrc * sourceBuffer.width), rowSizeInBytes)
             yDest += 1
         }
     }
@@ -170,8 +187,9 @@ struct Effects {
             pixelation = 1
         }
         
-        let frameSize = Int(sourceBuffer.frameSize)
         let rowSize = Int(sourceBuffer.width)
+        let destOffset = yOffset * rowSize
+        let frameSize = min(Int(sourceBuffer.frameSize), destBuffer.frameSize - destOffset)
         
         var n = 0
         
@@ -183,49 +201,47 @@ struct Effects {
             let y2 = y - (y % pixelation)
             let j = y2 * rowSize + x2
           
-            destBuffer.rawPointer[n + (yOffset * rowSize)] = sourceBuffer.rawPointer[j]
+            destBuffer.rawPointer[n + destOffset] = sourceBuffer.rawPointer[j]
             n += 1
         }
     }
     
     
     static func zoom(sourceBuffer: PixelBuffer, destBuffer: PixelBuffer, sourceRect: DuneRect, yOffset: Int = 0) {
-        var y = yOffset
-        let destHeight = Int16(destBuffer.height - Int(yOffset * 2))
-        let destY = Int16(destBuffer.height - Int(yOffset))
+        // The source occupies the rows starting at yOffset, and never more rows than it owns
+        let destY = min(destBuffer.height, yOffset &+ sourceBuffer.height)
+        let destHeight = destY - yOffset
+        let destWidth = min(destBuffer.width, sourceBuffer.width)
+        
+        guard destHeight > 0 && destWidth > 0 else {
+            return
+        }
 
-        let xScale = CGFloat(destBuffer.width) / CGFloat(sourceRect.width)
+        let xScale = CGFloat(destWidth) / CGFloat(sourceRect.width)
         let yScale = CGFloat(destHeight) / CGFloat(sourceRect.height)
         let sourceRectX = CGFloat(sourceRect.x)
         let sourceRectY = CGFloat(sourceRect.y)
+        let maxSourceX = sourceBuffer.width - 1
+        let maxSourceY = sourceBuffer.height - 1
 
+        var y = yOffset
+        
         while y < destY {
             var x = 0
-            let sourceY = Int(sourceRectY + CGFloat(y - yOffset) / yScale)
-          
-            guard sourceY < destBuffer.height else {
-                continue
-            }
-
-            let sourceIndex = sourceY * destBuffer.width
+            let sourceY = min(Int(sourceRectY + CGFloat(y - yOffset) / yScale), maxSourceY)
+            let sourceIndex = sourceY * sourceBuffer.width
             let destinationIndex = y * destBuffer.width
 
-            while x < destBuffer.width {
-                let sourceX = Int(sourceRectX + CGFloat(x) / xScale)
-                
-                // Ensure we don't go out of bounds
-                guard sourceX < destBuffer.width else {
-                    continue
-                }
+            while x < destWidth {
+                let sourceX = min(Int(sourceRectX + CGFloat(x) / xScale), maxSourceX)
 
                 // Copy the pixel from sourceBuffer to destinationBuffer
-                destBuffer.rawPointer[destinationIndex + x] = sourceBuffer.rawPointer[sourceIndex + sourceX]
+                destBuffer.rawPointer[destinationIndex &+ x] = sourceBuffer.rawPointer[sourceIndex &+ sourceX]
                 
                 x += 1
             }
             
             y += 1
         }
-
     }
 }

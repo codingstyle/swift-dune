@@ -18,6 +18,7 @@ final class CopyProtection: DuneNode {
     private let paletteIndex: UInt8 = 6
     private let sentenceIndex: UInt16 = 229
     private var input: String = ""
+    private var bypassProtection = false
 
     private let errorMessage = "Program aborted at the request of the protection comittee."
     private let manualPages: [UInt8] = [
@@ -64,6 +65,8 @@ final class CopyProtection: DuneNode {
 
         selectedFrameIndex = Math.random(0, 28)
         thumbnails?.setFrameIndex(selectedFrameIndex)
+      
+        engine.audioPlayer.stop()
     }
     
     
@@ -73,6 +76,14 @@ final class CopyProtection: DuneNode {
         gameFont = nil
         selectedFrameIndex = 0
         input = ""
+        bypassProtection = false
+    }
+  
+  
+    override func onParamsChange() {
+        if let bypassParam = params["bypassProtection"] {
+            self.bypassProtection = bypassParam as! Bool
+        }
     }
     
     
@@ -88,7 +99,7 @@ final class CopyProtection: DuneNode {
             return
         }
         
-        let frame = thumbnails.frame(at: selectedFrameIndex)
+        // let frame = thumbnails.frame(at: selectedFrameIndex)
         // let frameWidth = frame.videoBlock!.width
         
         thumbnails.renderFrame(buffer, pt: thumbnailPosition)
@@ -100,8 +111,8 @@ final class CopyProtection: DuneNode {
     
     
     override func onKey(_ event: DuneKeyEvent) {
-        if !event.char.isEmpty && input.count < 2 {
-            input.append(event.char)
+        if let ch = event.char.first, ch.isNumber && input.count < 2 {
+            input.append(ch)
         }
         
         if event.specialKey == .keyReturn && input.count > 0 {
@@ -111,7 +122,13 @@ final class CopyProtection: DuneNode {
     
     
     private func verifyInput() {
-        let pageNumber = Int(input)!
+        if bypassProtection {
+            EventManager.nodeEndedEvent.notify(NodeEventData(self.name))
+        }
+      
+        guard let pageNumber = Int(input.replacing(/[^0-9]+/, with: "")) else {
+            return
+        }
         
         if manualPages[selectedFrameIndex] != pageNumber {
             engine.exitProgram(errorMessage)

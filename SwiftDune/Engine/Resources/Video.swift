@@ -427,6 +427,9 @@ final class Video {
         let videoFrameByteCount = videoBlock.uncompressedBytesCount
         var paletteIndex: UInt8 = 0
         
+        let bufferWidth = buffer.width
+        let bufferHeight = buffer.height
+        
         var j = 0
 
         while j < frameHeight {
@@ -446,9 +449,16 @@ final class Video {
                     continue
                 }
 
-                destX = flipX ? 319 - (frameX + i) : (frameX + i)
-                destY = flipY ? 199 - (frameY + j) : (frameY + j)
-                destIndex = destY * 320 + destX
+                destX = flipX ? (bufferWidth - 1) - (frameX + i) : (frameX + i)
+                destY = flipY ? (bufferHeight - 1) - (frameY + j) : (frameY + j)
+                
+                // Clip against the destination buffer, which is not always full screen
+                if destX < 0 || destX >= bufferWidth || destY < 0 || destY >= bufferHeight {
+                    i += 1
+                    continue
+                }
+                
+                destIndex = destY * bufferWidth + destX
 
                 buffer.rawPointer[destIndex] = paletteIndex
                 

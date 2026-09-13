@@ -47,13 +47,13 @@ final class PixelBuffer {
         case .fadeIn(let start, let duration, let current):
             let progress = (current - start) / duration
             Effects.fade(progress: progress)
-            let size = max(0, (buffer.height - y) * buffer.rowSizeInBytes)
+            let size = max(0, min(height, buffer.height - y)) * rowSizeInBytes
             self.copyPixels(to: buffer, offset: y * buffer.width, size: size)
             break
         case .fadeOut(let end, let duration, let current):
             let progress = (end - current) / duration
             Effects.fade(progress: progress)
-            let size = max(0, (buffer.height - y) * buffer.rowSizeInBytes)
+            let size = max(0, min(height, buffer.height - y)) * rowSizeInBytes
             self.copyPixels(to: buffer, offset: y * buffer.width, size: size)
             break
         case .flipIn(let start, let duration, let current):
@@ -66,13 +66,13 @@ final class PixelBuffer {
             break
         case .dissolveIn(let start, let duration, let current):
             let progress = 1.0 - ((current - start) / duration)
-            let size = max(0, (buffer.height - y) * buffer.rowSizeInBytes)
+            let size = max(0, min(height, buffer.height - y)) * rowSizeInBytes
             self.copyPixels(to: buffer, offset: y * buffer.width, size: size)
             Effects.dissolve(destBuffer: buffer, progress: progress, yOffset: y)
             break
         case .dissolveOut(let end, let duration, let current):
             let progress = 1.0 - ((end - current) / duration)
-            let size = max(0, (buffer.height - y) * buffer.rowSizeInBytes)
+            let size = max(0, min(height, buffer.height - y)) * rowSizeInBytes
             self.copyPixels(to: buffer, offset: y * buffer.width, size: size)
             Effects.dissolve(destBuffer: buffer, progress: progress, yOffset: y)
             break
@@ -85,18 +85,27 @@ final class PixelBuffer {
             let rect = Math.lerpRect(from, to, progress)
             Effects.zoom(sourceBuffer: self, destBuffer: buffer, sourceRect: rect, yOffset: y)
         default:
-            let size = max(0, (buffer.height - y) * buffer.rowSizeInBytes)
+            let size = max(0, min(height, buffer.height - y)) * rowSizeInBytes
             self.copyPixels(to: buffer, offset: y * buffer.width, size: size)
         }
     }
     
     
     func copyPixels(from sourceBuffer: PixelBuffer) {
-        _ = memcpy(rawPointer, sourceBuffer.rawPointer, frameSizeInBytes)
+        _ = memcpy(rawPointer, sourceBuffer.rawPointer, min(frameSizeInBytes, sourceBuffer.frameSizeInBytes))
     }
     
     
     func copyPixels(to destBuffer: PixelBuffer, offset: Int = 0, size: Int = -1) {
-        _ = memcpy(destBuffer.rawPointer + offset, rawPointer, size == -1 ? frameSizeInBytes : size)
+        let requested = size == -1 ? frameSizeInBytes : size
+        
+        // Never read past the end of the source, nor write past the end of the destination
+        let available = min(requested, frameSizeInBytes, destBuffer.frameSizeInBytes - offset)
+        
+        guard offset >= 0 && available > 0 else {
+            return
+        }
+        
+        _ = memcpy(destBuffer.rawPointer + offset, rawPointer, available)
     }
 }

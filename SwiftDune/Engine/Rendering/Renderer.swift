@@ -8,6 +8,7 @@
 import Foundation
 import Metal
 import MetalKit
+import UniformTypeIdentifiers
 
 
 final class Renderer: NSObject, ObservableObject, MTKViewDelegate {
@@ -202,7 +203,7 @@ final class Renderer: NSObject, ObservableObject, MTKViewDelegate {
         let fileURL = downloadsDirectory.appendingPathComponent(fileName)
         
         // Create a CGImageDestination
-        guard let destination = CGImageDestinationCreateWithURL(fileURL as NSURL, kUTTypePNG, 1, nil) else {
+        guard let destination = CGImageDestinationCreateWithURL(fileURL as NSURL, UTType.png.identifier as CFString, 1, nil) else {
             DuneEngine.shared.logger.log(.error, "Error creating image destination")
             return
         }
