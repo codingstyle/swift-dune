@@ -320,6 +320,56 @@ final class Sprite: Equatable {
     func frame(at index: Int) -> SpriteFrameInfo {
         return frames[index]
     }
+    
+    
+    func paletteChunk(atResource index: Int) -> PaletteChunk? {
+        guard let stream = resource.stream else {
+            return nil
+        }
+        
+        stream.seek(0)
+        let tocPos = UInt32(stream.readUInt16LE())
+        stream.seek(tocPos)
+        
+        let firstOffset = stream.readUInt16LE(peek: true)
+        let resourceCount = Int(firstOffset / 2)
+        
+        if index < 0 || index >= resourceCount {
+            return nil
+        }
+        
+        stream.seek(tocPos + UInt32(index * 2))
+        let entryOffset = UInt32(stream.readUInt16LE())
+        stream.seek(tocPos + entryOffset)
+        
+        if stream.readUInt16LE() != 0 {
+            return nil
+        }
+        
+        let bodyLen = stream.readUInt16LE()
+        if bodyLen < 2 {
+            return nil
+        }
+        
+        let paletteStart = UInt16(stream.readByte())
+        let paletteCount = UInt16(stream.readByte())
+        if paletteCount == 0 {
+            return nil
+        }
+        
+        var chunk = Array<UInt32>(repeating: 0, count: Int(paletteCount))
+        var i: UInt16 = 0
+        
+        while i < paletteCount {
+            let r = UInt32(stream.readByte() << 2)
+            let g = UInt32(stream.readByte() << 2)
+            let b = UInt32(stream.readByte() << 2)
+            chunk[Int(i)] = (0xFF << 24) | (b << 16) | (g << 8) | r
+            i += 1
+        }
+        
+        return PaletteChunk(chunk: chunk, start: Int(paletteStart), count: Int(paletteCount))
+    }
 
     
     func animation(at index: Int) -> SpriteAnimation {
