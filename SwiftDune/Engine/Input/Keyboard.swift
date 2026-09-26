@@ -6,12 +6,18 @@
 //
 
 import Foundation
+#if os(macOS)
 import AppKit
+#endif
 
 enum DuneSpecialKey: UInt16, CaseIterable {
     case keyReturn = 36
     case keyDelete = 51
     case keyEscape = 53
+    case keyLeft = 123
+    case keyRight = 124
+    case keyDown = 125
+    case keyUp = 126
     case none = 0
 }
 
@@ -26,6 +32,7 @@ final class Keyboard {
     private var monitorID: Any?
     var keysPressed = Queue<DuneKeyEvent>()
     
+    #if os(macOS)
     init() {
         self.monitorID = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
             if self.processKeyUpEvent(event) {
@@ -68,5 +75,13 @@ final class Keyboard {
         }
 
         return processed
+    }
+    #endif
+
+
+    /// Queues a key press coming from a non-AppKit source (iOS on-screen
+    /// controls or a hardware keyboard attached to an iPhone/iPad).
+    func push(_ keyEvent: DuneKeyEvent) {
+        keysPressed.enqueue(keyEvent)
     }
 }

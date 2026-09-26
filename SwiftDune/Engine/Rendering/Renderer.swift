@@ -26,10 +26,11 @@ final class Renderer: NSObject, ObservableObject, MTKViewDelegate {
     private var device: MTLDevice
     private var commandQueue: MTLCommandQueue
     private var texture: MTLTexture
-    private var pipelineState: MTLRenderPipelineState
+    private var pipelineState: MTLRenderPipelineState?
     private var rawBufferPointer: UnsafeMutablePointer<UInt8>
     private var shouldTakeScreenshot = false
     private var screenshotScale = 3
+    private var screenshotName: String?
 
     var metalView: MTKView
     
@@ -58,10 +59,13 @@ final class Renderer: NSObject, ObservableObject, MTKViewDelegate {
         metalView.clearColor = MTLClearColorMake(0.0, 0.0, 0.0, 1.0)
         metalView.releaseDrawables()
       
-        // Load the shader files
-        let defaultLibrary = device.makeDefaultLibrary()!
-        let vertexFunction = defaultLibrary.makeFunction(name: "vertex_main")
-        let fragmentFunction = defaultLibrary.makeFunction(name: "fragment_main")
+        // Load the shader files.  A development build can be launched before
+        // Xcode has installed its optional Metal Toolchain; keep that case a
+        // black but usable window instead of crashing during app startup.
+        let defaultLibrary = (try? device.makeDefaultLibrary(bundle: Bundle.main))
+            ?? (try? device.makeLibrary(source: Renderer.shaderSource, options: nil))
+        let vertexFunction = defaultLibrary?.makeFunction(name: "vertex_main")
+        let fragmentFunction = defaultLibrary?.makeFunction(name: "fragment_main")
         
         // Create the vertex descriptor
         let vertexDescriptor = MTLVertexDescriptor()
@@ -84,7 +88,7 @@ final class Renderer: NSObject, ObservableObject, MTKViewDelegate {
         pipelineDescriptor.depthAttachmentPixelFormat = .invalid
         pipelineDescriptor.stencilAttachmentPixelFormat = .invalid
         
-        pipelineState = try! device.makeRenderPipelineState(descriptor: pipelineDescriptor)
+        pipelineState = try? device.makeRenderPipelineState(descriptor: pipelineDescriptor)
       
         // Create a frame buffer that will contain RGBA components for each pixel to update the texture
         rawBufferPointer = UnsafeMutablePointer<UInt8>.allocate(capacity: frameSize)
@@ -98,6 +102,37 @@ final class Renderer: NSObject, ObservableObject, MTKViewDelegate {
     deinit {
         rawBufferPointer.deallocate()
     }
+
+
+    /// Same program as Shaders.metal, compiled at runtime when the bundle has
+    /// no default.metallib (builds made without the Metal toolchain).
+    /// Keep the two in sync.
+    private static let shaderSource = """
+    #include <metal_stdlib>
+    using namespace metal;
+
+    struct VertexIn {
+        float4 position [[attribute(0)]];
+        float2 texCoord [[attribute(1)]];
+    };
+
+    struct VertexOut {
+        float4 position [[position]];
+        float2 texCoord;
+    };
+
+    vertex VertexOut vertex_main(VertexIn in [[stage_in]]) {
+        VertexOut out;
+        out.position = in.position;
+        out.texCoord = in.texCoord;
+        return out;
+    }
+
+    fragment float4 fragment_main(VertexOut in [[stage_in]], texture2d<float> texture [[texture(0)]]) {
+        constexpr sampler s(address::clamp_to_edge, filter::nearest);
+        return texture.sample(s, in.texCoord);
+    }
+    """
     
     
     func update(_ buffer: PixelBuffer) {
@@ -145,6 +180,12 @@ final class Renderer: NSObject, ObservableObject, MTKViewDelegate {
               return
             }
             
+            guard let pipelineState = pipelineState else {
+                encoder.endEncoding()
+                commandBuffer.commit()
+                return
+            }
+
             encoder.setRenderPipelineState(pipelineState)
             encoder.setVertexBytes(vertexData, length: vertexDataSize, index: 0)
             encoder.setFragmentTexture(texture, index: 0)
@@ -163,8 +204,9 @@ final class Renderer: NSObject, ObservableObject, MTKViewDelegate {
     }
     
     
-    func requestScreenshot(_ scale: Int = 1) {
+    func requestScreenshot(_ scale: Int = 1, name: String? = nil) {
         self.screenshotScale = scale
+        self.screenshotName = name
         self.shouldTakeScreenshot = true
     }
     
@@ -198,9 +240,16 @@ final class Renderer: NSObject, ObservableObject, MTKViewDelegate {
         
         // Create a destination URL
         let date = NSDate()
-        let fileName = "DuneCapture_\(date.timeIntervalSince1970)@\(scale)x.png"
-        let downloadsDirectory = FileManager.default.urls(for: .downloadsDirectory, in: .userDomainMask).first!
-        let fileURL = downloadsDirectory.appendingPathComponent(fileName)
+        var fileURL = DuneEngine.outputDirectory
+            .appendingPathComponent("DuneCapture_\(date.timeIntervalSince1970)@\(scale)x.png")
+
+        if let name = screenshotName {
+            // Dev harness shots: stable names in a shots/ subfolder.
+            let shots = DuneEngine.outputDirectory.appendingPathComponent("shots")
+            try? FileManager.default.createDirectory(at: shots, withIntermediateDirectories: true)
+            fileURL = shots.appendingPathComponent("\(name).png")
+            screenshotName = nil
+        }
         
         // Create a CGImageDestination
         guard let destination = CGImageDestinationCreateWithURL(fileURL as NSURL, UTType.png.identifier as CFString, 1, nil) else {

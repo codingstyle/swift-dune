@@ -390,7 +390,7 @@ final class ResourceStream {
     
     
     func saveAs(_ fileName: String) {
-        let downloadsDirectory = FileManager.default.urls(for: .downloadsDirectory, in: .userDomainMask).first!
+        let downloadsDirectory = DuneEngine.outputDirectory
         let fileURL = downloadsDirectory.appendingPathComponent(fileName)
         
         let dataToWrite = Data(data)

@@ -50,6 +50,12 @@ final class AudioPlayer {
     private let oplQueue = DispatchQueue(label: "com.swiftdune.opl3", qos: .userInteractive)
   
     init() {
+        #if os(iOS)
+        // Without the playback category the ring/silent switch mutes the game
+        // (same issue the ScummVM port hit; see IOS_PORT.md).
+        try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
+        try? AVAudioSession.sharedInstance().setActive(true)
+        #endif
         initAudioEngine()
     }
     

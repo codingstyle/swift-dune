@@ -7,7 +7,7 @@
 
 import Foundation
 import CoreGraphics
-import AppKit
+import CoreGraphics
 
 
 class SpriteFrameInfo {
@@ -68,7 +68,7 @@ final class Sprite: Equatable {
     
     private let animationFrameRate: Double = 12.0
     
-    private let rect = NSRect(x: 0, y: 0, width: 320, height: 200)
+    private let rect = CGRect(x: 0, y: 0, width: 320, height: 200)
     
   
     init(_ fileName: String) {

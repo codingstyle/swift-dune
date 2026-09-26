@@ -1,3 +1,7 @@
 Docs
 DuneFiles
 run_dosbox.sh
+build/
+builds/
+*.ipa
+.DS_Store
