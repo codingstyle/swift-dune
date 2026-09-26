@@ -50,6 +50,12 @@ final class AudioPlayer {
     private let oplQueue = DispatchQueue(label: "com.swiftdune.opl3", qos: .userInteractive)
   
     init() {
+        #if os(iOS)
+        // Without the playback category the ring/silent switch mutes the game
+        // (same issue the ScummVM port hit; see IOS_PORT.md).
+        try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
+        try? AVAudioSession.sharedInstance().setActive(true)
+        #endif
         initAudioEngine()
     }
     
@@ -250,6 +256,12 @@ final class AudioPlayer {
     }
     
     /// Mutes the OPL3 output
+    /// MUSIC OFF / MUSIC ON in the globe's options (the OPL3 music only).
+    var musicMuted = false {
+        didSet { musicMuted ? muteOPL3() : unmuteOPL3() }
+    }
+
+
     func muteOPL3() {
         oplMixerNode.outputVolume = 0.0
     }

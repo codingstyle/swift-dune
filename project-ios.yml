@@ -1,0 +1,70 @@
+# XcodeGen spec for the iOS target. The macOS app + editor keep using the
+# hand-maintained SwiftDune.xcodeproj; regenerate this one with
+#   xcodegen generate --spec project-ios.yml
+# (scripts/build_ios.sh does it for you).
+name: SwiftDuneiOS
+options:
+  deploymentTarget:
+    iOS: "16.0"
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    DEVELOPMENT_TEAM: ""
+    CODE_SIGNING_ALLOWED: "NO"
+targets:
+  DuneiOS:
+    type: application
+    platform: iOS
+    sources:
+      - path: SwiftDune/Engine
+        excludes:
+          - RenderView.swift          # AppKit NSViewRepresentable, macOS only
+      - path: SwiftDune/Game
+        excludes:
+          - DuneGameApp.swift         # AppKit entry point
+          - main.swift
+          - GameView.swift
+          - GameViewModel.swift
+          - StatsView.swift
+          - StatsViewModel.swift
+          - "*.entitlements"
+          - Assets.xcassets           # macOS icon set; iOS ships Platform/iOS/Icons
+      - path: SwiftDune/Platform/iOS
+      - path: DuneFiles
+        type: folder
+        buildPhase: resources
+    info:
+      path: SwiftDune/Platform/iOS/Info.plist
+      properties:
+        CFBundleDisplayName: Dune
+        # Plain icon files instead of an asset catalog: actool needs a
+        # simulator runtime matching the SDK, which clean builds lack.
+        CFBundleIcons:
+          CFBundlePrimaryIcon:
+            CFBundleIconFiles: [AppIcon60x60]
+        CFBundleIcons~ipad:
+          CFBundlePrimaryIcon:
+            CFBundleIconFiles: [AppIcon60x60, AppIcon76x76, AppIcon83.5x83.5]
+        CFBundleShortVersionString: "0.1"
+        CFBundleVersion: "1"
+        LSRequiresIPhoneOS: true
+        UIRequiresFullScreen: true
+        UIStatusBarHidden: true
+        UIFileSharingEnabled: true
+        LSSupportsOpeningDocumentsInPlace: true
+        UILaunchScreen:
+          UIColorName: ""
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        UISupportedInterfaceOrientations~ipad:
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        UIApplicationSceneManifest:
+          UIApplicationSupportsMultipleScenes: false
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.codingstyle.SwiftDuneiOS
+        PRODUCT_NAME: Dune
+        TARGETED_DEVICE_FAMILY: "1,2"
+        GENERATE_INFOPLIST_FILE: "NO"

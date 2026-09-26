@@ -34,6 +34,9 @@ final class Sietch: DuneNode {
     
     private var currentRoom: SietchRoom = .room8
     private var markers: Dictionary<Int, RoomCharacter> = [:]
+    /// Character numbers in the room (World.peopleInRoom); when set they
+    /// replace `markers`, placed by the original marker rule.
+    private var people: [Int]?
     private var character: DuneCharacter = .none
     
     private let waterInitialRadius = DunePoint(15, 3)
@@ -57,7 +60,18 @@ final class Sietch: DuneNode {
         
         waterDropSound = Sound("SD4.HSQ", player: engine.audioPlayer)
       
+        // Room 8 is the intro/gameplay sietch record whose marker assignment
+        // is decoded in the original scene script: Harah and Stilgar occupy
+        // marker slots 6 and 9. Keep explicit caller markers authoritative.
+        if markers.isEmpty && currentRoom == .room8 && people == nil {
+            markers = [6: .harah, 9: .stilgar]
+        }
+        applyPeople()
         sietchScenery?.characters = markers
+
+        if character != .none {
+            characterSprite = Sprite(character.resourceName)
+        }
         
         if currentRoom == .water {
             waterRadius = waterInitialRadius
@@ -71,7 +85,18 @@ final class Sietch: DuneNode {
     }
     
     
+    private func applyPeople() {
+        guard let people = people, let scenery = sietchScenery,
+              currentRoom.rawValue < scenery.rooms.count else { return }
+        let assignment = World.shared.markerAssignment(people: people,
+                                                       markers: scenery.rooms[currentRoom.rawValue].markerCount)
+        markers = assignment.compactMapValues { RoomCharacter(rawValue: World.persFrame($0)) }
+        scenery.characters = markers
+    }
+
+
     override func onDisable() {
+        people = nil
         sietchScenery = nil
         sky = nil
         characterSprite = nil
@@ -91,10 +116,17 @@ final class Sietch: DuneNode {
     override func onParamsChange() {
         if let room = params["room"] {
             self.currentRoom = room as! SietchRoom
+            self.contextBuffer.tag = 0
         }
         
         if let markers = params["markers"] {
             self.markers = markers as! Dictionary<Int, RoomCharacter>
+            sietchScenery?.characters = self.markers
+        }
+
+        if let people = params["people"] as? [Int] {
+            self.people = people
+            applyPeople()
         }
 
         if let duration = params["duration"] {
@@ -103,6 +135,7 @@ final class Sietch: DuneNode {
         
         if let character = params["character"] {
             self.character = character as! DuneCharacter
+            characterSprite = self.character == .none ? nil : Sprite(self.character.resourceName)
         }
       
         if let lightMode = params["lightMode"] {

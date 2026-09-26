@@ -52,6 +52,7 @@ final class Flight: DuneNode {
     private var dayMode: DuneLightMode = .day
     
     private var frameCount: UInt32 = 0
+    private var destinationSeed: UInt32 = 0
     private var debugVanishingLines = false
     
     private var flightSprites: [FlightTerrainSprite] = []
@@ -80,12 +81,22 @@ final class Flight: DuneNode {
     override func onEnable() {
         dunesSprite = Sprite("DUNES.HSQ")
         sky = Sky()
+        currentTime = 0.0
+        frameCount = 0
+        destinationSeed = 0
+        flightSprites.removeAll()
+        contextBuffer.tag = 0
     }
     
     
     override func onDisable() {
         dunesSprite = nil
         sky = nil
+        currentTime = 0.0
+        frameCount = 0
+        destinationSeed = 0
+        flightSprites.removeAll()
+        contextBuffer.tag = 0
     }
     
     
@@ -96,6 +107,10 @@ final class Flight: DuneNode {
         
         if let durationParam = params["duration"] {
             self.duration = durationParam as! TimeInterval
+        }
+
+        if let destinationCode = params["destinationCode"] as? Int {
+            destinationSeed = UInt32(truncatingIfNeeded: destinationCode)
         }
     }
     
@@ -108,8 +123,11 @@ final class Flight: DuneNode {
             return
         }
         
-        // 1. Randomize a sprite in 0-12 range
-        // 2. Choose a path
+        // The DOS flight scene is repeatable for a given route. Random
+        // placement made the Swift build produce different screenshots on
+        // every run and made route regressions impossible to inspect. Use a
+        // small deterministic sequence keyed by the original destination
+        // byte until the remaining flight records are decoded.
         if (frameCount % 60) == 0 {
             var i = 0
           
@@ -119,9 +137,8 @@ final class Flight: DuneNode {
             let indexCount = 5
           
             while i < indexCount {
-                let spriteIndex = UInt16(round(CGFloat(Math.random(0, 700)) / 100.0))
-                let randomIndex = Int(round(CGFloat(Math.random(0, (indexes.count - 1) * 100)) / 100.0))
-                let pathIndex = indexes.remove(at: randomIndex)
+                let spriteIndex = UInt16((destinationSeed &+ frameCount &+ UInt32(i * 3)) % 13)
+                let pathIndex = indexes.remove(at: Int((destinationSeed &+ UInt32(i)) % UInt32(indexes.count)))
                 let path = vanishingLines[pathIndex]
               
                 flightSprites.append(FlightTerrainSprite(

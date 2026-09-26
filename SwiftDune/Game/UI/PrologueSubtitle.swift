@@ -21,7 +21,7 @@ final class PrologueSubtitle: DuneNode {
     
     override func onEnable() {
         gameFont = GameFont()
-        sentences = Sentence(.command, language: .french)
+        sentences = Sentence(.command, language: .english)
     }
     
     

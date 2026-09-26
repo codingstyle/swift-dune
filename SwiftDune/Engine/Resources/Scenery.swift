@@ -96,6 +96,8 @@ struct RoomSpriteIndices {
 
 struct Room {
     var offset: UInt32 = 0
+    /// First byte of the room: how many position markers it has.
+    var markerCount: Int = 0
     var commands: [RoomCommandProtocol] = []
 }
 
@@ -117,6 +119,18 @@ final class Scenery {
     }
     
     var characters: Dictionary<Int, RoomCharacter> = [:]
+
+    /// Sheet chosen by the room code's slot (World.sheet(for:)). When set it
+    /// replaces the per-file index ranges below, which are only a guess
+    /// kept for the intro scenes.
+    var sheetOverride: String? {
+        didSet {
+            if let name = sheetOverride, sheetCache[name] == nil {
+                sheetCache[name] = Sprite(name)
+            }
+        }
+    }
+    private var sheetCache: [String: Sprite] = [:]
 
     init(_ fileName: String) {
         self.resource = Resource(fileName)
@@ -146,7 +160,10 @@ final class Scenery {
                 RoomSpriteIndices("EQUI.HSQ", 8, 9),
                 RoomSpriteIndices("BALCON.HSQ", 10, 11),
                 RoomSpriteIndices("CORR.HSQ", 12, 13),
-                RoomSpriteIndices("SERRE.HSQ", 14, 14),
+                // The floppy scene table selects PALPLAN.HSQ for SAL room
+                // 14 (background byte 0xCF). SERRE is the greenhouse
+                // resource and corrupts this palace room when used here.
+                RoomSpriteIndices("PALPLAN.HSQ", 14, 14),
             ]
         }
 
@@ -160,11 +177,14 @@ final class Scenery {
         let roomCount = firstOffset / 2
         var i = 0
 
-        resource.stream!.seek(UInt32(firstOffset))
-
         while i < roomCount {
+            // Each room starts at its entry in the offset table. Reading them
+            // back to back left the stream on the previous room's FF FF end,
+            // so every room after the first read 0xFF as its marker count.
+            resource.stream!.seek(UInt32(i * 2))
+            resource.stream!.seek(UInt32(resource.stream!.readUInt16LE()))
             var room = Room(offset: resource.stream!.offset)
-            let _ = resource.stream!.readByte() // Room marker count
+            room.markerCount = Int(resource.stream!.readByte())
             var markerIndex = 0
             
             /*engine.logger.log(.debug, "--------------------------------------------------------------------------------------")
@@ -258,9 +278,30 @@ final class Scenery {
         
         sprite.setPalette()
     }
+
+
+    // Room markers are cached into the room framebuffer, so their palette
+    // must be restored even when the room geometry is not redrawn.
+    func setCharacterPalette() {
+        characterSprite.setPalette()
+    }
+
+
+    // Some room sheets (notably BALCON.HSQ) intentionally omit the shared
+    // command-panel palette. POR.HSQ carries that common block.
+    func setSharedPalette() {
+        Scenery.panelSheet.setPalette()
+    }
+    /// POR.HSQ carries the panel's palette block, for every place.
+    private static let panelSheet = Sprite("POR.HSQ")
     
     
     func drawRoom(_ index: Int, buffer: PixelBuffer) {
+        guard index >= 0 && index < rooms.count else {
+            engine.logger.log(.error, "drawRoom(): invalid room index \(index) / \(rooms.count)")
+            return
+        }
+
         let room = rooms[index]
         
         var i = 0
@@ -296,6 +337,9 @@ final class Scenery {
         
         let frameInfo = characterSprite.frame(at: Int(character.rawValue))
         let scale = CGFloat((frameInfo.width << 8) / marker.scale) / CGFloat(frameInfo.width)
+        if ProcessInfo.processInfo.environment["DUNE_LOG_MARKERS"] != nil {
+            engine.logger.log(.debug, "marker \(marker.index) at \(marker.pt.x),\(marker.pt.y) scale \(marker.scale) -> PERS \(character.rawValue) \(frameInfo.width)x\(frameInfo.height)")
+        }
         
         var fx: SpriteEffect {
             return .transform(offset: marker.paletteOffset, flipX: marker.flipX, flipY: marker.flipY, scale: scale)
@@ -320,6 +364,9 @@ final class Scenery {
     
     
     private func sprite(at index: Int) -> Sprite? {
+        if let name = sheetOverride, let sprite = sheetCache[name] {
+            return sprite
+        }
         for s in spriteIndices {
             if index >= s.indexStart && index <= s.indexEnd {
                 return s.sprite

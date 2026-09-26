@@ -9,6 +9,9 @@ import Foundation
 
 final class Main: DuneNode {
     private var queue = Queue<DuneNodeParams>()
+    // The comparison build should enter gameplay directly. The original
+    // copy-protection node still waits for typed input even when bypassed.
+    private let skipCopyProtection = true
 
     init() {
         super.init("Main")
@@ -28,11 +31,15 @@ final class Main: DuneNode {
             self.onNodeEvent(nodeData)
         }
         
-        queue.enqueue(DuneNodeParams("Logo"))
-        queue.enqueue(DuneNodeParams("Intro"))
-        queue.enqueue(DuneNodeParams("Credits"))
-        queue.enqueue(DuneNodeParams("Prologue"))
-        queue.enqueue(DuneNodeParams("CopyProtection", [ "bypassProtection": true ]))
+        if !DevHarness.shared.startInGame {
+            queue.enqueue(DuneNodeParams("Logo"))
+            queue.enqueue(DuneNodeParams("Intro"))
+            queue.enqueue(DuneNodeParams("Credits"))
+            queue.enqueue(DuneNodeParams("Prologue"))
+        }
+        if !skipCopyProtection && !DevHarness.shared.startInGame {
+            queue.enqueue(DuneNodeParams("CopyProtection", [ "bypassProtection": true ]))
+        }
         queue.enqueue(DuneNodeParams("Game"))
 
         guard let itemConfig = queue.dequeueFirst() else {
@@ -96,7 +103,7 @@ final class Main: DuneNode {
         }
         
         // Prologue iterates screen by screen
-        if activeNode.name == "Prologue" || activeNode.name == "CopyProtection" {
+        if activeNode.name == "Prologue" || activeNode.name == "CopyProtection" || activeNode.name == "Game" {
             super.onKey(key)
         } else {
             moveToNextNode()

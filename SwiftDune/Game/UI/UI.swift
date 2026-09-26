@@ -27,6 +27,8 @@ enum UILeftPanel: Int {
     case bookClosed = 1
     case bookOpen
     case globe
+    /// The flat map: the eye frame with the planet (ICONES 6, 0x0D).
+    case map
 }
 
 enum UIRightPanel: Int {
@@ -42,8 +44,15 @@ final class UI: DuneNode {
     
     private var leftPanel: UILeftPanel = .bookClosed
     private var rightPanel: UIRightPanel = .roomDirections
-    private var directions: UIDirection = [.up, .down, .right]
+    // The first playable palace room supports all four exits.  Keeping the
+    // left arrow in the initial state also avoids making a real exit appear
+    // disabled before the room graph has been queried.
+    private var directions: UIDirection = .all
     private var menuItems: [UInt16] = []
+    private var menuCaptions: [String]? = nil
+    private var menuGreyed: [Bool]? = nil
+    private var dayNumber = 1
+    private var phase: GamePhase = .dawn
     
     private var commands: Sentence?
     private var font: GameFont?
@@ -88,7 +97,7 @@ final class UI: DuneNode {
         guard let uiSprite = uiSprite else {
             return
         }
-                
+
         // Block
         uiSprite.drawFrame(15, x: 126, y: 148, buffer: buffer)
         uiSprite.drawFrame(14, x: 92, y: 152, buffer: buffer)
@@ -122,16 +131,33 @@ final class UI: DuneNode {
             uiSprite.drawFrame(52, x: 20, y: 168, buffer: buffer)
             uiSprite.drawFrame(53, x: 36, y: 172, buffer: buffer)
             break
+          case .map:
+            uiSprite.drawFrame(6, x: 0, y: 152, buffer: buffer)
+            uiSprite.drawFrame(0x0D, x: 22, y: 161, buffer: buffer)
         }
       
-        // Characters
-        uiSprite.drawFrame(64, x: 35, y: 182, buffer: buffer)
-        uiSprite.drawFrame(64, x: 58, y: 182, buffer: buffer)
+        // Companion buttons belong to the normal room HUD only.  The DOS
+        // book and map/globe friezes replace this area with their own panel;
+        // drawing the room buttons there leaves two stray squares over the
+        // left-bottom corner.
+        if leftPanel == .bookClosed {
+            // Companion slots ds:1152/1153 (record byte 14); ICONES 0x41 + id,
+            // 64 = empty box.
+            let slots = [World.shared.b(0x1152), World.shared.b(0x1153)]
+            uiSprite.drawFrame(slots[0] == 0xFF ? 64 : 0x41 + UInt16(slots[0]), x: 35, y: 182, buffer: buffer)
+            uiSprite.drawFrame(slots[1] == 0xFF ? 64 : 0x41 + UInt16(slots[1]), x: 58, y: 182, buffer: buffer)
+        }
 
         // Right part
         switch rightPanel {
           case .mapDirections:
+            // The flat map's arrows (seg000:d792 frieze; ScummVM drawPanelExtras).
             uiSprite.drawFrame(41, x: 266, y: 171, buffer: buffer)
+            uiSprite.drawFrame(37, x: 267, y: 162, buffer: buffer)
+            uiSprite.drawFrame(38, x: 285, y: 171, buffer: buffer)
+            uiSprite.drawFrame(39, x: 267, y: 184, buffer: buffer)
+            uiSprite.drawFrame(40, x: 254, y: 171, buffer: buffer)
+            uiSprite.drawFrame(53, x: 266, y: 171, buffer: buffer)
           case .roomDirections:
             uiSprite.drawFrame(33, x: 255, y: 162, buffer: buffer)
             uiSprite.drawFrame(36, x: 269, y: 173, buffer: buffer)
@@ -159,6 +185,16 @@ final class UI: DuneNode {
     }
   
   
+    private static let sunPositions: [(x: Int16, y: Int16)?] = [
+        (6, 187), (6, 186), (6, 185), (7, 183), (9, 182), (10, 181), (13, 181), (16, 181),
+        (18, 182), (20, 183), (20, 185), (20, 186), (20, 187), nil, nil, nil
+    ]
+    private static let moonPositions: [(x: Int16, y: Int16)?] = [
+        (25, 186), (26, 188), nil, nil, nil, nil, nil, nil,
+        nil, nil, nil, (8, 188), (9, 186), (12, 183), (17, 182), (23, 183)
+    ]
+
+
     private func renderTimeAndDay(_ buffer: PixelBuffer) {
         guard let uiSprite = uiSprite,
               let font = font else {
@@ -166,10 +202,17 @@ final class UI: DuneNode {
         }
       
         font.paletteIndex = lightColorIndex
-        font.render("1", rect: dayTextRect, buffer: buffer, alignment: .center, style: .small)
+        font.render(String(dayNumber), rect: dayTextRect, buffer: buffer, alignment: .center, style: .small)
       
-        uiSprite.drawFrame(74, x: 6, y: 184, buffer: buffer)
-        //uiSprite.drawFrame(75, x: 8, y: 188, buffer: buffer)
+        // Sun (ICONES 0x4A) and moon (0x4B) positions for each of the 16
+        // periods of a day: the table at ds:1E7E (ScummVM panel.cpp).
+        let period = World.shared.hour
+        if let sun = UI.sunPositions[period] {
+            uiSprite.drawFrame(0x4A, x: sun.x, y: sun.y, buffer: buffer)
+        }
+        if let moon = UI.moonPositions[period] {
+            uiSprite.drawFrame(0x4B, x: moon.x, y: moon.y, buffer: buffer)
+        }
     }
     
     
@@ -201,14 +244,18 @@ final class UI: DuneNode {
 
             uiSprite.drawFrame(27, x: 92, y: y, buffer: buffer)
 
-            if i == selectedMenuIndex {
+            let greyed = menuGreyed?.indices.contains(i) == true && menuGreyed![i]
+            if i == selectedMenuIndex && !greyed && i < menuItems.count {
                 Primitives.fillRect(menuItemBackgroundRect, 250, buffer, isOffset: false)
             }
 
             if i < menuItems.count {
-                let sentence = commands.sentence(at: menuItems[i])
-                font.paletteIndex = i == selectedMenuIndex ? darkColorIndex : lightColorIndex
-                font.render(sentence, rect: menuItemTextRect, buffer: buffer, style: .small)
+                let sentence = menuCaptions?.indices.contains(i) == true
+                    ? menuCaptions![i]
+                    : commands.sentence(at: menuItems[i])
+                font.paletteIndex = greyed ? 246 : i == selectedMenuIndex ? darkColorIndex : lightColorIndex
+                let row = font.fit(sentence, width: Int(menuItemTextRect.width) - 2, style: .small)
+                font.render(row, rect: menuItemTextRect, buffer: buffer, style: .small)
             }
 
             i += 1
@@ -218,8 +265,13 @@ final class UI: DuneNode {
     
     func onUIEvent(_ e: UIStateEventData) {
         self.menuItems = e.items
+        self.menuCaptions = e.captions
+        self.menuGreyed = e.greyed
         self.leftPanel = e.leftPanel
         self.rightPanel = e.rightPanel
+        self.directions = e.directions
+        self.dayNumber = e.day
+        self.phase = e.phase
     }
 }
 
@@ -228,6 +280,13 @@ struct UIStateEventData {
     var leftPanel: UILeftPanel
     var rightPanel: UIRightPanel
     var items: [UInt16]
+    var directions: UIDirection = .all
+    var day: Int = 1
+    var phase: GamePhase = .dawn
+    var captions: [String]? = nil
+    /// Greyed rows: drawn in colour 246 (dark + 3), not selectable, no
+    /// highlight (Panel::setRowDisabled in the ScummVM engine).
+    var greyed: [Bool]? = nil
 }
 
 
