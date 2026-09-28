@@ -7,7 +7,9 @@
 
 import Foundation
 import CoreGraphics
+#if os(macOS)
 import AppKit
+#endif
 
 
 struct PaletteChunk {
@@ -79,6 +81,7 @@ final class Palette {
     }
     
     
+    #if os(macOS)
     func nsColor(at index: Int) -> NSColor {
         let color: UInt32 = rawPointer[index]
 
@@ -103,9 +106,11 @@ final class Palette {
         
         return colors
     }
+    #endif
 }
 
 
+#if os(macOS)
 extension NSColor {
     var asHexString: String {
         return "#000000"
@@ -118,3 +123,4 @@ extension NSColor {
         */
     }
 }
+#endif

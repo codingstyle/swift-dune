@@ -7,6 +7,13 @@
 
 import Foundation
 
+enum DesertMove {
+    case up
+    case right
+    case down
+    case left
+}
+
 final class DesertWalk: DuneNode {
     private var contextBuffer = PixelBuffer(width: 320, height: 152)
     
@@ -20,6 +27,9 @@ final class DesertWalk: DuneNode {
     
     private var transitionIn: TransitionEffect = .none
     private var transitionOut: TransitionEffect = .none
+    private var interactive = false
+    private var destinationCode = 0
+    private var travelStep = 0
     
     init() {
         super.init("DesertWalk")
@@ -30,6 +40,8 @@ final class DesertWalk: DuneNode {
         dunesSprite = Sprite("DUNES.HSQ")
         dunes2Sprite = Sprite("DUNES2.HSQ")
         sky = Sky()
+        currentTime = 0.0
+        contextBuffer.tag = 0x0000
     }
     
     
@@ -41,12 +53,32 @@ final class DesertWalk: DuneNode {
         transitionIn = .none
         transitionOut = .none
         sky = nil
+        interactive = false
+        destinationCode = 0
+        travelStep = 0
+        contextBuffer.tag = 0x0000
     }
     
     
     override func onParamsChange() {
         if let dayMode = params["dayMode"] {
             self.dayMode = dayMode as! DuneLightMode
+        }
+
+        if let interactive = params["interactive"] as? Bool {
+            self.interactive = interactive
+            self.currentTime = 0.0
+            self.contextBuffer.tag = 0x0000
+        }
+
+        if let destinationCode = params["destinationCode"] as? Int {
+            self.destinationCode = destinationCode
+            self.travelStep = 0
+            self.contextBuffer.tag = 0x0000
+        }
+
+        if let travelStep = params["travelStep"] as? Int {
+            self.travelStep = travelStep
         }
 
         if let duration = params["duration"] {
@@ -66,7 +98,7 @@ final class DesertWalk: DuneNode {
     override func update(_ elapsedTime: TimeInterval) {
         currentTime += elapsedTime
         
-        if currentTime > duration {
+        if !interactive && currentTime > duration {
             EventManager.nodeEndedEvent.notify(NodeEventData(self.name))
             return
         }
@@ -77,6 +109,22 @@ final class DesertWalk: DuneNode {
         
         sky.lightMode = dayMode
         sky.setPalette()
+    }
+
+
+    // Movement keeps the exact palace destination code and updates the shared
+    // world state. The desert renderer remains data-backed while the original
+    // map-neighbour records are being decoded; it never fabricates a route.
+    func move(_ direction: DesertMove) {
+        guard interactive else { return }
+
+        switch direction {
+        case .up, .right, .down, .left:
+            travelStep = (travelStep + 1) % 4
+        }
+        GameState.shared.recordTravelStep()
+        contextBuffer.tag = 0x0000
+        currentTime = 0.0
     }
     
     

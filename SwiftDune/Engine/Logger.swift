@@ -24,7 +24,24 @@ final class Logger {
     private let osLogger = os.Logger.init(subsystem: "com.dune.logger", category: "Engine")
 
     
+    #if os(iOS)
+    /// Documents/dune-ios.log, readable from the Files app and AirDrop-able.
+    private let logQueue = DispatchQueue(label: "com.dune.logfile.queue")
+    private lazy var logHandle: FileHandle? = {
+        let url = DuneEngine.outputDirectory.appendingPathComponent("dune-ios.log")
+        FileManager.default.createFile(atPath: url.path, contents: nil)
+        return try? FileHandle(forWritingTo: url)
+    }()
+    #endif
+
+
     func log(_ level: LogLevel, _ s: String) {
+          #if os(iOS)
+          logQueue.async { [weak self] in
+              let line = "\(Date()) [\(level)] \(s)\n"
+              self?.logHandle?.write(line.data(using: .utf8)!)
+          }
+          #endif
           switch level {
             case .debug:
               self.osLogger.debug("\(s)")

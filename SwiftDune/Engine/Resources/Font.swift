@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import AppKit
+import CoreGraphics
 
 
 enum FontAlignment {
@@ -40,10 +40,33 @@ final class GameFont {
     var paletteIndex: UInt8 = 128
     
     init() {
-        self.resource = Resource("DUNECHAR.HSQ")
+        // The CD keeps the same font as DNCHAR.BIN (the ScummVM engine's
+        // Panel loads it first).
+        self.resource = DuneArchive.isCD ? Resource("DNCHAR.BIN", uncompressed: true) : Resource("DUNECHAR.HSQ")
 
         resource.stream!.seek(0)
         self.charWidths = resource.stream!.readBytes(256)
+    }
+
+    /// Convert a Swift character to an index in the original DOS font.
+    ///
+    /// The command text is decoded from the game's ISO-8859-1 data, but Swift
+    /// strings can contain Unicode scalars which do not have a corresponding
+    /// glyph in DUNECHAR.HSQ.  The resource has 128 glyphs per font size,
+    /// even though its width table has 256 entries. Never let an extended
+    /// value escape into the glyph data: story text must remain renderable.
+    private func characterIndex(_ character: Swift.Character) -> Int {
+        guard let scalar = String(character).unicodeScalars.first,
+              scalar.value < 128 else {
+            return charWidths.indices.contains(63) ? 63 : 0 // '?'
+        }
+
+        let index = Int(scalar.value)
+        return charWidths.indices.contains(index) ? index : (charWidths.indices.contains(63) ? 63 : 0)
+    }
+
+    private var spaceWidth: Int {
+        charWidths.indices.contains(32) ? Int(charWidths[32]) : 5
     }
     
     
@@ -57,7 +80,7 @@ final class GameFont {
         // 3. For each line compute space for justification and render
 
         let charHeight: Int = style == .normal ? 9 : 7
-        var spaceWidth = 5 //Int(self.charWidths[32])
+        var spaceWidth = self.spaceWidth
 
         if style == .small {
             spaceWidth = min(6, spaceWidth)
@@ -103,14 +126,53 @@ final class GameFont {
     }
     
     
+    /// How many lines render() will use for `text` in `width` pixels.
+    func lineCount(_ text: String, width: Int, style: FontSize) -> Int {
+        let space = style == .small ? min(6, spaceWidth) : spaceWidth
+        var lines = 1, lineWidth = 0, words = 0
+        for word in text.split(separator: /\s/) {
+            let w = self.width(for: String(word), style: style)
+            if lineWidth + space * (words + 1) + w < width {
+                lineWidth += w
+                words += 1
+            } else {
+                lines += 1
+                lineWidth = w
+                words = 1
+            }
+        }
+        return lines
+    }
+
+
+    /// The longest prefix of `text` that fits in `width` pixels on one line
+    /// (command rows never wrap).
+    func fit(_ text: String, width: Int, style: FontSize) -> String {
+        // Measured the way render() lays a line out: word widths plus one
+        // space width between words.
+        let space = style == .small ? min(6, spaceWidth) : spaceWidth
+        func lineWidth(_ line: String) -> Int {
+            let words = line.split(separator: " ")
+            // render() keeps a word on the line while the words so far plus
+            // one space per word stay under the width.
+            return words.reduce(0) { $0 + self.width(for: String($1), style: style) } + space * words.count
+        }
+        var result = text
+        while !result.isEmpty && lineWidth(result) >= width {
+            result.removeLast()
+        }
+        return result
+    }
+
+
     private func width(for text: String, style: FontSize) -> Int {
         var width = 0
         var i = 0
         
         while i < text.count {
-            let char = text[i].utf8.first!.byteSwapped
-            
-            var charWidth = self.charWidths[Int(char)]
+            let char = characterIndex(text[i])
+
+            var charWidth = self.charWidths[char]
             
             if style == .small {
                 charWidth = min(6, charWidth)
@@ -130,38 +192,45 @@ final class GameFont {
         let charHeight: UInt32 = style == .normal ? 9 : 7
         let offset: UInt32 = style == .normal ? 256 : 1408
         var spaces: [Int] = []
+
+        // Empty sentences are valid in the original command table.  More
+        // importantly, centered text still needs an entry for every gap
+        // between words: the old code only populated `spaces` for left and
+        // justified text, then indexed it while drawing a centered sentence.
+        guard !words.isEmpty else {
+            return
+        }
+
+        var interWordSpace = self.spaceWidth
+        if style == .small {
+            interWordSpace = min(6, interWordSpace)
+        }
         
         if alignment == .justify {
             let wordsWidth = words.reduce(0) { $0 + $1.size }
-            let spaceSize = (Int(width) - wordsWidth) / (words.count - 1)
+            let gapCount = words.count - 1
+            if gapCount == 0 {
+                spaces = []
+            } else {
+                let spaceSize = (Int(width) - wordsWidth) / gapCount
 
-            spaces = Array<Int>(repeating: spaceSize, count: words.count - 1)
+                spaces = Array<Int>(repeating: spaceSize, count: gapCount)
 
-            let remainingSpace = Int(width) - wordsWidth - (spaceSize * (words.count - 1))
+                let remainingSpace = max(0, Int(width) - wordsWidth - (spaceSize * gapCount))
             
-            for i in 0..<remainingSpace {
-                spaces[i % (spaces.count)] += 1
+                for i in 0..<remainingSpace {
+                    spaces[i % spaces.count] += 1
+                }
             }
         } else if alignment == .left {
-            var spaceWidth = Int(self.charWidths[32])
-            
-            if style == .small {
-                spaceWidth = min(6, spaceWidth)
-            }
-            
-            spaces = Array<Int>(repeating: spaceWidth, count: words.count - 1)
+            spaces = Array<Int>(repeating: interWordSpace, count: words.count - 1)
         } else if alignment == .center {
             // Calculate text size including spaces
             let wordsWidth = words.reduce(0) { $0 + $1.size }
-            var spaceWidth = Int(self.charWidths[32])
-          
-            if style == .small {
-                spaceWidth = min(6, spaceWidth)
-            }
-          
-            let textWidth = wordsWidth + (spaceWidth * (words.count - 1))
+            let textWidth = wordsWidth + (interWordSpace * (words.count - 1))
             
             currentX += (Int(width) - textWidth) / 2
+            spaces = Array<Int>(repeating: interWordSpace, count: words.count - 1)
         }
         
         var j = 0
@@ -171,14 +240,14 @@ final class GameFont {
             let word = words[j]
 
             // Spacing
-            if j > 0 && j < words.count {
+            if j > 0, spaces.indices.contains(j - 1) {
                 currentX += spaces[j - 1]
             }
 
             while i < word.text.count {
-                let char = word.text[i].utf8.first!.byteSwapped
-                
-                var charWidth = self.charWidths[Int(char)]
+                let char = characterIndex(word.text[i])
+
+                var charWidth = self.charWidths[char]
                 
                 if style == .small {
                     charWidth = min(6, charWidth)
@@ -196,9 +265,19 @@ final class GameFont {
                     var charX = 0
                     
                     while charX < charWidth {
-                        let destOffset = (currentY + charY) * buffer.width + (currentX + charX)
+                        let destinationX = currentX + charX
+                        let destinationY = currentY + charY
 
-                        if charLine & 0x80 > 0 {
+                        // Results and dialogue text come from binary sentence
+                        // tables and can be wider than their destination
+                        // rectangle. Clip at the framebuffer edge instead of
+                        // allowing a long line to crash the app.
+                        if charLine & 0x80 > 0,
+                           destinationX >= 0,
+                           destinationX < buffer.width,
+                           destinationY >= 0,
+                           destinationY < buffer.height {
+                            let destOffset = destinationY * buffer.width + destinationX
                             buffer.rawPointer[destOffset] = paletteIndex
                         }
 

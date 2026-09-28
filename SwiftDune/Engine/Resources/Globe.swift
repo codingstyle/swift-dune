@@ -124,6 +124,10 @@ final class Globe {
     private var tilt: Int16 = 0
     private var rotation: UInt16 = 0
     private var initialRotation: UInt16 = 0
+    // Intro scenes use a scripted, time-derived rotation. The interactive
+    // Fresk globe must retain button changes instead of having update() write
+    // the scripted value back on the next frame.
+    private var usesScriptedRotation = true
 
     init() {
         let tablatResource = Resource("TABLAT.BIN", uncompressed: true)
@@ -329,38 +333,56 @@ final class Globe {
         self.rotation = rotation
         precalculateGlobeRotationLookupTable(rotation)
     }
+
+
+    func beginInteractiveControl() {
+        usesScriptedRotation = false
+    }
+
+
+    func center() {
+        setOrientation(tilt: 0, rotation: 0)
+    }
     
     
     func move(_ move: GlobeMove) {
         switch move {
         case .left:
             if self.rotation > UInt16.min {
-                self.rotation -= 100
+                self.rotation = self.rotation &- 4096
             } else {
-                self.rotation = 65500
+                self.rotation = 61440
             }
             break
         case .right:
-            if self.rotation < 65500 {
-                self.rotation += 100
+            if self.rotation <= 61439 {
+                self.rotation += 4096
             } else {
                 self.rotation = 0
             }
             break
         case .up:
-            self.tilt -= 1
+            self.tilt -= 8
             break
         case .down:
-            self.tilt += 1
+            self.tilt += 8
             break
         }
 
+        self.tilt = Math.clamp(self.tilt, -96, 96)
         setOrientation(tilt: self.tilt, rotation: self.rotation)
     }
     
     
     func update(_ time: TimeInterval) {
-        let rotation = initialRotation + UInt16(Int(ceil(time) * 200.0) % 65000)
+        guard usesScriptedRotation else {
+            return
+        }
+
+        // Rotation is a 16-bit DOS angle. The scripted intro can add more
+        // than one full turn to the initial angle; normal Swift addition
+        // traps when that crosses 65535, while the original engine wraps.
+        let rotation = initialRotation &+ UInt16(Int(ceil(time) * 200.0) % 65000)
         self.rotation = rotation
 
         self.precalculateGlobeRotationLookupTable(rotation)
