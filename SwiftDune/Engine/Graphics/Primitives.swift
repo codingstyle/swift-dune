@@ -157,7 +157,8 @@ struct Primitives {
     
     
     static func drawGradientLineWithNoise(_ pixelBuffer: PixelBuffer, _ x: UInt16, _ y: UInt16, _ w: UInt16, _ bp: inout UInt16, _ si: UInt16, _ di: Int16, _ color: UInt16) {
-        var offset = 320 * Int(y) + Int(x)
+        var pixelX = Int(x)
+        let pixelY = Int(y)
         var w = w
         var color = Int(color)
         
@@ -172,8 +173,13 @@ struct Primitives {
             let v = (bp & 3) + ((UInt16(color) >> 8) & 0xFF) - 1
             color += Int(di)
 
-            pixelBuffer.rawPointer[offset] = UInt8(truncatingIfNeeded: (v & 0xFF))
-            offset += 1
+            // The floppy renderer clips writes at the screen edge. Preserve
+            // the gradient/noise sequence without writing outside the Swift
+            // pixel buffer when a polygon reaches an edge.
+            if pixelX >= 0 && pixelX < pixelBuffer.width && pixelY >= 0 && pixelY < pixelBuffer.height {
+                pixelBuffer.rawPointer[pixelY * pixelBuffer.width + pixelX] = UInt8(truncatingIfNeeded: (v & 0xFF))
+            }
+            pixelX += 1
             w -= 1
         } while w > 0
     }
@@ -187,9 +193,18 @@ struct Primitives {
         var color = (command & 0xFF) << 8
 
         //if (command & 0x0100) == 0 {
+            let polygonHeight = Int(polygon.finalY) - Int(polygon.startY)
+            guard polygonHeight > 0 else {
+                return
+            }
+
+            let drawableRows = min(
+                polygonHeight,
+                min(polygon.polygonSideUp.count, polygon.polygonSideDown.count)
+            )
             var y: UInt16 = 0
-            
-            while y < polygon.finalY - polygon.startY {
+
+            while Int(y) < drawableRows {
                 var x0 = polygon.polygonSideUp[Int(y)]
                 var x1 = polygon.polygonSideDown[Int(y)]
                 

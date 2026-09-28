@@ -311,6 +311,7 @@ final class ResourceStream {
     func readByte(peek: Bool = false) -> UInt8 {
         if offset >= size {
             print("Trying to read offset \(offset) with size \(size)")
+            return 0
         }
         
         let b0 = data[Int(offset)]
@@ -390,7 +391,7 @@ final class ResourceStream {
     
     
     func saveAs(_ fileName: String) {
-        let downloadsDirectory = FileManager.default.urls(for: .downloadsDirectory, in: .userDomainMask).first!
+        let downloadsDirectory = DuneEngine.outputDirectory
         let fileURL = downloadsDirectory.appendingPathComponent(fileName)
         
         let dataToWrite = Data(data)
@@ -418,13 +419,36 @@ final class Resource
     
     private var fileSize: UInt64 = 0
     
+    /// Asset cache: every file is read and decompressed once per run.
+    /// Arrays are copy-on-write, so all Resources of a file share one copy
+    /// (scenes re-create Scenery, Sprite and Sentence objects on every room
+    /// change and overlay).
+    private static var cache: [String: [UInt8]] = [:]
+    private static let cacheLock = NSLock()
+
     init(_ fileName: String, uncompressed: Bool = false) {
         self.fileName = fileName
+        let key = uncompressed ? "raw:" + fileName : fileName
+
+        Resource.cacheLock.lock()
+        let cached = Resource.cache[key]
+        Resource.cacheLock.unlock()
+        if let cached = cached {
+            unpackedData = cached
+            stream = ResourceStream(cached)
+            return
+        }
 
         if uncompressed {
             self.parseRaw()
         } else {
             self.parseHSQ()
+        }
+
+        if !unpackedData.isEmpty {
+            Resource.cacheLock.lock()
+            Resource.cache[key] = unpackedData
+            Resource.cacheLock.unlock()
         }
     }
     
@@ -434,7 +458,8 @@ final class Resource
         let fileNameWithoutExtension = String(fileComponents[0])
         let fileExtension = String(fileComponents[1])
 
-        guard let filePath = Bundle.main.path(forResource: fileNameWithoutExtension, ofType: fileExtension, inDirectory: "DuneFiles") else {
+        _ = (fileNameWithoutExtension, fileExtension)
+        guard let filePath = DuneArchive.path(fileName) else {
             engine.logger.log(.error, "\(fileName): not found.")
             return
         }
@@ -473,7 +498,7 @@ final class Resource
             return
         }
 
-        guard let filePath = Bundle.main.path(forResource: fileName.replacingOccurrences(of: ".\(fileExtension)", with: ""), ofType: fileExtension, inDirectory: "DuneFiles") else {
+        guard let filePath = DuneArchive.path(fileName) else {
             engine.logger.log(.error, "\(fileName): not found.")
             return
         }
@@ -691,4 +716,3 @@ extension FileHandle {
         }
     }
 }
-

@@ -8,6 +8,11 @@ It is written in Swift 5.6 and runs on macOS.
 You need the original assets from the game to play it.
 Create a subfolder `DuneFiles` and place the files in it.
 
+## iPhone and iPad
+
+The game also builds for iOS and iPadOS 16 and later, with touch controls:
+see [IOS_PORT.md](IOS_PORT.md).
+
 ## How to use
 
 There are 2 applications:

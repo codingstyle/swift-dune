@@ -8,10 +8,13 @@
 import Foundation
 
 
-enum DuneCharacter {
+enum DuneCharacter: Equatable {
   case none
   case leto
   case jessica
+  case thufir
+  case duncan
+  case gurney
   case paul
   case chani
   case harah
@@ -23,6 +26,10 @@ enum DuneCharacter {
   case fremen2
   case fremen3
   case smuggler
+  /// The Emperor (EMPR.HSQ) speaks through the COMM room.
+  case emperor
+  /// The Harkonnen captain (HARK.HSQ).
+  case captain
   
   var resourceName: String {
     switch self {
@@ -30,6 +37,12 @@ enum DuneCharacter {
       "LETO.HSQ"
     case .jessica:
       "JESS.HSQ"
+    case .thufir:
+      "HAWA.HSQ"
+    case .duncan:
+      "IDAH.HSQ"
+    case .gurney:
+      "GURN.HSQ"
     case .paul:
       "PAUL.HSQ"
     case .chani:
@@ -52,6 +65,10 @@ enum DuneCharacter {
       "FRM3.HSQ"
     case .smuggler:
       "SMUG.HSQ"
+    case .emperor:
+      "EMPR.HSQ"
+    case .captain:
+      "HARK.HSQ"
     case .none:
       ""
     }

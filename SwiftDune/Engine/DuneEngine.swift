@@ -6,7 +6,11 @@
 //
 
 import Foundation
+#if os(macOS)
 import AppKit
+#else
+import UIKit
+#endif
 import Darwin
 import UniformTypeIdentifiers
 
@@ -31,6 +35,11 @@ final class DuneEngine {
     private var lastTime: TimeInterval = 0.0
 
     var rootNode: DuneNode
+
+    /// Palettes applied after every node has drawn this frame (the palette
+    /// is shared; a backdrop whose colours must win over overlays drawn on
+    /// top of it registers here, e.g. the vision dream's VIS.HSQ).
+    var finalPalettes: [() -> Void] = []
     
     var intermediateFrameBuffer: PixelBuffer
     
@@ -105,6 +114,7 @@ final class DuneEngine {
                 let elapsedTime = currentTime - lastTime
                 gameTime += elapsedTime
                 
+                DevHarness.shared.tick(gameTime, self)
                 processInput()
                 
                 update(elapsedTime)
@@ -138,6 +148,8 @@ final class DuneEngine {
         
         currentOffscreenBuffer.clearBuffer()
         rootNode.render(currentOffscreenBuffer)
+        finalPalettes.forEach { $0() }
+        finalPalettes.removeAll()
         
         // Sends update to the front
         DispatchQueue.main.sync {
@@ -164,6 +176,21 @@ final class DuneEngine {
     func exitProgram(_ message: String?) {
         stop()
         
+        #if os(iOS)
+        // iOS apps must not quit themselves; show the message and leave the
+        // app idle so the user can read it and swipe it away.
+        if let message = message {
+            logger.log(.error, "exitProgram: \(message)")
+            DispatchQueue.main.async {
+                let alert = UIAlertController(title: "Dune", message: message, preferredStyle: .alert)
+                UIApplication.shared.connectedScenes
+                    .compactMap { ($0 as? UIWindowScene)?.keyWindow?.rootViewController }
+                    .first?
+                    .present(alert, animated: true)
+            }
+        }
+        return
+        #else
         if let message = message {
             DispatchQueue.main.sync {
                 // Close all open windows
@@ -182,5 +209,17 @@ final class DuneEngine {
         }
         
         exit(1)
+        #endif
+    }
+
+
+    /// Folder for screenshots, dumps and logs: Downloads on macOS, the app's
+    /// Documents folder on iOS (visible in the Files app, see Info.plist).
+    static var outputDirectory: URL {
+        #if os(iOS)
+        return FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+        #else
+        return FileManager.default.urls(for: .downloadsDirectory, in: .userDomainMask).first!
+        #endif
     }
 }

@@ -129,7 +129,10 @@ class DuneNode: Comparable {
     }
     
     func render(_ buffer: PixelBuffer) {
-        activeNodes.forEach { node in
+        // Rendering priority is meaningful for gameplay composites: scenery
+        // must land before the HUD, and overlays must land above both. The
+        // update list remains in attachment order for input dispatch.
+        activeNodes.sorted().forEach { node in
             node.render(buffer)
         }
     }

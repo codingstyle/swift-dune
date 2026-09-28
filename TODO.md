@@ -9,13 +9,13 @@
 
 ## Scenes
 
-- [ ] ADD: Ornithopter flight animated dunes
-- [ ] ADD: flat planet map with interpolation
+- [X] ADD: Ornithopter flight animated dunes (Flight.swift, used for travel; still sparser than the original)
+- [X] ADD: flat planet map with interpolation (MapRenderer, ported from dune-rust via the ScummVM engine)
 - [ ] UPDATE: improve sun rise animation
 
 ## Engine
 
-- [ ] ADD: create an asset cache and preload all resources for faster access
+- [X] ADD: create an asset cache (Resource keeps every decompressed file once; no preload)
 - [ ] UPDATE: node params as property wrappers ?
 - [ ] UPDATE: rewrite editor to properly use node system and engine
 
@@ -24,7 +24,7 @@
 - [ ] UPDATE: new animation system on Stars planet pan
 - [ ] ADD: Page flip transition on frame buffer
 - [ ] ADD: Move up transition on frame buffer
-- [ ] ADD: Wobble effect on frame buffer (visions)
+- [X] ADD: Wobble effect on frame buffer (visions) (VisionDream; the original's wave parameters are not decoded)
 
 ## Video
 
@@ -33,29 +33,30 @@
 ## UI 
 
 - [ ] ADD: dialogue panel background on characters
-- [ ] UPDATE: menu states (selected, disabled)
-- [ ] ADD: implement UI sun/moon and day number
-- [ ] ADD: implement UI bar characters going with Paul
-- [ ] ADD: globe settings
-- [ ] ADD: interpolated flat map
+- [X] UPDATE: menu states (selected, disabled) (greyed rows: colour 246, not selectable)
+- [X] ADD: implement UI sun/moon and day number (ds:1E7E positions, sky per period)
+- [X] ADD: implement UI bar characters going with Paul (companion slots ds:1152/1153)
+- [X] ADD: globe settings (SAVE, LOAD, OPTIONS: music, restart, exit)
+- [X] ADD: interpolated flat map (FlatMap scene)
 
 ## Game logic
 
-- [ ] ADD: dialogue panels
-- [ ] ADD: implement day timer 
-- [ ] ADD: sietch positions on map
-- [ ] ADD: implement global game variables
-- [ ] ADD: implement save file format
-- [ ] ADD: support string formatting in sentences
-- [ ] ADD: reverse engineer CONDIT.HSQ
-- [ ] ADD: reverse engineer DIALOGUE.HSQ
+- [X] ADD: dialogue panels (the original speech balloon, ICONES 0x1C)
+- [X] ADD: implement day timer (Game/World, runPeriod each period)
+- [X] ADD: sietch positions on map (place icons from the location table, tap to choose)
+- [X] ADD: implement global game variables (the executable's data segment, Game/World/World.swift)
+- [X] ADD: implement save file format (DUNE21S, Game/World/SaveGame.swift)
+- [X] ADD: support string formatting in sentences (Game/World/GameText.swift)
+- [X] ADD: reverse engineer CONDIT.HSQ (ported from the ScummVM engine)
+- [X] ADD: reverse engineer DIALOGUE.HSQ (ported from the ScummVM engine)
 
 ## Platform
 
-- [ ] FIX: high memory consumption from Metal renderer
+- [X] FIX: high memory consumption from Metal renderer (iOS: 27 MB at start, 34 MB after 65 s, no leak; macOS not investigated)
 - [ ] ADD: support Swift 6: CustomDebugStringConvertible and @DebugDescription, 
-- [ ] ADD: support different versions of Dune (detect Savegame)
+- [ ] ADD: support different versions of Dune (detect Savegame) (floppy/CD detected from the executable; CD not playable)
 - [ ] ADD: extend port to Linux and Windows
+- [X] ADD: iOS port (IOS_PORT.md)
 - [ ] ADD: support PC-CD versions
 
 # Archive

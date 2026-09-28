@@ -6,7 +6,10 @@
 //
 
 import Foundation
+import CoreGraphics
+#if os(macOS)
 import AppKit
+#endif
 
 
 struct DuneMouseClickEvent {
@@ -20,6 +23,7 @@ final class Mouse {
 
     var mouseClicks = Queue<DuneMouseClickEvent>()
 
+    #if os(macOS)
     init() {
         self.monitorID = NSEvent.addLocalMonitorForEvents(matching: [.mouseEntered, .mouseExited, .mouseMoved, .leftMouseUp]) { event in
             if self.processMouseEvent(event) {
@@ -80,5 +84,23 @@ final class Mouse {
         }
         
         return true
+    }
+    #endif
+
+
+    /// Maps a touch/pointer location inside the game view (whose bounds show
+    /// the whole 320x200 frame) to game coordinates. Used by the iOS front end.
+    func updateTouch(_ location: CGPoint, in bounds: CGRect, ended: Bool) {
+        guard bounds.width > 0, bounds.height > 0 else { return }
+
+        let x = (location.x - bounds.minX) * 320.0 / bounds.width
+        let y = (location.y - bounds.minY) * 200.0 / bounds.height
+
+        coordinates.x = Int16(max(0, min(319, x)))
+        coordinates.y = Int16(max(0, min(199, y)))
+
+        if ended {
+            mouseClicks.enqueue(DuneMouseClickEvent(point: coordinates))
+        }
     }
 }

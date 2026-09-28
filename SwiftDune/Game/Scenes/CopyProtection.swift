@@ -60,7 +60,7 @@ final class CopyProtection: DuneNode {
     
     override func onEnable() {
         thumbnails = Video("PRT.HNM")
-        sentences = Sentence(.command, language: .french)
+        sentences = Sentence(.command, language: .english)
         gameFont = GameFont()
 
         selectedFrameIndex = Math.random(0, 28)
