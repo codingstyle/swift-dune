@@ -6,9 +6,14 @@
 //  Header: time (u16), 0x02F7 (floppy; low byte 0xF7 = RLE marker), file
 //  length - 2 (u16); then an RLE body (marker, count, value):
 //    map stage bits, 4 pixels per byte          12,671 bytes
-//    an extra block of the executable's own     0xC6 floppy / 0xA2 CD
-//    DIALOGUE.HSQ with its said flags           4,464 bytes (floppy)
-//    the data segment vars[0 ..< savedSize]     0x126E floppy
+//    an extra block of the executable's own     0xA2
+//    DIALOGUE.HSQ with its said flags           4,464 floppy / 4,496 CD
+//      (its list header as near pointers: offset + 0xCFE9 floppy, 0xAA76 CD)
+//    a gap                                      36 floppy / 104 CD
+//    the data segment vars[0 ..< savedSize]     0x126E floppy / 0x1261 CD
+//  (checked against the original's saves; SwiftDune before 2026-09-28 wrote
+//  the header raw, the floppy gap before the table and no CD gap: such saves
+//  still load.)
 //
 //  Port of the ScummVM Dune engine's saves.cpp. The stage bits are the
 //  live map's (World.map, Ecology.swift): a load puts them back into each
@@ -29,10 +34,16 @@ final class SaveGame {
     private let world = World.shared
     private let story = Story.shared
     private var extra: [UInt8] = []
+    private var gap: [UInt8] = []
 
     private init() {}
 
-    private var extraSize: Int { world.isFloppy ? 0xC6 : 0xA2 }
+    private let extraSize = 0xA2
+    private var gapSize: Int { world.isFloppy ? 36 : 104 }
+    /// The dialogue list header is saved as near pointers.
+    private var pointerBase: Int { world.isFloppy ? 0xCFE9 : 0xAA76 }
+
+    private static func word(_ d: [UInt8], _ o: Int) -> Int { Int(d[o]) | Int(d[o + 1]) << 8 }
     /// Floppy saves keep 0x126E bytes of the segment; the CD 13 fewer.
     private var savedSize: Int { 0x1261 + (world.palaceTable - 0x1225) }
 
@@ -102,15 +113,30 @@ final class SaveGame {
             return false
         }
         let body = SaveGame.unpack(packed)
-        let dialogueSize = story.dialogue.data.count
-        let expected = SaveGame.mapFlagBytes + extraSize + dialogueSize + savedSize
+        story.dialogue.reset()
+        let fresh = story.dialogue.data
+        let dialogueSize = fresh.count
+        let headerSize = SaveGame.word(fresh, 0)
+        let map = SaveGame.mapFlagBytes
+        // The original's layout (header as pointers) or SwiftDune's old one
+        // (raw header; the floppy's 36 bytes before the table, no CD gap).
+        let original = body.count >= map + extraSize + 2
+            && SaveGame.word(body, map + extraSize) == (headerSize + pointerBase) & 0xFFFF
+        let tableAt = map + extraSize + (original || !world.isFloppy ? 0 : 36)
+        let gapLength = original ? gapSize : 0
+        let expected = tableAt + dialogueSize + gapLength + savedSize
         guard body.count >= expected else {
             DuneEngine.shared.logger.log(.error, "Saves: slot \(slot) holds \(body.count) bytes, \(expected) expected")
             return false
         }
-        var p = SaveGame.mapFlagBytes
-        extra = Array(body[p..<(p + extraSize)]); p += extraSize
-        story.dialogue.setData(Array(body[p..<(p + dialogueSize)])); p += dialogueSize
+        extra = Array(body[map..<(map + extraSize)])
+        // The header stays DIALOGUE.HSQ's; the lists and said flags are the save's.
+        var table = Array(body[tableAt..<(tableAt + dialogueSize)])
+        table.replaceSubrange(0..<headerSize, with: fresh[0..<headerSize])
+        story.dialogue.setData(table)
+        var p = tableAt + dialogueSize
+        gap = original ? Array(body[p..<(p + gapLength)]) : []
+        p += gapLength
         world.restore(Array(body[p..<(p + savedSize)]))
         // The map's flag bits, four cells to a byte, first cell in the top
         // bits (sub_1B427); restore() has reset the map to MAP.HSQ.
@@ -135,7 +161,14 @@ final class SaveGame {
             }
         }
         body += extra.count == extraSize ? extra : [UInt8](repeating: 0, count: extraSize)
-        body += story.dialogue.data
+        var table = story.dialogue.data
+        let headerSize = SaveGame.word(table, 0)
+        for i in stride(from: 0, to: headerSize, by: 2) {
+            let pointer = (SaveGame.word(table, i) + pointerBase) & 0xFFFF
+            table[i] = UInt8(pointer & 0xFF); table[i + 1] = UInt8(pointer >> 8)
+        }
+        body += table
+        body += gap.count == gapSize ? gap : [UInt8](repeating: 0, count: gapSize)
         body += world.vars[0..<savedSize]
 
         var packed: [UInt8] = [0, 0, SaveGame.rleMarker, world.isFloppy ? 0x02 : 0x00, 0, 0]

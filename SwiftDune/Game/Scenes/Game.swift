@@ -253,6 +253,14 @@ final class Game: DuneNode {
         publishMapUI()
     }
 
+    /// A game loaded from the globe opened over the map.
+    private func closeMapForLoad() {
+        guard mapActive else { return }
+        mapActive = false
+        movingTroop = nil
+        setNodeActive("FlatMap", false)
+    }
+
     private func closeMap() {
         mapActive = false
         movingTroop = nil
@@ -317,6 +325,11 @@ final class Game: DuneNode {
 
     private func handleMapClick(_ point: DunePoint) {
         let map = flatMap
+        // The globe in the map's left panel: the game menu (as in the original).
+        if point.x < 80 && point.y >= 152 {
+            showFresk()
+            return
+        }
         if let arrow = FlatMap.arrow(at: point) {
             if arrow == (0, 0) {
                 map.centreOn(world.currentLocation)
@@ -1848,7 +1861,7 @@ final class Game: DuneNode {
             return
         }
 
-        if mapActive {
+        if mapActive && !isOverlayActive("Fresk") {
             handleMapClick(event.point)
             return
         }
@@ -1890,6 +1903,7 @@ final class Game: DuneNode {
                             engine.exitProgram(nil)
                         case .loaded:
                             closeOverlay()
+                            closeMapForLoad()
                             gameState.reset()
                             showCurrentPlace()
                         case .restart:
@@ -1930,6 +1944,7 @@ final class Game: DuneNode {
                         engine.exitProgram(nil)
                     case .loaded:
                         closeOverlay()
+                        closeMapForLoad()
                         gameState.reset()
                         showCurrentPlace()
                     case .restart:

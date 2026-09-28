@@ -110,18 +110,21 @@ final class Fresk: DuneNode {
 
     /// Save/load rows: COMMAND 258-261 ("Log 1: DAY  0 / 12.00 a.m.", ...)
     /// with the slot's day and the period's label from COMMAND 266 (sixteen
-    /// 10-character labels), then EXIT GLOBE.
+    /// 10-character labels), then EXIT GLOBE. Row k is the file
+    /// DUNE21S<k+1>.SAV, as in the original (S0 is not one of the logs).
+    private static func file(_ row: Int) -> Int { row + 1 }
+
     private var slotCaptions: [String] {
         let labels = GameText.shared.command(266)
         var captions: [String] = []
         for slot in 0..<4 {
             var caption = GameText.shared.command(258 + slot)
-            if slot < 2, let time = SaveGame.shared.slotTime(slot) {
+            if slot < 2, let time = SaveGame.shared.slotTime(Fresk.file(slot)) {
                 let period = Int(time & 15)
                 let start = labels.index(labels.startIndex, offsetBy: min(10 * period, max(0, labels.count - 10)))
                 let label = labels.count >= 10 ? String(labels[start...].prefix(10)).trimmingCharacters(in: .whitespaces) : ""
                 caption = "Log \(slot + 1): DAY \(String(format: "%2d", time >> 4)) / \(label)"
-            } else if SaveGame.shared.slotTime(slot) == nil {
+            } else if SaveGame.shared.slotTime(Fresk.file(slot)) == nil {
                 caption += " -"
             }
             captions.append(caption)
@@ -299,12 +302,12 @@ final class Fresk: DuneNode {
         case .save:
             if index == 4 { return .close }
             // SAVE SUCCESSFUL (262) or *** SAVE ERROR (263) in the last row.
-            statusCaption = GameText.shared.command(SaveGame.shared.save(index) ? 262 : 263)
+            statusCaption = GameText.shared.command(SaveGame.shared.save(Fresk.file(index)) ? 262 : 263)
             publishMenuState()
             return .handled
         case .load:
             if index == 4 { return .close }
-            return SaveGame.shared.load(index) ? .loaded : .handled
+            return SaveGame.shared.load(Fresk.file(index)) ? .loaded : .handled
         case .options:
             switch index {
             case 0:
