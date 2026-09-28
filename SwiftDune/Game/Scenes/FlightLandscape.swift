@@ -130,7 +130,7 @@ final class FlightLandscape: DuneNode {
     private var clipClock: TimeInterval = 0
     private var stepClock: TimeInterval = 0
     static let cdStepSeconds = 3.834
-    private static let clipFrameSeconds = 0.083   // the HNM frame time without a soundtrack
+    static let clipFrameSeconds = 0.08   // 12.5 frames/s (the DNCDPRG capture)
 
     init() {
         super.init("FlightLandscape")
@@ -363,15 +363,14 @@ final class FlightLandscape: DuneNode {
         stepCountdown -= 1
     }
 
-    /// The terrain ahead for the CD's clip choice: the mean of the current
-    /// cell's and the cell 6 steps ahead's heights (ScummVM drawCdFlightView).
+    /// travel_probe_terrain_ahead (seg000:4e8e): the map bytes 6 and 7
+    /// steps ahead, averaged whole; the clip choice takes the low nibble.
     private func terrainAhead() -> Int {
-        let (lng, lat) = ahead(6)
-        func height(_ lng: UInt16, _ lat: Int16) -> Int {
-            guard let c = world.mapCell(longitude: lng, latitude: Int(lat)), c < world.map.count else { return 0 }
-            return Int(world.map[c] & 0x0F)
+        func byte(_ p: (UInt16, Int16)) -> Int {
+            guard let c = world.mapCell(longitude: p.0, latitude: Int(p.1)), c < world.map.count else { return 0 }
+            return Int(world.map[c])
         }
-        return (height(longitude, latitude) + height(lng, lat)) / 2
+        return ((byte(ahead(6)) + byte(ahead(7))) / 2) & 0x0F
     }
 
     private func nextClip() {
@@ -383,6 +382,7 @@ final class FlightLandscape: DuneNode {
         }
         clips[clip].begin()
         clips[clip].step()
+        engine.logger.log(.info, "Flight view: MNT\(clip + 1) after \(steps) steps (terrain ahead \(terrainAhead()))")
     }
 
     private func updateCD(_ elapsedTime: TimeInterval) {

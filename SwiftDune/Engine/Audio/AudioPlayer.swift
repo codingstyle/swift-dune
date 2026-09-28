@@ -69,7 +69,9 @@ final class AudioPlayer {
       do {
           // Attach mixer
           let outputAudioFormat = audioEngine.mainMixerNode.outputFormat(forBus: 0)
-          audioEngine.mainMixerNode.outputVolume = 1.0  // Increased from 0.1 to 1.0
+          // DUNE_MUTE=1 (dev harness, scripted test runs): silent output.
+          let muted = ProcessInfo.processInfo.environment["DUNE_MUTE"] == "1"
+          audioEngine.mainMixerNode.outputVolume = muted ? 0.0 : 1.0
           audioEngine.connect(audioEngine.mainMixerNode, to: audioEngine.outputNode, format: outputAudioFormat)
           
           // Sound FX nodes with 11500 Hz sample rate

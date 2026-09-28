@@ -61,6 +61,18 @@ What the CD adds (ported from the Desert Frost engine, as the file headers say):
   the approach clip of the destination (`SIET.HNM` and the others). The CD does
   not load `DUNES.HSQ`; the floppy keeps its perspective landscape.
 
+Measured against the original CD program (run headless, with frames matched
+to the clips) for the flight from the palace to Carthag-Tuek on day 1:
+
+| What | Original |
+| --- | --- |
+| Clip frame time | 80 ms (MNT1: 180 frames in 14.4 s) |
+| Clip order | MNT1, 2, 4, 2, 3, 4, 1, each played to its end |
+| Take-off | 33 frames of 100 ms (`orni_anim_loop`) in room 1, then MNT1 frame 0 and the first route step together |
+| Route step | about 3.85 s |
+| Landing | the view flies on for 8.2 s after the route arrives, then SIET plays in full, then a short dither into room 1 with the ornithopter parked |
+| Outdoor rooms | the clip's flat sky (colour 199) shows the dithered sky gradient behind it |
+
 ## Input mapping
 
 | Touch / key | Game input |
@@ -105,7 +117,7 @@ afterwards.
 The variables are read by `Engine/DevHarness.swift`: `DUNE_START=game` skips
 the intro, `DUNE_LOAD=<slot>` loads a save, `DUNE_TIME=<n>` and
 `DUNE_PHASE=<hex>` set the clock and the story phase, `DUNE_LOG_MEMORY` logs
-the memory footprint, and `DUNE_SCRIPT=<seconds>:<action>[:<arg>];...` plays
+the memory footprint, `DUNE_MUTE` silences the audio, and `DUNE_SCRIPT=<seconds>:<action>[:<arg>];...` plays
 timed `key`, `click`, `hover`, `shot`, `place` (choose a place on the flat
 map) and `scene` (play a scripted scene) steps. For example:
 

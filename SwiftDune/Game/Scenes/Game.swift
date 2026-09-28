@@ -64,6 +64,12 @@ final class Game: DuneNode {
     private var flightPoint: (latitude: Int, longitude: UInt16)?
     /// CD: the arrival clip is playing (a tap skips it).
     private var arrivalClip = false
+    /// CD: Paul's ornithopter is taking off from room 1; the flight starts after.
+    private var takeOff: (until: TimeInterval, go: () -> Void)?
+    /// CHANGE DESTINATION: the next flight starts in the air (no take-off).
+    private var changingDestination = false
+    /// CD: the route has reached the destination; the view flies on until then.
+    private var landing: TimeInterval?
     private var clock: TimeInterval = 0
     /// Paul in the open desert (ds:8 = 0xFF).
     private var inDesert = false
@@ -369,6 +375,7 @@ final class Game: DuneNode {
     /// Take off from room 1 (one ornithopter less here) and fly: one cell
     /// every 3,834 ms; a tap or SKIP TO DESTINATION lands at once.
     private func fly(to destination: Int) {
+        guard takeOffFirst({ [unowned self] in fly(to: destination) }) else { return }
         mapActive = false
         setNodeActive("FlatMap", false)
         setNodeActive("Palace", false)
@@ -384,6 +391,24 @@ final class Game: DuneNode {
         flightPoint = nil
         engine.logger.log(.info, "Flight: \(world.currentLocation) -> \(destination), \(cells) cells")
         startFlightView(from: origin, to: (Int(to.latitude), to.longitude))
+    }
+
+    /// CD: before a flight from a place, its room 1 shows Paul's ornithopter
+    /// taking off (play_travel_departure_transition, orni_anim_loop); `go`
+    /// runs when it has gone. False while it plays, true to fly at once.
+    private func takeOffFirst(_ go: @escaping () -> Void) -> Bool {
+        if takeOff != nil { return true } // the take-off is over: fly
+        let airborne = changingDestination
+        changingDestination = false
+        guard !world.isFloppy, !riding, !inDesert, !airborne else { return true }
+        if world.room != 1 { world.setRoom(1) }
+        guard parkedOrnithopters() > 0 else { return true }
+        mapActive = false
+        setNodeActive("FlatMap", false)
+        showCurrentPlace()
+        findNode("Palace")?.params = ["takeOff": true]
+        takeOff = (clock + Double(Palace.takeOffFrames) * Palace.takeOffFrameSeconds, go)
+        return false
     }
 
     /// Where a flight starts: the place, or the desert point Paul stands on.
@@ -412,6 +437,7 @@ final class Game: DuneNode {
 
     /// GO THERE FLYING AN ORNI to a desert point.
     private func fly(toLatitude latitude: Int, longitude: UInt16) {
+        guard takeOffFirst({ [unowned self] in fly(toLatitude: latitude, longitude: longitude) }) else { return }
         let origin = travelOrigin()
         let cells = world.cellDistance(fromLatitude: origin.latitude, longitude: origin.longitude,
                                        toLatitude: latitude, longitude: longitude)
@@ -446,6 +472,8 @@ final class Game: DuneNode {
     private func arrive(periods: Int? = nil) {
         guard let trip = flight else { return }
         flight = nil
+        landing = nil
+        changingDestination = false
         setNodeActive("DesertWalk", false)
         setNodeActive("Flight", false)
         setNodeActive("FlightLandscape", false)
@@ -858,6 +886,7 @@ final class Game: DuneNode {
         // "Fremen Chief" for each hired troop's chief.
         guard world.placeType <= Location.sietchMax else { return [141, 123] }
         var items: [UInt16] = [141]
+        if world.room == 1, let take = takeOrnithopterRow { items.append(take) }
         for person in world.peopleInRoom() {
             if person <= World.harah {
                 items.append(UInt16(109 + person))
@@ -900,6 +929,9 @@ final class Game: DuneNode {
             return battleRows().map { $0.id }
         }
         var items: [UInt16] = [141]
+        // The first room of a place (build_room_command_records, floppy
+        // 327B): TAKE AN ORNITHOPTER, greyed without one parked here.
+        if world.room == 1, let take = takeOrnithopterRow { items.append(take) }
         for person in world.peopleInRoom() where person <= World.harah {
             items.append(UInt16(109 + person))
         }
@@ -908,6 +940,8 @@ final class Game: DuneNode {
         }
         return Array(items.prefix(5))
     }
+
+    private var takeOrnithopterRow: UInt16? { GameText.shared.findCommand("TAKE AN ORNITHOPTER").map { UInt16($0) } }
 
     private var inCommRoom: Bool { world.placeType == Location.palace && world.room == 8 }
 
@@ -918,7 +952,10 @@ final class Game: DuneNode {
             return battleRows().map { $0.greyed }
         }
         let unread = Int(world.b(World.unread)), count = world.sightingCount
-        return items.map { $0 == 202 ? unread == 0 : $0 == 203 ? unread >= count : false }
+        let noOrnithopter = world.location(world.currentLocation).ornithopters == 0 && world.placeType != Location.palace
+        return items.map {
+            $0 == 202 ? unread == 0 : $0 == 203 ? unread >= count : ($0 == takeOrnithopterRow ? noOrnithopter : false)
+        }
     }
 
     // MARK: - Battles
@@ -1529,11 +1566,23 @@ final class Game: DuneNode {
             gameState.advance(elapsedTime)
         }
         clock += elapsedTime
+        if let pending = takeOff, clock >= pending.until {
+            pending.go()
+            takeOff = nil
+        }
         if let flight = flight {
             // The route lands when its cell is the destination's (the
-            // landscape flies it); the timer stays as a fallback.
+            // landscape flies it); the timer stays as a fallback. The CD's
+            // view flies on for 8.2 s first (the DNCDPRG capture: the route
+            // arrives at 133.1 s, the approach clip starts at 141.3 s).
             if let landscape = findNode("FlightLandscape") as? FlightLandscape, landscape.isActive, landscape.arrived {
-                arrive(periods: landscape.steps / 16)
+                if world.isFloppy {
+                    arrive(periods: landscape.steps / 16)
+                } else if let due = landing {
+                    if clock >= due { landing = nil; arrive(periods: landscape.steps / 16) }
+                } else {
+                    landing = clock + 8.2
+                }
             } else if clock >= flight.arrival + 10 {
                 arrive()
             }
@@ -1598,6 +1647,7 @@ final class Game: DuneNode {
 
 
     override func onKey(_ key: DuneKeyEvent) {
+        if takeOff != nil { return }
         idleTime = 0
         if isOverlayActive("Dialogue") {
             if conversation != nil {
@@ -1752,6 +1802,7 @@ final class Game: DuneNode {
 
     override func onClick(_ event: DuneMouseClickEvent) {
         idleTime = 0
+        if takeOff != nil { return }
         if arrivalClip {
             (findNode("VideoClip") as? VideoClip)?.skip()
             return
@@ -1786,6 +1837,8 @@ final class Game: DuneNode {
             // DESTINATION (row 1) back to the map.
             if menuRect.contains(event.point) && Int((event.point.y - menuRect.y) / 8) == 1 {
                 flight = nil
+                landing = nil
+                changingDestination = true
                 setNodeActive("DesertWalk", false)
                 setNodeActive("Flight", false)
                 openMap(select: true, caption: false)
@@ -1944,6 +1997,8 @@ final class Game: DuneNode {
             return
         }
         switch mainMenuItems[index] {
+        case let row where row == takeOrnithopterRow:
+            openMap(select: true, caption: false) // choose where to fly
         case 202:
             openCommList(seen: false)
         case 203:
@@ -2020,6 +2075,10 @@ final class Game: DuneNode {
             let rootItems = sietchRootCharacterItems()
             guard index < rootItems.count else { return }
             switch rootItems[index] {
+            case let row where row == takeOrnithopterRow:
+                if world.location(world.currentLocation).ornithopters > 0 {
+                    openMap(select: true, caption: false)
+                }
             case 141:
                 openMap(select: false, caption: true)
             case 109, 110, 111, 112, 113, 114, 115, 116, 117, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132:

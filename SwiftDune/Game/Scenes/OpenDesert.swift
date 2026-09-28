@@ -204,8 +204,8 @@ final class VideoClip: DuneNode {
     override func update(_ elapsedTime: TimeInterval) {
         guard let player = player, !finished else { return }
         clock += elapsedTime
-        while clock >= 0.083 && !finished {
-            clock -= 0.083
+        while clock >= FlightLandscape.clipFrameSeconds && !finished {
+            clock -= FlightLandscape.clipFrameSeconds
             if !player.step() { finished = true }
         }
     }

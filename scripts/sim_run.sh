@@ -33,6 +33,8 @@ if [[ ! -s $udid_file ]] || ! xcrun simctl list devices | grep -q "$(cat $udid_f
 fi
 print "simulator runtime: $runtime"
 sim=$(cat $udid_file)
+# Killed or finished, the simulator (and the app's sound) stops.
+trap 'xcrun simctl shutdown $sim 2>/dev/null || true' EXIT INT TERM
 xcrun simctl boot $sim 2>/dev/null || true
 
 app=$(scripts/build_ios.sh "${build_args[@]}" | sed -n 's/^APP=//p')
@@ -43,6 +45,8 @@ data=$(xcrun simctl get_app_container $sim $bundle data)
 rm -rf "$data/Documents/shots" "$data/Documents/dune-ios.log"
 
 env_args=()
+# Test runs are silent (DUNE_MUTE=1; pass DUNE_MUTE=0 to hear them).
+env_args+=("SIMCTL_CHILD_DUNE_MUTE=1")
 for kv in "$@"; do env_args+=("SIMCTL_CHILD_$kv"); done
 env "${env_args[@]}" xcrun simctl launch $sim $bundle >/dev/null
 sleep "$seconds"

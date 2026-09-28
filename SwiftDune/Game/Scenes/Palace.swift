@@ -46,6 +46,13 @@ final class Palace: DuneNode {
     /// Ornithopters parked on the pad of room 1 (count, pad position).
     private var parked: (count: Int, pad: DunePoint) = (0, .zero)
     private lazy var ornithopter = Sprite("ORNYTK.HSQ")
+    /// CD: Paul's ornithopter taking off from the pad (time since the start).
+    private var takeOffTime: TimeInterval?
+    /// orni_anim_loop (seg000:47fb): frames 1-0x21, one per 0x14 ticks.
+    static let takeOffFrames = 0x21
+    static let takeOffFrameSeconds = 0.1
+    /// The CD clips' flat sky, drawn over by the sky in the rooms.
+    static let videoSkyColour: UInt8 = 199
     /// Sheet from the room code (World.sheet(for:)); nil = legacy ranges.
     private var sheet: String?
     /// Character numbers in the room; placed with World.markerAssignment.
@@ -102,15 +109,33 @@ final class Palace: DuneNode {
     /// Parked ornithopters (ScummVM scene.cpp 1174-1242): up to three on
     /// the pad, each further one 70 px right and 10 px lower; ORNYTK body 0,
     /// hub 1 at +(6,30), legs 2 at +(4,50), wings 8 at +(-81,-3) (frame 0).
-    private func drawParkedOrnithopters(_ buffer: PixelBuffer) {
+    private func drawParkedOrnithopters(_ buffer: PixelBuffer, skip: Int = 0) {
         guard parked.count > 0, DuneArchive.path("ORNYTK.HSQ") != nil else { return }
-        for k in 0..<min(3, parked.count) {
-            let x = parked.pad.x + Int16(70 * k), y = parked.pad.y + Int16(10 * k)
-            ornithopter.drawFrame(8, x: x - 81, y: y - 3, buffer: buffer)
-            ornithopter.drawFrame(0, x: x, y: y, buffer: buffer)
-            ornithopter.drawFrame(1, x: x + 6, y: y + 30, buffer: buffer)
-            ornithopter.drawFrame(2, x: x + 4, y: y + 50, buffer: buffer)
+        for k in skip..<max(skip, min(3, parked.count)) {
+            drawOrnithopter(buffer, x: parked.pad.x + Int16(70 * k), y: parked.pad.y + Int16(10 * k), frame: 0)
         }
+    }
+
+    /// draw_orni (seg000:3aa9) at an animation frame: the wings 8 + min(frame,
+    /// 14) unfold, the legs 2 + clamp(frame - 15, 0, 5) fold.
+    private func drawOrnithopter(_ buffer: PixelBuffer, x: Int16, y: Int16, frame: Int) {
+        ornithopter.drawFrame(UInt16(8 + min(frame, 14)), x: x - 81, y: y - 3, buffer: buffer)
+        ornithopter.drawFrame(0, x: x, y: y, buffer: buffer)
+        ornithopter.drawFrame(1, x: x + 6, y: y + 30, buffer: buffer)
+        ornithopter.drawFrame(UInt16(2 + min(max(frame - 15, 0), 5)), x: x + 4, y: y + 50, buffer: buffer)
+    }
+
+    /// orni_anim_draw_frame (seg000:4821): past frame 14 the craft climbs
+    /// away, 5 px a frame to the left and (frame - 14)^2 / 2 up.
+    private func drawTakeOff(_ buffer: PixelBuffer, time: TimeInterval) {
+        guard parked.count > 0 else { return }
+        let frame = min(1 + Int(time / Palace.takeOffFrameSeconds), Palace.takeOffFrames)
+        var x = Int(parked.pad.x), y = Int(parked.pad.y)
+        if frame > 14 {
+            x -= 5 * (frame - 14)
+            y -= (frame - 14) * (frame - 14) / 2
+        }
+        drawOrnithopter(buffer, x: Int16(x), y: Int16(y), frame: frame)
     }
 
 
@@ -124,6 +149,7 @@ final class Palace: DuneNode {
         outdoor = nil
         videoBackdrop = nil
         parked = (0, .zero)
+        takeOffTime = nil
         sheet = nil
         people = nil
         cast = nil
@@ -177,6 +203,10 @@ final class Palace: DuneNode {
             videoBackdrop = params["videoBackdrop"] as? String
             contextBuffer.tag = 0
         }
+        if params["takeOff"] as? Bool == true {
+            takeOffTime = 0
+            contextBuffer.tag = 0
+        }
 
         if params.keys.contains("sheet") {
             self.sheet = params["sheet"] as? String
@@ -226,6 +256,7 @@ final class Palace: DuneNode {
     
     override func update(_ elapsedTime: TimeInterval) {
         currentTime += elapsedTime
+        if let t = takeOffTime { takeOffTime = t + elapsedTime }
         
         if duration != 0.0 && currentTime > duration {
             EventManager.nodeEndedEvent.notify(NodeEventData(self.name))
@@ -270,13 +301,18 @@ final class Palace: DuneNode {
         if isGameplayExterior || (gameRoomID == nil && (currentRoom == .porch || currentRoom == .balcony)) {
             // Cache per room and sky: re-draw when the period's sky changes.
             let tag = 0x0100 | UInt32(roomIndex) << 4 | sky.lightMode.asInt | (inPalace ? 0 : 0x1000)
-                | (videoBackdrop != nil ? 0x2000 : 0)
+                | (videoBackdrop != nil ? 0x2000 : 0) | (takeOffTime != nil ? 0x4000 : 0)
             if contextBuffer.tag != tag {
                 contextBuffer.clearBuffer()
                 if let name = videoBackdrop, let frame = HnmPlayer.lastFrame(name) {
-                    // CD: the arrival clip's last picture (drawVideoBackdrop).
+                    // CD: the arrival clip's last picture (drawVideoBackdrop)
+                    // over the sky: its flat sky colour 199 lets the dithered
+                    // gradient through (the DNCDPRG capture of room 1).
+                    sky.render(contextBuffer, width: 320, at: 0, type: .narrow, gameplayPalette: true)
                     for y in 0..<min(152, contextBuffer.height) {
-                        for x in 0..<320 { contextBuffer.rawPointer[y * contextBuffer.width + x] = frame[y * 320 + x] }
+                        for x in 0..<320 where frame[y * 320 + x] != Palace.videoSkyColour {
+                            contextBuffer.rawPointer[y * contextBuffer.width + x] = frame[y * 320 + x]
+                        }
                     }
                 } else if gameRoomID != nil && inPalace && roomIndex == 11 {
                     // The palace front (SAL room 11) uses the large sky, 200 px.
@@ -290,11 +326,13 @@ final class Palace: DuneNode {
                     Primitives.fillRect(DuneRect(0, 78, 320, 74), 190, contextBuffer, isOffset: false)
                 }
                 palaceScenery.drawRoom(roomIndex, buffer: contextBuffer)
-                drawParkedOrnithopters(contextBuffer)
+                // Taking off: the first one is drawn per frame over the rest.
+                drawParkedOrnithopters(contextBuffer, skip: takeOffTime != nil ? 1 : 0)
                 contextBuffer.tag = tag
             }
 
             contextBuffer.render(to: intermediateFrameBuffer, effect: fx)
+            if let t = takeOffTime { drawTakeOff(intermediateFrameBuffer, time: t) }
         } else if currentRoom == .stairs {
             sky.render(intermediateFrameBuffer, width: 200, at: 0, type: .large)
             palaceScenery.drawRoom(roomIndex, buffer: intermediateFrameBuffer)
