@@ -58,7 +58,6 @@ enum VOCAudioCodec: UInt8 {
  @see https://fabiensanglard.net/reverse_engineering_strike_commander/docs/Creative%20Voice%20(VOC)%20file%20format.txt
  */
 public final class CreativeVoice {
-  private let engine = DuneEngine.shared
   private var resource: Resource
   private var signature: String?
   private var version: UInt16 = 0
@@ -83,9 +82,9 @@ public final class CreativeVoice {
     
     do {
       try data.write(to: fileURL)
-      engine.logger.log(.info, "Array saved to file: \(fileURL.absoluteString)")
+      Logger.shared.log(.info, "Array saved to file: \(fileURL.absoluteString)")
     } catch {
-      engine.logger.log(.error, "Error saving \(fileName): \(error)")
+      Logger.shared.log(.error, "Error saving \(fileName): \(error)")
     }
   }
   
@@ -99,7 +98,7 @@ public final class CreativeVoice {
     let eofByte = resource.stream!.readByte()
     
     if signature != "Creative Voice File" || eofByte != 0x1A {
-      engine.logger.log(.error, "parseVOC(): Invalid signature")
+      Logger.shared.log(.error, "parseVOC(): Invalid signature")
       return
     }
     
@@ -107,13 +106,13 @@ public final class CreativeVoice {
     let headerSize = resource.stream!.readUInt16LE()
     
     if headerSize != 26 {
-      engine.logger.log(.error, "parseVOC(): Wrong header size")
+      Logger.shared.log(.error, "parseVOC(): Wrong header size")
     }
     
     version = resource.stream!.readUInt16LE()
     
     if version != 0x10A && version != 0x114 {
-      engine.logger.log(.error, "parseVOC(): Unknown VOC version: \(String.fromWord(version))")
+      Logger.shared.log(.error, "parseVOC(): Unknown VOC version: \(String.fromWord(version))")
     }
     
     
@@ -121,7 +120,7 @@ public final class CreativeVoice {
     let computedChecksum = (UInt(~version) + 0x1234) & 0x0000FFFF
     
     if checksum != computedChecksum {
-      engine.logger.log(.error, "parseVOC(): Invalid checksum: \(checksum)")
+      Logger.shared.log(.error, "parseVOC(): Invalid checksum: \(checksum)")
     }
     
     // Read data blocks
@@ -176,27 +175,27 @@ public final class CreativeVoice {
   }
   
   func dumpInfo() {
-    engine.logger.log(.debug, "File: \(resource.fileName)")
-    engine.logger.log(.debug, "Signature: \(signature!)")
-    engine.logger.log(.debug, "Version: \(version >> 8).\(version & 0xFF)")
-    engine.logger.log(.debug, "Blocks:")
+    Logger.shared.log(.debug, "File: \(resource.fileName)")
+    Logger.shared.log(.debug, "Signature: \(signature!)")
+    Logger.shared.log(.debug, "Version: \(version >> 8).\(version & 0xFF)")
+    Logger.shared.log(.debug, "Blocks:")
     
     for i in 0..<dataBlocks.count {
       switch dataBlocks[i] {
         case .terminate:
-          engine.logger.log(.debug, "- Terminate")
+          Logger.shared.log(.debug, "- Terminate")
         case .soundData(let codec, let samplingRate, let bytes):
-          engine.logger.log(.debug, "- Sound data: codec=\(codec), samplingRate=\(samplingRate), bytes=\(bytes.count)")
+          Logger.shared.log(.debug, "- Sound data: codec=\(codec), samplingRate=\(samplingRate), bytes=\(bytes.count)")
         case .repetition(let count):
-          engine.logger.log(.debug, "- Repeat block start: count=\(count)")
+          Logger.shared.log(.debug, "- Repeat block start: count=\(count)")
         case .marker(let bytes):
-          engine.logger.log(.debug, "- Marker: \(String.fromByte(bytes[0])) - \(String.fromByte(bytes[1]))")
+          Logger.shared.log(.debug, "- Marker: \(String.fromByte(bytes[0])) - \(String.fromByte(bytes[1]))")
         case .endRepetition:
-          engine.logger.log(.debug, "- Repeat block end")
+          Logger.shared.log(.debug, "- Repeat block end")
         case .silence(let codec, let length, let samplingRate):
-          engine.logger.log(.debug, "- Silence: codec=\(codec), length=\(length), samplingRate=\(samplingRate)")
+          Logger.shared.log(.debug, "- Silence: codec=\(codec), length=\(length), samplingRate=\(samplingRate)")
         case .string(let s):
-          engine.logger.log(.debug, "- String: \(s)")
+          Logger.shared.log(.debug, "- String: \(s)")
       }
     }
     

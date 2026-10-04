@@ -17,16 +17,29 @@ final class Game: DuneNode {
     override func onEnable() {
       engine.palette.clear()
       
+      EventManager.uiStateChangedEvent.addListener(self) { [weak self] state in
+        guard let self = self else { return }
+        self.onUIEvent(state)
+      }
+      
       showRoom()
       showUI()
     }
   
-    func showRoom() {
-        if currentTime == 0.0 {
-            let music = Music("ARRAKIS.HSQ", player: engine.audioPlayer)
-            engine.audioPlayer.play(music)
+  
+    override func onDisable() {
+        EventManager.uiStateChangedEvent.removeListener(self)
+    }
+  
+  
+    func onUIEvent(_ e: UIStateEventData) {
+        if e.leftPanel == .bookOpen {
+            showBook()
         }
-
+    }
+  
+  
+    func showRoom() {
         let palaceNode = Palace()
         palaceNode.params = [
           "room": PalaceRoom.porch,
@@ -35,6 +48,8 @@ final class Game: DuneNode {
           ]
         ]
         attachNode(palaceNode)
+        setNodeActive("Fresk", false)
+        setNodeActive("Book", false)
         setNodeActive("Palace", true)
     }
 
@@ -47,12 +62,16 @@ final class Game: DuneNode {
     
     func showFresk() {
         attachNode(Fresk())
+        setNodeActive("Book", false)
+        setNodeActive("Palace", false)
         setNodeActive("Fresk", true)
     }
     
     
     func showBook() {
-        attachNode(Book())
-        setNodeActive("Book", true)
+      attachNode(Book())
+      setNodeActive("Fresk", false)
+      setNodeActive("Palace", false)
+      setNodeActive("Book", true)
     }
 }

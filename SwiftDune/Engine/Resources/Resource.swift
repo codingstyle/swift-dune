@@ -12,7 +12,7 @@ import Foundation
 
 enum ResourceType {
     /**
-     Condition expressions for game logic
+     Condition expressions for game and dialogue logic
      */
     case gameLogic
     /**
@@ -108,14 +108,6 @@ enum ResourceType {
             return [
                 "CONDIT.HSQ",   // Game phases logic
                 "DIALOGUE.HSQ", // Dialogue logic
-                "VERBIN.HSQ",
-                // TODO: Sound stuff?
-                "DUNESDB.HSQ",
-                "DUNEADL.HSQ",
-                "DUNEADG.HSQ",
-                "DUNEMID.HSQ",
-                "DUNEPCS.HSQ",
-                "DUNEVGA.HSQ",
             ]
         case .font:
             return [
@@ -243,6 +235,16 @@ enum ResourceType {
             ]
         }
     }
+  
+    /*
+     "VERBIN.HSQ",  // Worm travel animation
+     "DUNESDB.HSQ", // Sound Blaster audio management
+     "DUNEADL.HSQ", // AdLib audio management
+     "DUNEADG.HSQ", // AdLib Gold audio management
+     "DUNEMID.HSQ", // MIDI audio management
+     "DUNEPCS.HSQ", // PC speaker audio management
+     "DUNEVGA.HSQ", // VGA rendering functions
+     */
 }
 
 enum ResourceError: Error {
@@ -397,9 +399,9 @@ final class ResourceStream {
         
         do {
             try dataToWrite.write(to: fileURL)
-            DuneEngine.shared.logger.log(.info, "File saved successfully at: \(fileURL.path)")
+            Logger.shared.log(.info, "File saved successfully at: \(fileURL.path)")
         } catch {
-            DuneEngine.shared.logger.log(.error, "Error saving file: \(error.localizedDescription)")
+            Logger.shared.log(.error, "Error saving file: \(error.localizedDescription)")
         }
     }
 }
@@ -414,8 +416,6 @@ final class Resource
     var fileName: String
 
     private static let validChecksum = 171
-    private let engine = DuneEngine.shared
-    
     private var fileSize: UInt64 = 0
     
     init(_ fileName: String, uncompressed: Bool = false) {
@@ -435,12 +435,12 @@ final class Resource
         let fileExtension = String(fileComponents[1])
 
         guard let filePath = Bundle.main.path(forResource: fileNameWithoutExtension, ofType: fileExtension, inDirectory: "DuneFiles") else {
-            engine.logger.log(.error, "\(fileName): not found.")
+            Logger.shared.log(.error, "\(fileName): not found.")
             return
         }
 
         guard let fileHandle = FileHandle(forReadingAtPath: filePath) else {
-            engine.logger.log(.error, "\(fileName): unable to read file.")
+            Logger.shared.log(.error, "\(fileName): unable to read file.")
             return
         }
 
@@ -453,7 +453,7 @@ final class Resource
             unpackedData = [UInt8](data!)
             stream = ResourceStream(unpackedData)
         } catch {
-            engine.logger.log(.error, "\(fileName): unable to read uncompressed file")
+            Logger.shared.log(.error, "\(fileName): unable to read uncompressed file")
         }
     }
     
@@ -462,24 +462,24 @@ final class Resource
         let fileComponents = fileName.split(separator: ".")
         
         guard fileComponents.count == 2 else {
-            engine.logger.log(.error, "\(fileName): no extension found.")
+            Logger.shared.log(.error, "\(fileName): no extension found.")
             return
         }
                 
         let fileExtension = String(fileComponents[1])
         
         guard fileExtension == "HSQ" || fileExtension == "SAL" else {
-            engine.logger.log(.error, "\(fileExtension) is not a recognized HSQ format.")
+            Logger.shared.log(.error, "\(fileExtension) is not a recognized HSQ format.")
             return
         }
 
         guard let filePath = Bundle.main.path(forResource: fileName.replacingOccurrences(of: ".\(fileExtension)", with: ""), ofType: fileExtension, inDirectory: "DuneFiles") else {
-            engine.logger.log(.error, "\(fileName): not found.")
+            Logger.shared.log(.error, "\(fileName): not found.")
             return
         }
 
         guard let fileHandle = FileHandle(forReadingAtPath: filePath) else {
-            engine.logger.log(.error, "\(fileName): unable to read file.")
+            Logger.shared.log(.error, "\(fileName): unable to read file.")
             return
         }
 
@@ -500,7 +500,7 @@ final class Resource
                 stream = ResourceStream(unpackedData)
             }
         } catch {
-            engine.logger.log(.error, "\(fileName): parsing raw file.")
+            Logger.shared.log(.error, "\(fileName): parsing raw file.")
             parseRaw()
         }
     }
@@ -527,7 +527,7 @@ final class Resource
         let realFileSize = try fileHandle.offset()
         
         if realFileSize != fileSize {
-            engine.logger.log(.error, "\(fileName): wrong file size (expected=\(realFileSize), isCompressed=\(header.isCompressed!), actual=\(fileSize)). HSQ file may be corrupted.")
+            Logger.shared.log(.error, "\(fileName): wrong file size (expected=\(realFileSize), isCompressed=\(header.isCompressed!), actual=\(fileSize)). HSQ file may be corrupted.")
             throw ResourceError.fileSizeMismatch
         }
         
@@ -535,7 +535,7 @@ final class Resource
         header.data = try fileHandle.read(upToCount: 6)
 
         if header.checksumValue != Resource.validChecksum {
-            engine.logger.log(.error, "\(fileName): invalid checksum. HSQ file may be corrupted.")
+            Logger.shared.log(.error, "\(fileName): invalid checksum. HSQ file may be corrupted.")
             throw ResourceError.checksumMismatch
         }
         
@@ -659,7 +659,7 @@ extension FileHandle {
         let data = readData(ofLength: MemoryLayout<UInt8>.size * 2)
         
         guard data.count == 2 else {
-            DuneEngine.shared.logger.log(.error, "readUInt16LE(): Unable to read word")
+            Logger.shared.log(.error, "readUInt16LE(): Unable to read word")
             return 0
         }
         
@@ -674,7 +674,7 @@ extension FileHandle {
         let data = readData(ofLength: MemoryLayout<UInt8>.size)
         
         guard data.count == 1 else {
-            DuneEngine.shared.logger.log(.error, "readByte(): Unable to read byte")
+            Logger.shared.log(.error, "readByte(): Unable to read byte")
             return 0
         }
 

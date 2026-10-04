@@ -18,7 +18,7 @@ class EditorViewModel: ObservableObject {
     private var selectedSpriteFrameIndex = 0
     private var isSpriteAnimation = false
     
-    @Published var dialogue: Sentence?
+    @Published var sentence: Sentence?
     @Published var music: Music?
     @Published var sound: Sound?
     @Published var video: Video?
@@ -32,6 +32,9 @@ class EditorViewModel: ObservableObject {
     
     @Published var globe: Globe?
 
+    @Published var condition: Condition?
+    @Published var dialogue: Dialogue?
+  
     @Published var scenery: Scenery?
 
     @Published var spriteImage: NSImage?
@@ -42,7 +45,9 @@ class EditorViewModel: ObservableObject {
     @Published var trackMuteStates: [Bool] = []
     @Published var selectedTrackIndex: Int = 0
     
-    private var timer: Timer?
+    /// Invalidated from `deinit`, which is nonisolated. The view model is main-actor
+    /// isolated and uniquely referenced when `deinit` runs.
+    nonisolated(unsafe) private var timer: Timer?
     private var currentTime: Double = 0.0
     
     private var renderBitmap = NSBitmapImageRep(
@@ -92,7 +97,7 @@ class EditorViewModel: ObservableObject {
         
         music = nil
         sprite = nil
-        dialogue = nil
+        sentence = nil
         sound = nil
         spriteImage = nil
         globe = nil
@@ -111,7 +116,7 @@ class EditorViewModel: ObservableObject {
             
             // sprite!.saveAs(selection.resourceName + ".DEC")
         } else if selection.resourceType == .sentence {
-            dialogue = Sentence(selection.resourceName)
+            sentence = Sentence(selection.resourceName)
         } else if selection.resourceType == .sound {
             sound = Sound(selection.resourceName, player: engine.audioPlayer)
             sound!.dumpInfo()
@@ -177,6 +182,12 @@ class EditorViewModel: ObservableObject {
             
             blitBuffer()
             //saveBufferAsPNG(to: "BUFFER.PNG")
+        } else if selection.resourceType == .gameLogic {
+          if selection.resourceName == "CONDIT.HSQ" {
+            condition = Condition()
+          } else if selection.resourceName == "DIALOGUE.HSQ" {
+            dialogue = Dialogue()
+          }
         }
     }
     

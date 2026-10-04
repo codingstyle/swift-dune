@@ -13,6 +13,7 @@ enum SkyType {
 }
 
 
+@MainActor
 final class Sky {
     private var skySprite: Sprite?
     

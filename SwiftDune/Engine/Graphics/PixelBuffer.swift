@@ -42,7 +42,8 @@ final class PixelBuffer {
     }
     
     
-    func render(to buffer: PixelBuffer, effect: SpriteEffect = .none, x: Int = 0, y: Int = 0) {
+    @MainActor
+    func render(to buffer: PixelBuffer, effect: SpriteEffect = .none, x: Int = 0, y: Int = 0, previous: PixelBuffer? = nil) {
         switch effect {
         case .fadeIn(let start, let duration, let current):
             let progress = (current - start) / duration
@@ -84,6 +85,24 @@ final class PixelBuffer {
             let progress = Math.clampf((current - start) / duration, 0.0, 1.0)
             let rect = Math.lerpRect(from, to, progress)
             Effects.zoom(sourceBuffer: self, destBuffer: buffer, sourceRect: rect, yOffset: y)
+        case .pageFlip(let start, let duration, let current):
+            if let previous {
+                let progress = (current - start) / duration
+                Effects.pageFlip(fromBuffer: previous, toBuffer: self, destBuffer: buffer, progress: CGFloat(progress), forward: true, yOffset: y)
+            } else {
+                let size = max(0, min(height, buffer.height - y)) * rowSizeInBytes
+                self.copyPixels(to: buffer, offset: y * buffer.width, size: size)
+            }
+            break
+        case .pageFlipBack(let start, let duration, let current):
+            if let previous {
+                let progress = (current - start) / duration
+                Effects.pageFlip(fromBuffer: previous, toBuffer: self, destBuffer: buffer, progress: CGFloat(progress), forward: false, yOffset: y)
+            } else {
+                let size = max(0, min(height, buffer.height - y)) * rowSizeInBytes
+                self.copyPixels(to: buffer, offset: y * buffer.width, size: size)
+            }
+            break
         default:
             let size = max(0, min(height, buffer.height - y)) * rowSizeInBytes
             self.copyPixels(to: buffer, offset: y * buffer.width, size: size)

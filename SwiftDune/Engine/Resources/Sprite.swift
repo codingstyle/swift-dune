@@ -17,6 +17,8 @@ class SpriteFrameInfo {
     var height: UInt16 = 0
     var bytesPerRow: UInt16 = 0
     var paletteOffset: UInt8 = 0
+    /// Baseline, in source pixels, for DUNES frames. Other sprites leave this at 0.
+    var anchor: UInt16 = 0
     var paletteIndices: UnsafeMutablePointer<UInt8>
     
     init(_ bufferSize: Int) {
@@ -29,7 +31,8 @@ class SpriteFrameInfo {
 }
 
 
-final class Sprite: Equatable {
+@MainActor
+final class Sprite: @MainActor Equatable {
     static func == (lhs: Sprite, rhs: Sprite) -> Bool {
         return lhs.resource.fileName == rhs.resource.fileName
     }
@@ -295,9 +298,10 @@ final class Sprite: Equatable {
             // Skip 4 bytes of frame header to access the pixels
             resource.stream!.seek(frameInfo.startOffset)
             
-            // FIXME: sprites without palette seems to have an extra 2-byte value to read?
+            // DUNES frames carry a 2-byte baseline after the 4-byte header. The flight
+            // projector plants the sprite on the ground from this anchor.
             if fileName.starts(with: "DUNES") {
-                resource.stream!.skip(2)
+                frameInfo.anchor = resource.stream!.readUInt16LE()
             }
             
             if !frameInfo.isCompressed {
@@ -386,7 +390,16 @@ final class Sprite: Equatable {
     func addAnimation(_ animation: SpriteAnimation) {
         animations.append(animation)
     }
-    
+  
+  
+    func replaceAnimationsImageIndex(_ index: UInt16, _ replacementIndex: UInt16) {
+        var i = 0
+      
+        while i < animations.count {
+            animations[i].replaceAnimationsImageIndex(index, replacementIndex)            
+            i += 1
+        }
+    }
     
     func drawAnimation(_ animIndex: UInt16, buffer: PixelBuffer, time: Double = 0.0, offset: DunePoint = .zero, loop: Bool = true) {
         guard animIndex < animations.count else {

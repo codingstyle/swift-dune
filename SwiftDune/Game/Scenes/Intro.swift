@@ -48,7 +48,7 @@ final class Intro: DuneNode {
 
     override func onEnable() {
         // Intro script
-        queue.enqueue(IntroStep(
+        /*queue.enqueue(IntroStep(
           background: DuneNodeParams("LogoSwap"),
           duration: 6.03,
           transitionOut: .fadeOut(duration: 2.0)
@@ -231,7 +231,7 @@ final class Intro: DuneNode {
           duration: 10.0,
           transitionIn: .dissolveIn(duration: 0.3),
           transitionOut: .fadeOut(duration: 2.0)
-        ))
+        ))*/
         queue.enqueue(IntroStep(
           background: DuneNodeParams("Sietch", [ "room": SietchRoom.entrance, "lightMode": DuneLightMode.night ]),
           foreground: DuneNodeParams("Ornithopter", [ "flightMode": OrnithopterFlightMode.takingOff ]),
@@ -332,7 +332,7 @@ final class Intro: DuneNode {
     }
     
     
-  func onNodeEvent(_ e: NodeEventData) {
+    func onNodeEvent(_ e: NodeEventData) {
         if !self.isActive || !self.isChildNode(e.nodeName) {
             return
         }

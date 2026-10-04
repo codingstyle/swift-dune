@@ -17,7 +17,11 @@ enum LogLevel {
 }
 
 
-final class Logger {
+/// Logging and metrics are safe to call off the main actor.
+/// `os.Logger` is thread-safe, and metric updates are serialized on `metricsQueue`.
+final class Logger: @unchecked Sendable {
+    static let shared = Logger()
+
     private var metrics: [(Double, Double)] = []
     private let maxEntries: Int = 500
     private let metricsQueue = DispatchQueue(label: "com.dune.metrics.queue")

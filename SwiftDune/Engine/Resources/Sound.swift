@@ -49,7 +49,7 @@ final class Sound: AudioPlayerItem {
     return resource.fileName
   }
   
-  private let engine = DuneEngine.shared
+
   private var creativeVoice: CreativeVoice
   private var resource: Resource
   private var player: AudioPlayer
@@ -165,7 +165,7 @@ final class Sound: AudioPlayerItem {
       case .unsigned8bitPCM:
         sample = convertUnsigned8bitPCMToFloat32PCM(bytes)
       default:
-        DuneEngine.shared.logger.log(.error, "Unsupported codec: \(codec)")
+        Logger.shared.log(.error, "Unsupported codec: \(codec)")
     }
     
     let format = AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: samplingRate, channels: 1, interleaved: false)!
@@ -249,9 +249,9 @@ final class Sound: AudioPlayerItem {
     
     do {
         try data.write(to: fileURL)
-        engine.logger.log(.info, "Array saved to file: \(fileURL.absoluteString)")
+        Logger.shared.log(.info, "Array saved to file: \(fileURL.absoluteString)")
     } catch {
-        engine.logger.log(.error, "Error saving \(fileName): \(error)")
+        Logger.shared.log(.error, "Error saving \(fileName): \(error)")
     }
   }
   

@@ -17,11 +17,12 @@ struct TextDetailsView: View {
                 .font(.title2)
                 .fontWeight(.bold)
 
-            if let dialogue = viewModel.dialogue {
+            if let dialogue = viewModel.sentence {
                 ScrollView {
                     VStack(alignment: .leading) {
                         ForEach(0..<dialogue.sentenceCount(), id: \.self) { index in
-                            let sentence = dialogue.sentence(at: index)
+                            let sentence = dialogue.sentence(at: index, convertSpecialChars: true)
+                          
                             Text("\(String(format: "%03d", index)) • \(sentence)")
                                 .fontDesign(.monospaced)
                                 .padding(.bottom, 5)

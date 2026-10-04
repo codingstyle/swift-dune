@@ -18,6 +18,8 @@ enum TransitionEffect {
     case dissolveOut(duration: Double)
     case pixelate(duration: Double)
     case zoom(duration: Double, from: DuneRect, to: DuneRect)
+    case pageFlip(duration: Double)
+    case pageFlipBack(duration: Double)
   
     var duration: Double {
         switch self {
@@ -36,6 +38,10 @@ enum TransitionEffect {
         case .pixelate(let duration):
             return duration
         case .zoom(let duration, _, _):
+            return duration
+        case .pageFlip(let duration):
+            return duration
+        case .pageFlipBack(let duration):
             return duration
         case .none:
             return 0.0
@@ -62,6 +68,10 @@ enum TransitionEffect {
         case .zoom(let duration, let from, let to):
             // Zoom has no in/out variant: the caller anchors it by passing the time the transition begins
             return .zoom(start: start, duration: duration, current: currentTime, from: from, to: to)
+        case .pageFlip(let duration):
+            return .pageFlip(start: start, duration: duration, current: currentTime)
+        case .pageFlipBack(let duration):
+            return .pageFlipBack(start: start, duration: duration, current: currentTime)
         case .none:
             return .none
         }
@@ -79,11 +89,14 @@ enum SpriteEffect {
     case dissolveOut(end: Double, duration: Double, current: Double)
     case pixelate(end: Double, duration: Double, current: Double)
     case zoom(start: Double, duration: Double, current: Double, from: DuneRect, to: DuneRect)
+    case pageFlip(start: Double, duration: Double, current: Double)
+    case pageFlipBack(start: Double, duration: Double, current: Double)
     case transform(offset: UInt8 = 0, flipX: Bool = false, flipY: Bool = false, scale: Double = 1.0)
 }
 
 
 struct Effects {
+    @MainActor
     static func fade(progress: CGFloat, startIndex: Int = 0, endIndex: Int = 255) {
         let engine = DuneEngine.shared
         
@@ -243,5 +256,109 @@ struct Effects {
             
             y += 1
         }
+    }
+    
+    
+    // 45° page turn across the 320×152 game area, in 8-pixel steps.
+    // Forward peels `fromBuffer` off from the bottom-right and reveals `toBuffer`.
+    // Backward unfurls `toBuffer` from the top-left over `fromBuffer`.
+    static func pageFlip(fromBuffer: PixelBuffer, toBuffer: PixelBuffer, destBuffer: PixelBuffer, progress: CGFloat, forward: Bool, yOffset: Int = 0) {
+        let pageWidth = min(320, fromBuffer.width, toBuffer.width, destBuffer.width)
+        let pageHeight = min(pageFlipRows, fromBuffer.height, toBuffer.height, destBuffer.height - yOffset)
+        
+        guard pageWidth > 0 && pageHeight > 0 && yOffset >= 0 else {
+            return
+        }
+        
+        let clamped = Math.clampf(progress, 0.0, 1.0)
+        
+        if clamped <= 0.0 {
+            copyPageRows(from: fromBuffer, to: destBuffer, width: pageWidth, height: pageHeight, yOffset: yOffset)
+            return
+        }
+        
+        if clamped >= 1.0 {
+            copyPageRows(from: toBuffer, to: destBuffer, width: pageWidth, height: pageHeight, yOffset: yOffset)
+            return
+        }
+        
+        let step = min(pageFlipSteps, max(1, Int((clamped * CGFloat(pageFlipSteps)).rounded(.up))))
+        let bx = forward ? (pageFlipRows - 8 * step) : (-pageFlipTravel + 8 * (step - 1))
+        let anchorX = bx >= 0 ? 320 : 320 + bx
+        let anchorY = bx >= 0 ? bx : 0
+        let crease = anchorX + anchorY - 1
+        let triangleHeight = min(pageFlipRows - anchorY, anchorX)
+        let triangleLeft = anchorX - triangleHeight
+        let turning = forward ? fromBuffer : toBuffer
+        
+        var y = 0
+        
+        while y < pageHeight {
+            let destRow = (y + yOffset) * destBuffer.width
+            let fromRow = y * fromBuffer.width
+            let toRow = y * toBuffer.width
+            let localY = y - anchorY
+            let rowWidth = triangleHeight - localY
+            let band = localY >= 0 && rowWidth > 0
+            var x = 0
+            
+            while x < pageWidth {
+                let inTriangle = band && x >= triangleLeft && x < triangleLeft + rowWidth
+                let revealed = forward ? (x + y) > crease : (x + y) <= crease
+                let pixel: UInt8
+                
+                if inTriangle {
+                    pixel = curlSample(turning, crease - y, crease - x, pageWidth, pageHeight)
+                } else if revealed {
+                    pixel = toBuffer.rawPointer[toRow + x]
+                } else {
+                    pixel = fromBuffer.rawPointer[fromRow + x]
+                }
+                
+                destBuffer.rawPointer[destRow + x] = pixel
+                x += 1
+            }
+            
+            y += 1
+        }
+    }
+    
+    
+    private static let pageFlipRows = 152
+    private static let pageFlipSteps = 58
+    private static let pageFlipTravel = 0x138
+    
+    
+    private static func copyPageRows(from source: PixelBuffer, to dest: PixelBuffer, width: Int, height: Int, yOffset: Int) {
+        let rowBytes = width * MemoryLayout<UInt8>.size
+        var y = 0
+        
+        while y < height {
+            _ = memcpy(dest.rawPointer + ((y + yOffset) * dest.width), source.rawPointer + (y * source.width), rowBytes)
+            y += 1
+        }
+    }
+    
+    
+    // Mirror sample across the crease. Rows 144...151 at x 126...193 take the flat paper 54 pixels to the right, and paper colors 0x60/0x61 darken by 2.
+    private static func curlSample(_ buffer: PixelBuffer, _ x: Int, _ y: Int, _ width: Int, _ height: Int) -> UInt8 {
+        var sampleX = x
+        let sampleY = y
+        
+        if sampleY >= 144 && sampleY < pageFlipRows && sampleX >= 126 && sampleX <= 193 {
+            sampleX += 54
+        }
+        
+        if sampleX < 0 || sampleY < 0 || sampleX >= width || sampleY >= height {
+            return 0
+        }
+        
+        let pixel = buffer.rawPointer[(sampleY * buffer.width) + sampleX]
+        
+        if pixel == 0x60 || pixel == 0x61 {
+            return pixel &+ 2
+        }
+        
+        return pixel
     }
 }

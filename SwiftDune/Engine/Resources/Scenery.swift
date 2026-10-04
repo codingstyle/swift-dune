@@ -22,8 +22,8 @@ enum RoomCharacter: UInt16 {
     case emperor = 22
     case sardaukar = 24
     case smuggler = 26
-    case fremen = 28
-    case fremen2 = 30
+    case fremen = 28  // + 33 for face change
+    case fremen2 = 30 // + 33 for face change
     case fremen3 = 32 // and 33
     case gurneyHorizontal = 34 // wtf?
 }
@@ -80,6 +80,7 @@ struct RoomMarker: RoomCommandProtocol {
 }
 
 
+@MainActor
 struct RoomSpriteIndices {
     var sprite: Sprite
     var indexStart: Int
@@ -100,9 +101,8 @@ struct Room {
 }
 
 
+@MainActor
 final class Scenery {
-    private let engine = DuneEngine.shared
- 
     private var resource: Resource
     private var spriteIndices: [RoomSpriteIndices] = []
     private var characterSprite: Sprite
@@ -303,6 +303,10 @@ final class Scenery {
      
         characterSprite.setPalette()
         characterSprite.drawFrame(character.rawValue, x: Int16(marker.pt.x), y: Int16(marker.pt.y), buffer: buffer, effect: fx)
+      
+        if character == .feyd {
+          characterSprite.drawFrame(character.rawValue + 1, x: Int16(marker.pt.x), y: Int16(marker.pt.y), buffer: buffer, effect: fx)
+        }
     }
     
     

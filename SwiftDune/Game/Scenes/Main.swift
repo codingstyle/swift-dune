@@ -9,6 +9,9 @@ import Foundation
 
 final class Main: DuneNode {
     private var queue = Queue<DuneNodeParams>()
+  
+    private let prologueNodeName = "Prologue"
+    private let copyProtectionNodeName = "CopyProtection"
 
     init() {
         super.init("Main")
@@ -19,6 +22,7 @@ final class Main: DuneNode {
         attachNode(Prologue())
         attachNode(CopyProtection())
         attachNode(Game())
+        attachNode(Ending())
     }
     
     
@@ -28,12 +32,13 @@ final class Main: DuneNode {
             self.onNodeEvent(nodeData)
         }
         
-        queue.enqueue(DuneNodeParams("Logo"))
+        //queue.enqueue(DuneNodeParams("Logo"))
         queue.enqueue(DuneNodeParams("Intro"))
         queue.enqueue(DuneNodeParams("Credits"))
         queue.enqueue(DuneNodeParams("Prologue"))
         queue.enqueue(DuneNodeParams("CopyProtection", [ "bypassProtection": true ]))
         queue.enqueue(DuneNodeParams("Game"))
+        //queue.enqueue(DuneNodeParams("Ending"))
 
         guard let itemConfig = queue.dequeueFirst() else {
             return
@@ -96,7 +101,7 @@ final class Main: DuneNode {
         }
         
         // Prologue iterates screen by screen
-        if activeNode.name == "Prologue" || activeNode.name == "CopyProtection" {
+        if activeNode.name == prologueNodeName || activeNode.name == copyProtectionNodeName {
             super.onKey(key)
         } else {
             moveToNextNode()

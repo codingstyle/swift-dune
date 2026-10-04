@@ -7,42 +7,14 @@
 
 import Foundation
 
-/*
- 
- Sprites from DUNES.HSQ
- 0-7: dunes
- 8-11: rocks
- 12-15: vegetation
- 16: Arrakeen
- 17: Sietch
- 18: Smugglers village
- 19: fort
- 
-*/
 
-
-struct FlightTerrainSprite {
-    var spriteIndex: UInt16
-    var animation: DuneAnimation<DunePoint>
-    var position: DunePoint = .zero
-    var scale: Double = 0.0
-    var markForRemoval: Bool = false
+/// One piece of the flight view: a DUNES frame at a lateral offset and a depth.
+private struct FlightObject {
+    var z: Int
+    var x: Int
+    var sprite: Int
 }
 
-
-struct FlightVanishingLine {
-    var start: DunePoint
-    var end: DunePoint
-    
-    init(start: DunePoint = DunePoint(160, 70), radius: UInt16 = 300, angle: Double) {
-        self.start = start
-
-        let xOffset = Double(radius) * cos(angle)
-        let yOffset = Double(radius) * sin(angle)
-        
-        self.end = DunePoint(start.x + Int16(xOffset), start.y + Int16(yOffset))
-    }
-}
 
 final class Flight: DuneNode {
     private var contextBuffer = PixelBuffer(width: 320, height: 152)
@@ -50,165 +22,215 @@ final class Flight: DuneNode {
     private var dunesSprite: Sprite?
     private var sky: Sky?
     private var dayMode: DuneLightMode = .day
-    
-    private var frameCount: UInt32 = 0
-    private var debugVanishingLines = false
-    
-    private var flightSprites: [FlightTerrainSprite] = []
-    private let vanishingLines: [FlightVanishingLine] = [
-      FlightVanishingLine(angle: 0.5 * Math.PI / 12.0),
-      FlightVanishingLine(angle: 1.0 * Math.PI / 12.0),
-      FlightVanishingLine(angle: 2.0 * Math.PI / 12.0),
-      FlightVanishingLine(angle: 3.0 * Math.PI / 12.0),
-      FlightVanishingLine(angle: 4.0 * Math.PI / 12.0),
-      FlightVanishingLine(angle: 5.0 * Math.PI / 12.0),
-      FlightVanishingLine(angle: 6.0 * Math.PI / 12.0),
-      FlightVanishingLine(angle: 7.0 * Math.PI / 12.0),
-      FlightVanishingLine(angle: 8.0 * Math.PI / 12.0),
-      FlightVanishingLine(angle: 9.0 * Math.PI / 12.0),
-      FlightVanishingLine(angle: 10.0 * Math.PI / 12.0),
-      FlightVanishingLine(angle: 11.0 * Math.PI / 12.0),
-      FlightVanishingLine(angle: 11.5 * Math.PI / 24.0),
+
+    private var objects: [FlightObject] = []
+    private var seed: UInt16 = 1
+    private var frameClock: TimeInterval = 0
+
+    /// ds:20E7. Rows meet the sky here.
+    private static let horizon = 77
+    /// ds:20ED. Ornithopter altitude, in the same units as the depth table.
+    private static let altitude = 0x48
+    /// New rows appear at this depth.
+    private static let farDepth = 40
+    /// One landscape frame per 16 ticks.
+    private static let frameSeconds = 0.080
+    /// Sand under the horizon (3AF8).
+    private static let groundColour = 0xBF
+    /// ds:20FD. The eight sets of lateral positions a row can take.
+    private static let xSets: [[Int]] = [
+        [-900, -200, 200, 900], [-1300, -400, 0, 1300], [-800, -100, 400, 800], [-600, -300, 100, 600],
+        [-1200, -500, 300, 700], [-1000, -50, 500, 1000], [-700, -150, 50, 800], [-1100, -350, 350, 600]
     ]
-    private let terrainRect = DuneRect(0, 78, 320, 74)
-    
+
+    private var groundRect: DuneRect {
+        DuneRect(0, Int16(Self.horizon), 320, UInt8(152 - Self.horizon))
+    }
+
     init() {
         super.init("Flight")
     }
-    
-    
+
+
     override func onEnable() {
         dunesSprite = Sprite("DUNES.HSQ")
         sky = Sky()
+        seed = 1
+        frameClock = 0
+        fillRows()
     }
-    
-    
+
+
     override func onDisable() {
         dunesSprite = nil
         sky = nil
+        objects.removeAll()
     }
-    
-    
+
+
     override func onParamsChange() {
         if let dayMode = params["dayMode"] {
             self.dayMode = dayMode as! DuneLightMode
         }
-        
+
         if let durationParam = params["duration"] {
             self.duration = durationParam as! TimeInterval
         }
     }
-    
-    
+
+
     override func update(_ elapsedTime: TimeInterval) {
         currentTime += elapsedTime
-        
+
         if currentTime > duration {
             EventManager.nodeEndedEvent.notify(NodeEventData(self.name))
             return
         }
-        
-        // 1. Randomize a sprite in 0-12 range
-        // 2. Choose a path
-        if (frameCount % 60) == 0 {
-            var i = 0
-          
-            let evenIndexes = [0, 2, 4, 6, 8, 10, 12]
-            let oddIndexes = [1, 3, 5, 7, 9, 11]
-            var indexes = (frameCount % 2 == 0 ? evenIndexes : oddIndexes)
-            let indexCount = 5
-          
-            while i < indexCount {
-                let spriteIndex = UInt16(round(CGFloat(Math.random(0, 700)) / 100.0))
-                let randomIndex = Int(round(CGFloat(Math.random(0, (indexes.count - 1) * 100)) / 100.0))
-                let pathIndex = indexes.remove(at: randomIndex)
-                let path = vanishingLines[pathIndex]
-              
-                flightSprites.append(FlightTerrainSprite(
-                  spriteIndex: spriteIndex,
-                  animation: DuneAnimation<DunePoint>(from: path.start, to: path.end, startTime: currentTime, endTime: currentTime + 2.0, timing: .cubic)
-                ))
-              
-              i += 1
-            }
-            
-            for var sprite in flightSprites {
-                let anim = sprite.animation
-                let pt = anim.interpolate(currentTime)
-                
-                if pt.y < terrainRect.y + Int16(terrainRect.height) {
-                    sprite.position = pt
-                    sprite.scale = 0.0
-                } else {
-                    sprite.markForRemoval = true
-                }
-            }
-            
-            flightSprites.removeAll { $0.markForRemoval == true }
-            
-            flightSprites.sort { a, b in
-              a.scale > b.scale
-            }
+
+        frameClock += elapsedTime
+        var steps = 0
+
+        while frameClock >= Self.frameSeconds && steps < 40 {
+            frameClock -= Self.frameSeconds
+            advance()
+            steps += 1
         }
-        
-        frameCount += 1
     }
-    
-    
+
+
     override func render(_ buffer: PixelBuffer) {
         drawBackground(buffer)
-        
+
         guard let dunesSprite = dunesSprite else {
             return
         }
-      
-        for var sprite in flightSprites {
-            let anim = sprite.animation
-            let pt = anim.interpolate(currentTime)
-          
-            if pt.y < terrainRect.y {
-                continue
-            }
 
-            if anim.endValue.y != anim.startValue.y {
-              sprite.scale = 1.2 * Double(pt.y - 80) / 72.0
-            }
-          
-            let spriteInfo = dunesSprite.frame(at: Int(sprite.spriteIndex))
-            let x = pt.x - Int16(Double(spriteInfo.width) * sprite.scale)
+        // Far rows were appended last, so they are painted first.
+        var index = objects.count - 1
 
-            dunesSprite.drawFrame(
-                sprite.spriteIndex,
-                x: x,
-                y: pt.y,
-                buffer: buffer,
-                effect: .transform(scale: sprite.scale)
-            )
-        }
-      
-        if debugVanishingLines {
-            for path in vanishingLines {
-              Primitives.drawLine(path.start, path.end, 3, buffer)
-            }
+        while index >= 0 {
+            draw(objects[index], dunesSprite, buffer)
+            index -= 1
         }
     }
-    
-    
+
+
+    /// 256/z in 8.8 fixed point (5A61). The quotient is zero for every z the view uses.
+    private static func depthScale(_ z: Int) -> Int {
+        let denom = 75 * z
+        let quotient = 75 / denom
+        let remainder = 75 % denom
+        return (quotient << 8) | ((65536 * remainder / denom) >> 8)
+    }
+
+
+    /// The intro has no route map, so each row is open sand: DUNES frames 0-7.
+    private func nextSprite() -> Int {
+        Int(random() >> 8) & 7
+    }
+
+
+    private func random() -> UInt16 {
+        seed = seed &* 0xE56D &+ 1
+        return seed
+    }
+
+
+    /// emit_row (5982): four pieces at one depth, from one of the eight x sets.
+    private func emitRow(_ z: Int) {
+        _ = random()
+        let xs = Self.xSets[Int((seed >> 8) & 0x38) >> 3]
+        var i = 0
+
+        while i < xs.count {
+            objects.append(FlightObject(z: z, x: xs[i], sprite: nextSprite()))
+            i += 1
+        }
+    }
+
+
+    /// The initial fill (76CA): five groups of eight rows, from the foreground back to z 40.
+    private func fillRows() {
+        objects.removeAll()
+        var group = 0
+
+        while group < 5 {
+            var z = 1 + 8 * group
+            let end = 9 + 8 * group
+
+            while z < end {
+                emitRow(z)
+                z += 1
+            }
+
+            group += 1
+        }
+    }
+
+
+    /// One frame (54ED): every piece steps nearer and drops out at depth 0, then a row enters at z 40.
+    private func advance() {
+        var index = 0
+        var kept = 0
+
+        while index < objects.count {
+            let object = objects[index]
+
+            if object.z > 1 {
+                objects[kept] = FlightObject(z: object.z - 1, x: object.x, sprite: object.sprite)
+                kept += 1
+            }
+
+            index += 1
+        }
+
+        if kept < objects.count {
+            objects.removeLast(objects.count - kept)
+        }
+
+        emitRow(Self.farDepth)
+    }
+
+
+    /// project_and_draw (5A8D). The ground line is horizon + altitude * (256/z).
+    /// `drawFrame` scales from the top-left, so the anchor is placed on that line by shifting y.
+    private func draw(_ object: FlightObject, _ dunes: Sprite, _ buffer: PixelBuffer) {
+        let depth = Self.depthScale(object.z)
+
+        guard depth > 0 else {
+            return
+        }
+
+        let frame = dunes.frame(at: object.sprite)
+        let scale = Double(depth) / 256.0
+        let baseline = Self.horizon + 256 * Self.altitude * depth / 65536
+        let left = 160 + object.x * depth / 256
+        let top = baseline - Int(Double(frame.anchor) * scale)
+
+        dunes.drawFrame(
+            UInt16(object.sprite),
+            x: Int16(clamping: left),
+            y: Int16(clamping: top),
+            buffer: buffer,
+            effect: .transform(scale: scale)
+        )
+    }
+
+
     private func drawBackground(_ buffer: PixelBuffer) {
         if contextBuffer.tag == dayMode.asInt {
             contextBuffer.render(to: buffer, effect: .none)
             return
         }
-        
+
         guard let sky = sky else {
             return
         }
-        
+
         sky.lightMode = dayMode
         sky.render(contextBuffer)
+        Primitives.fillRect(groundRect, Self.groundColour, contextBuffer, isOffset: false)
 
-        Primitives.fillRect(terrainRect, 63, contextBuffer)
-        
         contextBuffer.render(to: buffer, effect: .none)
         contextBuffer.tag = dayMode.asInt
     }

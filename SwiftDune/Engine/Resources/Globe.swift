@@ -112,6 +112,7 @@ enum GlobeMove {
 }
 
 
+@MainActor
 final class Globe {
     private let engine = DuneEngine.shared
     private var tablat: [UInt8]

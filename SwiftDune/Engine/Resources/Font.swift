@@ -219,6 +219,7 @@ final class GameFont {
 }
 
 
+@MainActor
 final class LargeFont {
     private var sprite: Sprite
     

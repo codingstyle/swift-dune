@@ -7,15 +7,6 @@
 
 import Foundation
 
-enum GameVersion {
-  case v21 // 2.1 (floppy)
-  case v23 // 2.3 (floppy)
-  case v24 // 2.4 (floppy)
-  case v37 // 3.7 (PC-CD)
-  case v38 // 3.8 (PC-CD)
-}
-
-
 struct ResourceFile {
     var flags: UInt16
     var fileName: String
@@ -142,3 +133,22 @@ enum DuneLightMode: Equatable {
 }
 
 
+enum DuneOrientation: UInt8 {
+  case north = 0
+  case northEast = 1
+  case east = 2
+  case southEast = 3
+  case south = 4
+  case southWest = 5
+  case west = 6
+  case northWest = 7
+}
+
+
+enum DuneGameVersion {
+  case v21 // 2.1 (floppy)
+  case v23 // 2.3 (floppy)
+  case v24 // 2.4 (floppy)
+  case v37 // 3.7 (PC-CD)
+  case v38 // 3.8 (PC-CD)
+}

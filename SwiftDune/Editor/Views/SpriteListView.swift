@@ -43,7 +43,7 @@ struct SpriteFrameListItem: View {
 }
 
 
-enum SpriteListItemType {
+enum SpriteListItemType: Hashable {
     case animation
     case frame
 }
@@ -61,21 +61,27 @@ struct SpriteListView: View {
     
     var body: some View {
         List(selection: $selection) {
-            if viewModel.sprite != nil && viewModel.sprite!.frameCount > 0 {
+            if let sprite = viewModel.sprite, sprite.frameCount > 0 {
                 Section("Frames") {
-                    ForEach(0..<viewModel.sprite!.frameCount, id: \.self) { i in
-                        NavigationLink(value: SpriteListItemSelection(index: i, itemType: .frame), label: {
-                            SpriteFrameListItem(sprite: viewModel.sprite!, index: i)
+                    let items = (0..<sprite.frameCount).map {
+                        SpriteListItemSelection(index: $0, itemType: .frame)
+                    }
+                    ForEach(items, id: \.self) { item in
+                        NavigationLink(value: item, label: {
+                            SpriteFrameListItem(sprite: sprite, index: item.index)
                         })
                     }
                 }
             }
 
-            if viewModel.sprite != nil && viewModel.sprite!.animationCount > 0 {
+            if let sprite = viewModel.sprite, sprite.animationCount > 0 {
                 Section("Animations") {
-                    ForEach(0..<viewModel.sprite!.animationCount, id: \.self) { i in
-                        NavigationLink(value: SpriteListItemSelection(index: i, itemType: .animation), label: {
-                            SpriteAnimationListItem(sprite: viewModel.sprite!, index: i)
+                    let items = (0..<sprite.animationCount).map {
+                        SpriteListItemSelection(index: $0, itemType: .animation)
+                    }
+                    ForEach(items, id: \.self) { item in
+                        NavigationLink(value: item, label: {
+                            SpriteAnimationListItem(sprite: sprite, index: item.index)
                         })
                     }
                 }

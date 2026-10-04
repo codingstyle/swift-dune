@@ -10,12 +10,33 @@ import Foundation
 
 struct SpriteAnimationFrame {
     var groups: [SpriteAnimationImageGroup] = []
+  
+    mutating func replaceImageIndex(_ index: UInt16, _ replacementIndex: UInt16) {
+        var i = 0
+      
+        while i < groups.count {
+            groups[i].replaceImageIndex(index, replacementIndex)
+            i += 1
+        }
+    }
 }
 
 
 struct SpriteAnimationImageGroup {
     var offset: UInt32 = 0
     var images: [SpriteAnimationImage] = []
+
+    mutating func replaceImageIndex(_ index: UInt16, _ replacementIndex: UInt16) {
+        var i = 0
+      
+        while i < images.count {
+            if index == images[i].imageNumber {
+                images[i].imageNumber = replacementIndex
+            }
+          
+            i += 1
+        }
+    }
 }
 
 
@@ -37,7 +58,6 @@ struct SpriteAnimation {
     var frames: [SpriteAnimationFrame] = []
     
     static func parseAnimations(_ resource: Resource, animationOffset: UInt32) -> [SpriteAnimation] {
-        let engine = DuneEngine.shared
 
         if resource.fileName == "VER.HSQ" {
             let animationResource = Resource("VERBIN.HSQ")
@@ -58,7 +78,7 @@ struct SpriteAnimation {
         let header = resource.stream!.readUInt16()
         
         if (header != 0x0000) {
-            engine.logger.log(.error, "parseAnimations(): ERROR - header=0x0000")
+            Logger.shared.log(.error, "parseAnimations(): ERROR - header=0x0000")
             // No animation found
             resource.stream!.seek(animationOffset)
             return []
@@ -68,8 +88,6 @@ struct SpriteAnimation {
             return parseShaiAnimations(resource, animationOffset: animationOffset)
         } else if resource.fileName == "DEATH1.HSQ" {
             return parseDeathAnimations(resource, animationOffset: animationOffset)
-        } else if resource.fileName == "ATTACK.HSQ" {
-            return parseAttackAnimations(resource, animationOffset: animationOffset)
         }
         
         return parseCharacterAnimations(resource, animationOffset: animationOffset)
@@ -77,13 +95,11 @@ struct SpriteAnimation {
     
     
     static func parseCharacterAnimations(_ resource: Resource, animationOffset: UInt32) -> [SpriteAnimation] {
-        let engine = DuneEngine.shared
-        
         let animationHeaderSize: UInt32 = 14
         let blockSize = resource.stream!.readUInt16LE() // Block size
         
         if animationOffset + UInt32(blockSize) > resource.stream!.size {
-            engine.logger.log(.error, "parseAnimations(): ERROR - Offset and size are above the resource size. animationOffset=\(animationOffset), blockSize=\(blockSize), resourceSize=\(resource.stream!.size)")
+            Logger.shared.log(.error, "parseAnimations(): ERROR - Offset and size are above the resource size. animationOffset=\(animationOffset), blockSize=\(blockSize), resourceSize=\(resource.stream!.size)")
             resource.stream!.seek(animationOffset)
             return []
         }
@@ -91,7 +107,7 @@ struct SpriteAnimation {
         let animX = resource.stream!.readUInt16LE()
         
         if animX > 320 {
-            engine.logger.log(.error, "parseAnimations(): ERROR - animX > 320. Something was not parsed correctly")
+            Logger.shared.log(.error, "parseAnimations(): ERROR - animX > 320. Something was not parsed correctly")
             resource.stream!.seek(animationOffset)
             return []
         }
@@ -102,7 +118,7 @@ struct SpriteAnimation {
         let animHeight = resource.stream!.readUInt16LE()
         let animDefinitionOffset = UInt32(resource.stream!.readUInt16LE())
         
-        engine.logger.log(.debug, "parseAnimations(): Animation header: size=\(blockSize), x=\(animX), y=\(animY), width=\(animWidth), height=\(animHeight), offset=\(animDefinitionOffset)")
+        Logger.shared.log(.debug, "parseAnimations(): Animation header: size=\(blockSize), x=\(animX), y=\(animY), width=\(animWidth), height=\(animHeight), offset=\(animDefinitionOffset)")
         
         // Reads the first image group def: this is the size of image group header
         let imageGroupSize = resource.stream!.readUInt16LE(peek: true) / 2
@@ -188,11 +204,10 @@ struct SpriteAnimation {
     
     
     static func parseShaiAnimations(_ resource: Resource, animationOffset: UInt32) -> [SpriteAnimation] {
-        let engine = DuneEngine.shared
         let blockSize = resource.stream!.readUInt16LE() // Block size
         
         if animationOffset + UInt32(blockSize) > resource.stream!.size {
-            engine.logger.log(.error, "parseShaiAnimations(): ERROR - Offset and size are above the resource size. animationOffset=\(animationOffset), blockSize=\(blockSize), resourceSize=\(resource.stream!.size)")
+            Logger.shared.log(.error, "parseShaiAnimations(): ERROR - Offset and size are above the resource size. animationOffset=\(animationOffset), blockSize=\(blockSize), resourceSize=\(resource.stream!.size)")
             return []
         }
 
@@ -254,11 +269,10 @@ struct SpriteAnimation {
     
     
     static func parseDeathAnimations(_ resource: Resource, animationOffset: UInt32) -> [SpriteAnimation] {
-        let engine = DuneEngine.shared
         let blockSize = resource.stream!.readUInt16LE() // Block size
         
         if animationOffset + UInt32(blockSize) > resource.stream!.size {
-            engine.logger.log(.error, "parseDeathAnimations(): ERROR - Offset and size are above the resource size. animationOffset=\(animationOffset), blockSize=\(blockSize), resourceSize=\(resource.stream!.size)")
+            Logger.shared.log(.error, "parseDeathAnimations(): ERROR - Offset and size are above the resource size. animationOffset=\(animationOffset), blockSize=\(blockSize), resourceSize=\(resource.stream!.size)")
             return []
         }
         
@@ -324,7 +338,7 @@ struct SpriteAnimation {
                 yOffset: Int16(y)
             )
             
-            engine.logger.log(.debug, "parseDeathAnimations(): animation=\(animations.count) frame=\(animation.frames.count), index=\(spriteIndex), x=\(x), y=\(y)")
+            Logger.shared.log(.debug, "parseDeathAnimations(): animation=\(animations.count) frame=\(animation.frames.count), index=\(spriteIndex), x=\(x), y=\(y)")
             
             group.images.append(groupImage)
         }
@@ -383,50 +397,14 @@ struct SpriteAnimation {
         
         return animations
     }
-    
-    
-    static func parseAttackAnimations(_ resource: Resource, animationOffset: UInt32) -> [SpriteAnimation] {
-        var animations: [SpriteAnimation] = []
-
-        // TODO: fix animation parsing
-        return animations
-
-        /*resource.stream!.seek(animationOffset)
-        resource.stream!.skip(2)
-      
-        var animWidth = resource.stream!.readUInt16LE()
-        var animHeight = UInt16(resource.stream!.readByte())
-        var animation = SpriteAnimation(x: 0, y: 0, width: animWidth, height: animHeight)
-
-        while !resource.stream!.isEOF() {
-            if animation.frames.count == 28 {
-                animations.append(animation)
-
-                resource.stream!.skip(2)
-              
-                animWidth = resource.stream!.readUInt16LE()
-                animHeight = UInt16(resource.stream!.readByte())
-                
-                animation = SpriteAnimation(x: 0, y: 0, width: animWidth, height: animHeight)
-            }
-            
-            let x = Int16(resource.stream!.readSByte())
-            let y = Int16(resource.stream!.readSByte())
-            let spriteIndex = UInt16(resource.stream!.readByte())
-
-            let spriteImage = SpriteAnimationImage(imageNumber: spriteIndex, xOffset: x, yOffset: y)
-
-            var group = SpriteAnimationImageGroup()
-            group.images.append(spriteImage)
-
-            var frame = SpriteAnimationFrame()
-            frame.groups.append(group)
-
-            animation.frames.append(frame)
+  
+  
+    mutating func replaceAnimationsImageIndex(_ index: UInt16, _ replacementIndex: UInt16) {
+        var i = 0
+        
+        while i < frames.count {
+            frames[i].replaceImageIndex(index, replacementIndex)
+            i += 1
         }
-
-        animations.append(animation)
-
-        return animations*/
     }
 }

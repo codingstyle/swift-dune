@@ -100,6 +100,7 @@ final class Renderer: NSObject, ObservableObject, MTKViewDelegate {
     }
     
     
+    @MainActor
     func update(_ buffer: PixelBuffer) {
         let engine = DuneEngine.shared
         
@@ -176,7 +177,7 @@ final class Renderer: NSObject, ObservableObject, MTKViewDelegate {
         
         // Create a data provider from the components array
         guard let dataProvider = CGDataProvider(data: NSData(bytes: self.rawBufferPointer, length: self.frameSize)) else {
-            DuneEngine.shared.logger.log(.error, "Error creating data provider")
+            Logger.shared.log(.error, "Error creating data provider")
             return
         }
         
@@ -184,7 +185,7 @@ final class Renderer: NSObject, ObservableObject, MTKViewDelegate {
         let bitmapInfo: CGBitmapInfo = [ CGBitmapInfo(rawValue: CGImageAlphaInfo.noneSkipLast.rawValue), .byteOrder32Big ]
         
         guard let cgImage = CGImage(width: self.region.size.width, height: self.region.size.height, bitsPerComponent: bitsPerComponent, bitsPerPixel: bytesPerPixel * bitsPerComponent, bytesPerRow: bytesPerRow, space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: bitmapInfo, provider: dataProvider, decode: nil, shouldInterpolate: false, intent: .defaultIntent) else {
-            DuneEngine.shared.logger.log(.error, "Error creating CGImage")
+            Logger.shared.log(.error, "Error creating CGImage")
             return
         }
         
@@ -192,7 +193,7 @@ final class Renderer: NSObject, ObservableObject, MTKViewDelegate {
         let scaledSize = CGSize(width: self.region.size.width * scale, height: self.region.size.height * scale)
         
         guard let resizedImage = cgImage.resize(to: scaledSize) else {
-            DuneEngine.shared.logger.log(.error, "Error resizing image")
+            Logger.shared.log(.error, "Error resizing image")
             return
         }
         
@@ -204,7 +205,7 @@ final class Renderer: NSObject, ObservableObject, MTKViewDelegate {
         
         // Create a CGImageDestination
         guard let destination = CGImageDestinationCreateWithURL(fileURL as NSURL, UTType.png.identifier as CFString, 1, nil) else {
-            DuneEngine.shared.logger.log(.error, "Error creating image destination")
+            Logger.shared.log(.error, "Error creating image destination")
             return
         }
         
@@ -213,11 +214,11 @@ final class Renderer: NSObject, ObservableObject, MTKViewDelegate {
         
         // Finalize the destination to write the image to disk
         guard CGImageDestinationFinalize(destination) else {
-            DuneEngine.shared.logger.log(.error, "Error finalizing image destination")
+            Logger.shared.log(.error, "Error finalizing image destination")
             return
         }
         
-        DuneEngine.shared.logger.log(.info, "Image saved successfully")
+        Logger.shared.log(.info, "Image saved successfully")
     }
 }
 

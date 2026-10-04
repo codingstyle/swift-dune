@@ -54,7 +54,8 @@ enum RenderPriority: Int {
 }
 
 
-class DuneNode: Comparable {
+@MainActor
+class DuneNode: @MainActor Comparable {
     var engine: DuneEngine {
         return DuneEngine.shared
     }

@@ -54,8 +54,6 @@ extension Int: DuneAnimatable {
 
 
 final class DuneAnimation<T: DuneAnimatable> {
-    private let engine = DuneEngine.shared
-    
     private var frameCount: Double
     
     var startValue: T
