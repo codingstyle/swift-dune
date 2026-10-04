@@ -5,7 +5,8 @@ It is written in Swift 5.6 and runs on macOS.
 
 ## Installation
 
-You need the original assets from the game to play it.
+Game currently only supports Dune v2.1 assets (initial floppy version) 
+You need the original files from the game to play it.
 Create a subfolder `DuneFiles` and place the files in it.
 
 ## How to use
