@@ -7,10 +7,10 @@
 
 import Foundation
 import AppKit
-import Darwin
 import UniformTypeIdentifiers
 
 
+@MainActor
 final class DuneEngine {
     static let shared = DuneEngine()
     
@@ -19,7 +19,7 @@ final class DuneEngine {
     var keyboard: Keyboard
     var mouse: Mouse
     var renderer: Renderer
-    var logger: Logger
+    let logger = Logger.shared
 
     var isRunning: Bool = false
 
@@ -47,7 +47,6 @@ final class DuneEngine {
         keyboard = Keyboard()
         mouse = Mouse()
         renderer = Renderer()
-        logger = Logger()
 
         intermediateFrameBuffer = PixelBuffer(width: 320, height: 200)
         
@@ -61,8 +60,8 @@ final class DuneEngine {
     func run() {
         isRunning = true
 
-        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-            self?.gameLoop()
+        Task { @MainActor in
+            await self.gameLoop()
         }
     }
 
@@ -90,16 +89,12 @@ final class DuneEngine {
     }
     
 
-    func gameLoop() {
+    func gameLoop() async {
         logger.log(.info, "Starting game loop...")
         
         lastTime = ProcessInfo.processInfo.systemUptime
 
-        while true {
-            if !isRunning {
-                break
-            }
-
+        while isRunning {
             autoreleasepool {
                 currentTime = ProcessInfo.processInfo.systemUptime
                 let elapsedTime = currentTime - lastTime
@@ -108,8 +103,10 @@ final class DuneEngine {
                 processInput()
                 
                 update(elapsedTime)
-                render()
             }
+
+            // Sleeping suspends the main actor so AppKit can deliver input between frames.
+            await render()
         }
     }
     
@@ -132,17 +129,14 @@ final class DuneEngine {
     }
     
     
-    func render() {
+    func render() async {
         // Prepare buffer
         let currentOffscreenBuffer = screenBuffers[offscreenBufferIndex]
         
         currentOffscreenBuffer.clearBuffer()
         rootNode.render(currentOffscreenBuffer)
         
-        // Sends update to the front
-        DispatchQueue.main.sync {
-            self.renderer.update(currentOffscreenBuffer)
-        }
+        renderer.update(currentOffscreenBuffer)
         
         // Swap the pixel buffers
         offscreenBufferIndex = (offscreenBufferIndex + 1) % screenBuffers.count
@@ -154,7 +148,7 @@ final class DuneEngine {
         let sleepTime = expectedFrameTime - renderingTime
         
         if sleepTime > 0.0 {
-            usleep(useconds_t(sleepTime * 1_000_000.0))
+            try? await Task.sleep(nanoseconds: UInt64(sleepTime * 1_000_000_000.0))
         }
         
         logger.addMetric(1.0 / (renderingTime + (sleepTime > 0.0 ? sleepTime : 0.0)), at: gameTime)
@@ -165,20 +159,16 @@ final class DuneEngine {
         stop()
         
         if let message = message {
-            DispatchQueue.main.sync {
-                // Close all open windows
-                for window in NSApplication.shared.windows {
-                    window.close()
-                }
-                
-                // Show the alert
-                let alert = NSAlert()
-                alert.messageText = "Dune"
-                alert.informativeText = message
-                alert.alertStyle = .informational
-                alert.addButton(withTitle: "OK")
-                alert.runModal()
+            for window in NSApplication.shared.windows {
+                window.close()
             }
+            
+            let alert = NSAlert()
+            alert.messageText = "Dune"
+            alert.informativeText = message
+            alert.alertStyle = .informational
+            alert.addButton(withTitle: "OK")
+            alert.runModal()
         }
         
         exit(1)

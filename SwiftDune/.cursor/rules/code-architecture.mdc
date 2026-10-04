@@ -1,0 +1,53 @@
+---
+description: "Use this rule when creating new files, organizing project structure, adding new features, creating UI components, setting up ViewModels, or when file placement and architecture decisions are needed. Applies to tasks involving project organization, component creation, feature development, and code structure."
+alwaysApply: false
+---
+# Project Architecture
+
+This rule defines the desired architecture for the {ProjectName} project. All new files must follow this structure, and existing files should be progressively reorganized according to this architecture.
+
+## Folder Structure
+
+```
+SwiftDune/
+├─ SwiftDune.xcodeproj
+├─ Engine/
+│  ├─ Audio/                   # Sound and music playback
+│  ├─ Graphics/                # Primitives, pixel buffers, effects, palette management
+│  ├─ Input/                   # Keyboard and mouse handling
+│  ├─ Rendering/               # Renderer into a GPU backed view
+│  ├─ Resources/               # Parser and models for the original game assets
+│  └─ README.md                # Design system documentation
+│
+├─ Game/
+│  ├─ Logic/                   # Game loop, state and logic
+│  ├─ Scenes/                  # Screens/Scenes from the games
+│  └─ UI/                      # UI panel elements
+│  └─ Assets.xcassets
+│    └─ Icons/
+│        └─ AppIcon.appiconset
+│
+└─ Editor/
+   ├─ Views                    # Dune editor asset views
+   └─ Assets.xcassets
+     └─ Icons/
+         └─ AppIcon.appiconset
+
+```
+
+## Architecture Principles
+
+### 1. Separation of Concerns
+- **Engine/** : Everything used to parse original assets, then render audio, sound, and GFX
+- **Game/** : Reimplementation of the game loop and logic, including its screens and UI
+- **Editor/** : Used for testing the Engine asset parsing and used as a viewer
+
+### 2. Game
+- Game is reinterpreted using a modern node graph pattern, similarly to Unity
+- All game screens and UI elements inherit from `DuneNode` and use a final class
+- Use `update()` to update the variable state and `render()` to draw into the pixel buffer
+- Use `PixelBuffer` context property in case you need to draw different stages of the buffer
+
+### 3. Editor
+- Each feature uses its own ListView and DetailView state
+- MVVM structure: View + ViewModel (+ State if needed)

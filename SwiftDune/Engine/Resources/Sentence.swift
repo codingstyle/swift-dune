@@ -22,7 +22,6 @@ enum SentenceLanguage: Int {
 
 
 final class Sentence {
-    private let engine = DuneEngine.shared
     private var resource: Resource
     
     convenience init(_ type: SentenceType, language: SentenceLanguage = .french) {
@@ -42,7 +41,7 @@ final class Sentence {
     }
     
     
-    func sentence(at index: UInt16, printableOnly: Bool = false) -> String {
+    func sentence(at index: UInt16, printableOnly: Bool = false, convertSpecialChars: Bool = false) -> String {
         resource.stream!.seek(UInt32(index) * 2)
 
         let start = resource.stream!.readUInt16LE()
@@ -65,7 +64,20 @@ final class Sentence {
             bytes.append(current)
         }
         
-        return String(bytes: bytes, encoding: .isoLatin1)!
+        let str = String(bytes: bytes, encoding: .isoLatin1)!
+      
+        if convertSpecialChars {
+          return str
+            .replacingOccurrences(of: "|", with: "é")
+            .replacingOccurrences(of: "\\", with: "ê")
+            .replacingOccurrences(of: "}", with: "è")
+            .replacingOccurrences(of: "{", with: "à")
+            .replacingOccurrences(of: "^", with: "ô")
+            .replacingOccurrences(of: "_", with: "û")
+            .replacingOccurrences(of: "~", with: "ù")
+        }
+      
+        return str
     }
     
     
@@ -74,7 +86,7 @@ final class Sentence {
         
         for i in 0..<count {
             let s = sentence(at: i)
-            engine.logger.log(.debug, "Sentence #\(i): \(s)")
+            Logger.shared.log(.debug, "Sentence #\(i): \(s)")
         }
     }
 }

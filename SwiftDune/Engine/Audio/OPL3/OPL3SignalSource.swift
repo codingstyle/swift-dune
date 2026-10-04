@@ -28,8 +28,10 @@ struct OPL3SignalSource {
     private let source: Unmanaged<OPL3Operator>?
     private let kind: OPL3SignalSourceKind
 
-    /// A signal source that always returns zero
-    static let zero = OPL3SignalSource(source: nil, kind: .zero)
+    /// A signal source that always returns zero.
+    /// The value is immutable (`source` is nil); the stored type is non-Sendable only because
+    /// other instances hold an unowned pointer to an operator owned by the chip.
+    nonisolated(unsafe) static let zero = OPL3SignalSource(source: nil, kind: .zero)
 
     /// Reads the current signal value based on the source kind.
     /// Uses `takeUnretainedValue()` to load the object pointer without any ARC operation.

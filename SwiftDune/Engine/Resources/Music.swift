@@ -21,7 +21,6 @@ final class Music: AudioPlayerItem {
     return resource.fileName
   }
   
-  private let engine = DuneEngine.shared
   private var herad: HERAD
   private var resource: Resource
   private var player: AudioPlayer
@@ -73,13 +72,9 @@ final class Music: AudioPlayerItem {
       
       // Check if music has ended
       guard self.currentHeradTicks <= self.herad.maxTicks else {
-        self.isPlaying = false
-        
-        DispatchQueue.main.async {
-          self.stop()
-          self.engine.logger.log(.debug, "Music is finished: \(self.resource.fileName)")
-        }
-        
+        let fileName = self.resource.fileName
+        self.stop()
+        Logger.shared.log(.debug, "Music is finished: \(fileName)")
         return false
       }
       
@@ -246,7 +241,7 @@ final class Music: AudioPlayerItem {
 
     // Check if channel has a program assigned
     if herad.channels[idx].playProgram == nil {
-      engine.logger.log(.error, "eventNoteOn: channel \(channelIndex) has no program assigned. Note will be skipped.")
+      Logger.shared.log(.error, "eventNoteOn: channel \(channelIndex) has no program assigned. Note will be skipped.")
       return
     }
 
@@ -262,7 +257,7 @@ final class Music: AudioPlayerItem {
     playNote(channelIndex, note, .noteOn)
 
     guard let instrument = herad.channels[idx].playProgram else {
-      engine.logger.log(.error, "eventNoteOn(): Invalid instrument/playProgram for channel \(channelIndex)")
+      Logger.shared.log(.error, "eventNoteOn(): Invalid instrument/playProgram for channel \(channelIndex)")
       return
     }
 
@@ -293,10 +288,10 @@ final class Music: AudioPlayerItem {
   
   
   private func eventProgramChange(_ channelIndex: UInt8, _ programNumber: UInt8) {
-    // engine.logger.log(.debug, "eventProgramChange: channel=\(channelIndex), program=\(programNumber), instruments.count=\(herad.instruments.count)")
+    // Logger.shared.log(.debug, "eventProgramChange: channel=\(channelIndex), program=\(programNumber), instruments.count=\(herad.instruments.count)")
     
     if programNumber >= herad.instruments.count {
-      engine.logger.log(.error, "eventProgramChange: programNumber \(programNumber) >= instruments.count \(herad.instruments.count)")
+      Logger.shared.log(.error, "eventProgramChange: programNumber \(programNumber) >= instruments.count \(herad.instruments.count)")
       return
     }
     
@@ -311,7 +306,7 @@ final class Music: AudioPlayerItem {
 
   private func eventAftertouch(_ channel: UInt8, _ velocity: UInt8) {
     guard let instrument = herad.channels[Int(channel)].playProgram else {
-      engine.logger.log(.error, "eventAftertouch(): Invalid instrument/playProgram for channel \(channel)")
+      Logger.shared.log(.error, "eventAftertouch(): Invalid instrument/playProgram for channel \(channel)")
       return
     }
     
@@ -345,7 +340,7 @@ final class Music: AudioPlayerItem {
     var note = note
 
     guard let instrument = herad.channels[idx].playProgram else {
-      engine.logger.log(.error, "playNote(): Invalid instrument/playProgram for channel \(channelIndex)")
+      Logger.shared.log(.error, "playNote(): Invalid instrument/playProgram for channel \(channelIndex)")
       return
     }
 
@@ -724,7 +719,7 @@ final class Music: AudioPlayerItem {
   
   
   func dumpInfo() {
-    engine.logger.log(.debug, herad.debugDescription)
+    Logger.shared.log(.debug, herad.debugDescription)
   }
 }
 

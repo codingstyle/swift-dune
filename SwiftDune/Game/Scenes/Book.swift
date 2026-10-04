@@ -43,8 +43,17 @@ struct BookPage {
 final class Book: DuneNode {
     private var contextBuffer = PixelBuffer(width: 320, height: 152)
     private var bookSprite: Sprite?
+  
+    private let bookTexts: [UInt16] = [
+      0x8456, 0x8457, 0x8459, 0x0884, 0x1939, 0x845c,
+      0x2199, 0x2a3a, 0x845d, 0x3a79, 0x8461, 0x08ae,
+    ]
     
     private let menuItemsBook: [UInt16] = [214, 215, 216, 217, 218]
+
+    private var animationStartTime = 0.0
+  
+    private var pageIndex = 1
     
     init() {
         super.init("Book")
@@ -53,26 +62,49 @@ final class Book: DuneNode {
     
     override func onEnable() {
         bookSprite = Sprite("BOOK.HSQ")
+
+        EventManager.uiStateChangedEvent.notify(UIStateEventData(
+          items: menuItemsBook
+        ))
+      
+        EventManager.bookStateChangedEvent.addListener(self) { event in
+            if event.action == .turnPageLeft && self.pageIndex > 0 {
+                self.animationStartTime = self.currentTime
+                self.pageIndex -= 1
+            }
+          
+            if event.action == .turnPageRight {
+                self.animationStartTime = self.currentTime
+                self.pageIndex += 1
+            }
+        }
     }
     
     
     override func onDisable() {
+        EventManager.bookStateChangedEvent.removeListener(self)
+      
         bookSprite = nil
+        contextBuffer.clearBuffer()
     }
     
     
     override func update(_ elapsedTime: TimeInterval) {
-        EventManager.uiStateChangedEvent.notify(UIStateEventData(
-            leftPanel: .bookOpen,
-            rightPanel: .rect,
-            items: menuItemsBook
-        ))
+        if currentTime == 0.0 {
+            let music = Music("WATER.HSQ", player: engine.audioPlayer)
+            engine.audioPlayer.play(music)
+        }
+    
+        currentTime += elapsedTime
     }
     
     
     override func render(_ buffer: PixelBuffer) {
-        renderCover(buffer)
-        //renderPage(buffer)
+        if pageIndex == 1 {
+            renderCover(buffer)
+        } else {
+            renderPage(buffer)
+        }
     }
     
 
@@ -128,6 +160,23 @@ final class Book: DuneNode {
             contextBuffer.tag = 0x02
         }
         
-        contextBuffer.render(to: buffer, effect: .none)
+        contextBuffer.render(to: buffer, effect: .pageFlip(start: animationStartTime, duration: animationStartTime + 2.0, current: currentTime))
     }
+}
+
+
+enum BookAction: Equatable {
+  case turnPageLeft
+  case turnPageRight
+  case topic(_ topic: BookTopic)
+}
+
+
+struct BookStateEventData {
+  var action: BookAction
+}
+
+
+extension EventManager {
+    static let bookStateChangedEvent = DuneEvent<BookStateEventData>()
 }

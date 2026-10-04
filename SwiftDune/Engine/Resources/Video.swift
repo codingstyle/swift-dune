@@ -65,12 +65,15 @@ struct VideoHeader {
     }
 }
 
+@MainActor
 final class Video {
     private let engine = DuneEngine.shared
 
     private var resource: Resource
-    private var videoHeader: VideoHeader?
-    private var frames: [VideoFrame] = []
+    /// Freed from `deinit`, which is nonisolated. The video is main-actor isolated
+    /// and uniquely referenced when `deinit` runs.
+    nonisolated(unsafe) private var videoHeader: VideoHeader?
+    nonisolated(unsafe) private var frames: [VideoFrame] = []
     private var currentFrameIndex = 0
 
     private let frameRate = 15.0

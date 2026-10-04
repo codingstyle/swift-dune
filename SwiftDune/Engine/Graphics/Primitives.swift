@@ -217,7 +217,35 @@ struct Primitives {
             print("Invalid polygon to draw")
         }*/
     }
+  
+  
+    static func drawRect(_ rect: DuneRect, _ paletteIndex: Int, _ buffer: PixelBuffer, isOffset: Bool = true) {
+        let w = Int16(rect.width)
+        let h = Int16(rect.height)
+        let pt1 = DunePoint(rect.x, rect.y)
+        let pt2 = DunePoint(rect.x + w, rect.y)
+        let pt3 = DunePoint(rect.x + w, rect.y + h)
+        let pt4 = DunePoint(rect.x, rect.y + h)
     
+        drawLine(pt1, pt2, paletteIndex, buffer, isOffset: isOffset)
+        drawLine(pt2, pt3, paletteIndex, buffer, isOffset: isOffset)
+        drawLine(pt3, pt4, paletteIndex, buffer, isOffset: isOffset)
+        drawLine(pt4, pt1, paletteIndex, buffer, isOffset: isOffset)
+    }
+
+  
+    static func drawNestedRect(_ rect: DuneRect, _ paletteIndex: Int, _ buffer: PixelBuffer, isOffset: Bool = true) {
+        var i = 4
+        var color = paletteIndex
+      
+        while i > 0 {
+          let nestedRect = DuneRect(rect.x + Int16(i), rect.y + Int16(i), rect.width - UInt16(i * 2), rect.height - UInt8(i * 2))
+          drawRect(nestedRect, color, buffer, isOffset: isOffset)
+          color -= 2
+          i -= 1
+        }
+    }
+  
     
     static func fillRect(_ rect: DuneRect, _ paletteIndex: Int, _ buffer: PixelBuffer, isOffset: Bool = true) {
         var y1 = Int(rect.y)

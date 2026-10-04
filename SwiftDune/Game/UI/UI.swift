@@ -36,9 +36,22 @@ enum UIRightPanel: Int {
 }
 
 
+struct SpritePosition {
+    var spriteIndex: UInt16
+    var pt: DunePoint
+  
+    init(_ spriteIndex: UInt16, _ pt: DunePoint) {
+        self.spriteIndex = spriteIndex
+        self.pt = pt
+    }
+}
+
+
 final class UI: DuneNode {
     private var uiSprite: Sprite?
     private var characterSprite: Sprite?
+    private var palacePlanSprite: Sprite?
+    private var palacePlanVisible: Bool = false
     
     private var leftPanel: UILeftPanel = .bookClosed
     private var rightPanel: UIRightPanel = .roomDirections
@@ -52,18 +65,35 @@ final class UI: DuneNode {
     private var menuItemBackgroundRect = DuneRect(93, 159, 134, 7)
     private var menuItemTextRect = DuneRect(97, 159, 120, 8)
   
+    private let palacePlanButtonRect = DuneRect(269, 173, 9, 7)
+    private let palacePlanPositions: [SpritePosition] = [
+      SpritePosition(0, DunePoint(182, 12)),
+      SpritePosition(3, DunePoint(266, 65)),
+      SpritePosition(4, DunePoint(238, 65)),
+      SpritePosition(5, DunePoint(193, 65))
+    ]
+    private let palacePlanRect = DuneRect(160, 0, 160, 116)
+  
+    private var headIndex: UInt16 = 26 /* 16-25 */
+    private var headAnimation: DuneAnimation<UInt16>?
+  
+    private let bookRect = DuneRect(22, 152, 120, 26)
+    private let bookLeftPageRect = DuneRect(13, 152, 30, 40)
+    private let bookRightPageRect = DuneRect(33, 152, 120, 40)
+  
     private let dayTextRect = DuneRect(7, 189, 22, 10)
     
     // Colors for text and background
     private let lightColorIndex: UInt8 = 250
     private let darkColorIndex: UInt8 = 243
-
+  
     init() {
         super.init("UI")
     }
     
     override func onEnable() {
         uiSprite = Sprite("ICONES.HSQ")
+        palacePlanSprite = Sprite("PALPLAN.HSQ")
         characterSprite = Sprite("PERS.HSQ")
         characterSprite?.setPalette()
         commands = Sentence(.command)
@@ -79,8 +109,15 @@ final class UI: DuneNode {
     override func onDisable() {
         uiSprite = nil
         characterSprite = nil
-      
+        palacePlanSprite = nil
+        palacePlanVisible = false
+        
         EventManager.uiStateChangedEvent.removeListener(self)
+    }
+  
+  
+    override func update(_ elapsedTime: TimeInterval) {
+        currentTime += elapsedTime
     }
     
     
@@ -94,8 +131,16 @@ final class UI: DuneNode {
         uiSprite.drawFrame(14, x: 92, y: 152, buffer: buffer)
         
         // Head
-        // let headState = 16 /* 16-25 */
-        uiSprite.drawFrame(26, x: 150, y: 137, buffer: buffer)
+        if let headAnimation = headAnimation {
+            headIndex = 26 - headAnimation.interpolate(currentTime)
+          
+          if headIndex == 16 {
+              EventManager.uiStateChangedEvent.notify(UIStateEventData(leftPanel: .bookOpen, rightPanel: .rect))
+              self.headAnimation = nil
+          }
+        }
+      
+        uiSprite.drawFrame(headIndex, x: 150, y: 137, buffer: buffer)
         uiSprite.drawFrame(12, x: 2, y: 154, buffer: buffer)
         uiSprite.drawFrame(12, x: 317, y: 154, buffer: buffer)
         
@@ -125,8 +170,10 @@ final class UI: DuneNode {
         }
       
         // Characters
-        uiSprite.drawFrame(64, x: 35, y: 182, buffer: buffer)
-        uiSprite.drawFrame(64, x: 58, y: 182, buffer: buffer)
+        if leftPanel == .bookClosed {
+            uiSprite.drawFrame(64, x: 35, y: 182, buffer: buffer)
+            uiSprite.drawFrame(64, x: 58, y: 182, buffer: buffer)
+        }
 
         // Right part
         switch rightPanel {
@@ -134,6 +181,8 @@ final class UI: DuneNode {
             uiSprite.drawFrame(41, x: 266, y: 171, buffer: buffer)
           case .roomDirections:
             uiSprite.drawFrame(33, x: 255, y: 162, buffer: buffer)
+            
+            // Red dot
             uiSprite.drawFrame(36, x: 269, y: 173, buffer: buffer)
             
             if directions.contains(.up) {
@@ -152,10 +201,15 @@ final class UI: DuneNode {
               uiSprite.drawFrame(30, x: 284, y: 172, buffer: buffer)
             }
           case .rect:
+            uiSprite.drawFrame(33, x: 255, y: 162, buffer: buffer)
             break
         }
       
         renderMenus(buffer)
+      
+        if palacePlanVisible {
+            renderPalacePlan(buffer)
+        }
     }
   
   
@@ -214,20 +268,90 @@ final class UI: DuneNode {
             i += 1
         }
     }
+  
+  
+    func renderPalacePlan(_ buffer: PixelBuffer) {
+        guard let palacePlanSprite = palacePlanSprite else {
+          return
+        }
+      
+        Primitives.fillRect(palacePlanRect, 0xf1, buffer, isOffset: false)
+        Primitives.drawNestedRect(palacePlanRect, 0xf7, buffer, isOffset: false)
+      
+        var i = 0
+      
+        while i < palacePlanPositions.count {
+          palacePlanSprite.drawFrame(palacePlanPositions[i].spriteIndex, x: palacePlanPositions[i].pt.x, y: palacePlanPositions[i].pt.y, buffer: buffer)
+          i += 1
+        }
+      
+        // TODO: render characters X in room + current position
+    }
     
     
     func onUIEvent(_ e: UIStateEventData) {
-        self.menuItems = e.items
-        self.leftPanel = e.leftPanel
-        self.rightPanel = e.rightPanel
+        if let items = e.items {
+            self.menuItems = items
+        }
+
+        if let leftPanel = e.leftPanel {
+            self.leftPanel = leftPanel
+        }
+        
+        if let rightPanel = e.rightPanel {
+            self.rightPanel = rightPanel
+        }
+    }
+  
+  
+    override func onClick(_ event: DuneMouseClickEvent) {
+        if palacePlanButtonRect.contains(event.point) {
+            palacePlanVisible = !palacePlanVisible
+        }
+      
+        if bookRect.contains(event.point) && leftPanel == .bookClosed {
+            showBook()
+        }
+      
+        if leftPanel == .bookOpen {
+            if bookLeftPageRect.contains(event.point) {
+                turnBookPageLeft()
+            } else if bookRightPageRect.contains(event.point) {
+                turnBookPageRight()
+            }
+        }
+    }
+  
+  
+    func showBook() {
+        headAnimation = DuneAnimation(from: 0, to: 10, startTime: currentTime, endTime: currentTime + 0.5)
+    }
+  
+  
+    func hideBook() {
+        headAnimation = DuneAnimation(from: 0, to: 10, startTime: currentTime, endTime: currentTime + 0.5)
+    }
+  
+  
+    func turnBookPageLeft() {
+        // TODO: animate pages
+      
+        EventManager.bookStateChangedEvent.notify(.init(action: .turnPageLeft))
+    }
+  
+    
+    func turnBookPageRight() {
+        // TODO: animate pages
+      
+        EventManager.bookStateChangedEvent.notify(.init(action: .turnPageRight))
     }
 }
 
 
 struct UIStateEventData {
-    var leftPanel: UILeftPanel
-    var rightPanel: UIRightPanel
-    var items: [UInt16]
+    var leftPanel: UILeftPanel?
+    var rightPanel: UIRightPanel?
+    var items: [UInt16]?
 }
 
 

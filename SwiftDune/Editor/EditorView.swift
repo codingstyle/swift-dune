@@ -20,12 +20,12 @@ struct EditorView: View {
     var body: some View {
         NavigationSplitView {
             List(selection: $selection) {
-                Section("Music") {
-                    ForEach(ResourceType.music.files, id: \.self) { r in
-                        NavigationLink("🎵 \(r)", value: EditorSelection(resourceName: r, resourceType: .music))
+                Section("Game Logic") {
+                    ForEach(ResourceType.gameLogic.files, id: \.self) { r in
+                        NavigationLink("🧠 \(r)", value: EditorSelection(resourceName: r, resourceType: .gameLogic))
                     }
                 }
-
+                
                 Section("Globe") {
                     ForEach(ResourceType.globe.files, id: \.self) { r in
                         NavigationLink("🌍 \(r)", value: EditorSelection(resourceName: r, resourceType: .globe))
@@ -37,7 +37,13 @@ struct EditorView: View {
                         NavigationLink("🖼️ \(r)", value: EditorSelection(resourceName: r, resourceType: .scene))
                     }
                 }
-                
+
+                Section("Music") {
+                    ForEach(ResourceType.music.files, id: \.self) { r in
+                        NavigationLink("🎵 \(r)", value: EditorSelection(resourceName: r, resourceType: .music))
+                    }
+                }
+
                 Section("Videos") {
                     ForEach(ResourceType.video.files, id: \.self) { r in
                         NavigationLink("📺 \(r)", value: EditorSelection(resourceName: r, resourceType: .video))
@@ -101,6 +107,8 @@ struct EditorView: View {
                 GlobeDetailsView(viewModel: viewModel)
             } else if selection?.resourceType == .music {
                 MusicDetailsView(viewModel: viewModel)
+            } else if selection?.resourceType == .gameLogic {
+                ConditionDetailsView(viewModel: viewModel)
             } else {
                 Text("No content selected")
             }

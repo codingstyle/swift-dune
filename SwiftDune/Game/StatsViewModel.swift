@@ -16,6 +16,7 @@ struct GameFPSData: Identifiable {
     var fps: Double
 }
 
+@MainActor
 final class StatsViewModel: ObservableObject {
     @Published var isRunning = false
     @Published var fpsChartData: [GameFPSData] = []
@@ -25,13 +26,11 @@ final class StatsViewModel: ObservableObject {
 
   
     func renderDidFinish() {
-        DispatchQueue.main.sync {
-            isRunning = engine.isRunning
-            palette = engine.palette.allColors()
-            
-            fpsChartData = engine.logger.getLastMetrics().map {
-                GameFPSData(time: $0, fps: $1)
-            }
+        isRunning = engine.isRunning
+        palette = engine.palette.allColors()
+        
+        fpsChartData = engine.logger.getLastMetrics().map {
+            GameFPSData(time: $0, fps: $1)
         }
     }
 

@@ -7,12 +7,17 @@ alwaysApply: true
 
 SwiftDune is a Swift reimplementation of the 1992 Dune game by Cryo Interactive. It is organized into three main modules:
 
-## Editor/
+## Editor
+
 macOS SwiftUI app for viewing and inspecting original Dune game assets (sprites, fonts, sceneries, videos, globe, text).
+App uses a Model-View-View Model (MVVM architecture). Each feature is organized into a list view and a detail view.
+A main list view lists the original assets from Cryo's Dune game and grouped by section/type.
+
 - `EditorView.swift` / `EditorViewModel.swift` — main editor UI and state
 - `Views/` — detail and list views for each asset type (sprites, scenery, fonts, video, globe, text)
 
-## Engine/
+## Engine
+
 Core engine shared by both Editor and Game. Handles audio, graphics, input, rendering, and resource decoding.
 - `Audio/` — audio playback (`AudioPlayer`), Creative Voice format (`CreativeVoice`), HERAD music driver, OPL3 FM synthesis (`OPL3/`)
 - `Graphics/` — pixel buffer, palette management, visual effects, drawing primitives
@@ -22,7 +27,8 @@ Core engine shared by both Editor and Game. Handles audio, graphics, input, rend
 - `DuneEngine.swift` — engine entry point
 - `Node.swift` / `Animation.swift` — scene graph and animation system
 
-## Game/
+## Game
+
 macOS SwiftUI app that runs the actual Dune game.
 - `Scenes/` — individual game scenes (Intro, Prologue, Flight, Palace, Sietch, Credits, etc.)
 - `UI/` — in-game UI elements

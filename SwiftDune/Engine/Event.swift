@@ -67,6 +67,7 @@ public class DuneEvent<T> {
 
 
 
+@MainActor
 public class EventManager {
     //static let shared = EventManager()
    

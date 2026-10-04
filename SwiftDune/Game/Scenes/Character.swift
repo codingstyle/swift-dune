@@ -23,6 +23,7 @@ enum DuneCharacter {
   case fremen2
   case fremen3
   case smuggler
+  case paulInMirror
   
   var resourceName: String {
     switch self {
@@ -30,7 +31,7 @@ enum DuneCharacter {
       "LETO.HSQ"
     case .jessica:
       "JESS.HSQ"
-    case .paul:
+    case .paul, .paulInMirror:
       "PAUL.HSQ"
     case .chani:
       "CHAN.HSQ"
@@ -64,6 +65,8 @@ enum DuneCharacter {
       DunePoint(83, 0)
     case .feyd:
       DunePoint(66, 0)
+    case .paulInMirror:
+      DunePoint(45, 0)
     default:
       .zero
     }
@@ -72,7 +75,7 @@ enum DuneCharacter {
 
 
 final class Character: DuneNode {
-  private var characterSprite: Sprite?
+  var characterSprite: Sprite?
   private var character: DuneCharacter = .none
   private var characterOffset: DunePoint = .zero
   private var animations: [Int] = []
