@@ -15,12 +15,12 @@ final class PaulAndChani: DuneNode {
         super.init("PaulAndChani")
     }
   
-    
+  
     override func onEnable() {
         paul = Character()
         paul!.params = [
           "character": DuneCharacter.paulInMirror,
-          "animations": [0],
+          "animations": [0]
         ]
         paul!.isActive = true
         paul!.characterSprite!.replaceAnimationsImageIndex(1, 9)
@@ -28,9 +28,21 @@ final class PaulAndChani: DuneNode {
         chani = Character()
         chani!.params = [
           "character": DuneCharacter.chani,
-          "animations": [1, 2]
+          "animations": [2],
+          "offset": DunePoint(0, 15)
         ]
         chani!.isActive = true
+    }
+  
+  
+    func setPalette() {
+        guard let paul = paul,
+              let chani = chani else {
+          return
+        }
+      
+        paul.characterSprite!.setPalette()
+        chani.characterSprite!.setPalette()
     }
   
   

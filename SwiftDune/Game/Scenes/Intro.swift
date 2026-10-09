@@ -48,7 +48,7 @@ final class Intro: DuneNode {
 
     override func onEnable() {
         // Intro script
-        /*queue.enqueue(IntroStep(
+        queue.enqueue(IntroStep(
           background: DuneNodeParams("LogoSwap"),
           duration: 6.03,
           transitionOut: .fadeOut(duration: 2.0)
@@ -98,14 +98,8 @@ final class Intro: DuneNode {
         queue.enqueue(IntroStep(
           background: DuneNodeParams("Sunrise", [ "mode": DuneLightMode.day ]),
           foreground: DuneNodeParams("Character", [ "character": DuneCharacter.chani, "animations": [ 0 ] ]),
-          duration: 2.0,
-          transitionIn: .zoom(duration: 2.0, from: DuneRect(48, 48, 80, 38), to: DuneRect(48, 48, 80, 38))
-        ))
-        queue.enqueue(IntroStep(
-          background: DuneNodeParams("Sunrise", [ "mode": DuneLightMode.day ]),
-          foreground: DuneNodeParams("Character", [ "character": DuneCharacter.chani, "animations": [ 0 ] ]),
-          duration: 2.5,
-          transitionIn: .zoom(duration: 0.25, from: DuneRect(48, 48, 80, 38), to: .fullScreen)
+          duration: 4.5,
+          transitionIn: .zoomReveal(sequence: .full, focal: Effects.talkingHeadFocalPoint(7))
         ))
         queue.enqueue(IntroStep(
           background: DuneNodeParams("Sunrise", [ "mode": DuneLightMode.day ]),
@@ -231,7 +225,7 @@ final class Intro: DuneNode {
           duration: 10.0,
           transitionIn: .dissolveIn(duration: 0.3),
           transitionOut: .fadeOut(duration: 2.0)
-        ))*/
+        ))
         queue.enqueue(IntroStep(
           background: DuneNodeParams("Sietch", [ "room": SietchRoom.entrance, "lightMode": DuneLightMode.night ]),
           foreground: DuneNodeParams("Ornithopter", [ "flightMode": OrnithopterFlightMode.takingOff ]),

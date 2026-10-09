@@ -8,6 +8,69 @@
 import Foundation
 
 
+// Stepped camera pull-back used by the intro and the idle NPC menu.
+// Positive entries are scale selectors 1...7. -1 holds the current scale.
+enum ZoomSequence {
+    case full
+    case idleA
+    case idleB
+
+    private static let fullSteps: [Int8] = [6, -1, 5, 4, 3, 2, 1]
+    private static let idleASteps: [Int8] = [5, -1, 4, 3]
+    private static let idleBSteps: [Int8] = [4, -1, 3]
+
+    fileprivate var steps: [Int8] {
+        switch self {
+        case .full:
+            return ZoomSequence.fullSteps
+        case .idleA:
+            return ZoomSequence.idleASteps
+        case .idleB:
+            return ZoomSequence.idleBSteps
+        }
+    }
+
+    var duration: Double {
+        var time = 0.0
+        var index = 0
+        let steps = self.steps
+
+        while index < steps.count {
+            time += steps[index] < 0 ? Effects.zoomPauseDuration : Effects.zoomStepDuration
+            index += 1
+        }
+
+        return time
+    }
+
+    // The scale held at `elapsed`, or nil once the sequence has finished (show the frame 1:1).
+    func scale(at elapsed: Double) -> Int? {
+        var time = 0.0
+        var index = 0
+        var scale = 0
+        let steps = self.steps
+
+        while index < steps.count {
+            let step = steps[index]
+            let hold = step < 0 ? Effects.zoomPauseDuration : Effects.zoomStepDuration
+
+            if step > 0 {
+                scale = Int(step)
+            }
+
+            if elapsed < time + hold {
+                return scale > 0 ? scale : nil
+            }
+
+            time += hold
+            index += 1
+        }
+
+        return nil
+    }
+}
+
+
 enum TransitionEffect {
     case none
     case fadeIn(duration: Double)
@@ -18,6 +81,7 @@ enum TransitionEffect {
     case dissolveOut(duration: Double)
     case pixelate(duration: Double)
     case zoom(duration: Double, from: DuneRect, to: DuneRect)
+    case zoomReveal(sequence: ZoomSequence, focal: DunePoint)
     case pageFlip(duration: Double)
     case pageFlipBack(duration: Double)
   
@@ -39,6 +103,8 @@ enum TransitionEffect {
             return duration
         case .zoom(let duration, _, _):
             return duration
+        case .zoomReveal(let sequence, _):
+            return sequence.duration
         case .pageFlip(let duration):
             return duration
         case .pageFlipBack(let duration):
@@ -68,6 +134,8 @@ enum TransitionEffect {
         case .zoom(let duration, let from, let to):
             // Zoom has no in/out variant: the caller anchors it by passing the time the transition begins
             return .zoom(start: start, duration: duration, current: currentTime, from: from, to: to)
+        case .zoomReveal(let sequence, let focal):
+            return .zoomReveal(start: start, sequence: sequence, focal: focal, current: currentTime)
         case .pageFlip(let duration):
             return .pageFlip(start: start, duration: duration, current: currentTime)
         case .pageFlipBack(let duration):
@@ -89,6 +157,7 @@ enum SpriteEffect {
     case dissolveOut(end: Double, duration: Double, current: Double)
     case pixelate(end: Double, duration: Double, current: Double)
     case zoom(start: Double, duration: Double, current: Double, from: DuneRect, to: DuneRect)
+    case zoomReveal(start: Double, sequence: ZoomSequence, focal: DunePoint, current: Double)
     case pageFlip(start: Double, duration: Double, current: Double)
     case pageFlipBack(start: Double, duration: Double, current: Double)
     case transform(offset: UInt8 = 0, flipX: Bool = false, flipY: Bool = false, scale: Double = 1.0)
@@ -283,43 +352,43 @@ struct Effects {
         }
         
         let step = min(pageFlipSteps, max(1, Int((clamped * CGFloat(pageFlipSteps)).rounded(.up))))
-        let bx = forward ? (pageFlipRows - 8 * step) : (-pageFlipTravel + 8 * (step - 1))
-        let anchorX = bx >= 0 ? 320 : 320 + bx
+        let bx = forward ? (pageFlipRows &- 8 &* step) : (-pageFlipTravel &+ 8 &* (step &- 1))
+        let anchorX = bx >= 0 ? 320 : 320 &+ bx
         let anchorY = bx >= 0 ? bx : 0
-        let crease = anchorX + anchorY - 1
-        let triangleHeight = min(pageFlipRows - anchorY, anchorX)
-        let triangleLeft = anchorX - triangleHeight
+        let crease = anchorX &+ anchorY &- 1
+        let triangleHeight = min(pageFlipRows &- anchorY, anchorX)
+        let triangleLeft = anchorX &- triangleHeight
         let turning = forward ? fromBuffer : toBuffer
         
         var y = 0
         
         while y < pageHeight {
-            let destRow = (y + yOffset) * destBuffer.width
-            let fromRow = y * fromBuffer.width
-            let toRow = y * toBuffer.width
-            let localY = y - anchorY
-            let rowWidth = triangleHeight - localY
+            let destRow = (y &+ yOffset) &* destBuffer.width
+            let fromRow = y &* fromBuffer.width
+            let toRow = y &* toBuffer.width
+            let localY = y &- anchorY
+            let rowWidth = triangleHeight &- localY
             let band = localY >= 0 && rowWidth > 0
             var x = 0
             
             while x < pageWidth {
                 let inTriangle = band && x >= triangleLeft && x < triangleLeft + rowWidth
-                let revealed = forward ? (x + y) > crease : (x + y) <= crease
+                let revealed = forward ? (x &+ y) > crease : (x &+ y) <= crease
                 let pixel: UInt8
                 
                 if inTriangle {
-                    pixel = curlSample(turning, crease - y, crease - x, pageWidth, pageHeight)
+                    pixel = curlSample(turning, crease &- y, crease &- x, pageWidth, pageHeight)
                 } else if revealed {
-                    pixel = toBuffer.rawPointer[toRow + x]
+                    pixel = toBuffer.rawPointer[toRow &+ x]
                 } else {
-                    pixel = fromBuffer.rawPointer[fromRow + x]
+                    pixel = fromBuffer.rawPointer[fromRow &+ x]
                 }
                 
-                destBuffer.rawPointer[destRow + x] = pixel
-                x += 1
+                destBuffer.rawPointer[destRow &+ x] = pixel
+                x &+= 1
             }
             
-            y += 1
+            y &+= 1
         }
     }
     
@@ -360,5 +429,114 @@ struct Effects {
         }
         
         return pixel
+    }
+
+
+    // PIT tick used by the DOS zoom sequencer (4.99253 ms).
+    static let zoomStepDuration = 6.0 * 0.004992530
+    static let zoomPauseDuration = 300.0 * 0.004992530
+
+    private static let zoomOutWidth = 320
+    private static let zoomOutHeight = 152
+
+    // (numerator, denominator) for scale selectors 1...7. Index 0 is unused.
+    private static let zoomNumerator = [1, 8, 4, 3, 2, 3, 4, 8]
+    private static let zoomDenominator = [1, 7, 3, 2, 1, 1, 1, 1]
+
+    // Source-rect half extents (col, row) for each scale. The window is centred on the focal point.
+    private static let zoomHalfWidth = [0, 140, 120, 106, 80, 53, 40, 20]
+    private static let zoomHalfHeight = [0, 66, 57, 50, 38, 25, 19, 9]
+
+    // Focal points indexed by talking-head id. (0, 0) means this character has no zoom.
+    private static let talkingHeadFocalX: [Int16] = [
+        0x4c, 0x4b, 0x00, 0x53,
+        0x4c, 0x53, 0x4d, 0x58,
+        0x47, 0x56, 0x69, 0x00,
+        0x4a, 0x00, 0x5e, 0x00,
+        0x00
+    ]
+    private static let talkingHeadFocalY: [Int16] = [
+        0x2f, 0x49, 0x00, 0x25,
+        0x3e, 0x3e, 0x4e, 0x3f,
+        0x41, 0x1b, 0x5b, 0x00,
+        0x29, 0x00, 0x57, 0x00,
+        0x00
+    ]
+
+
+    static func talkingHeadFocalPoint(_ id: Int) -> DunePoint {
+        guard id >= 0 && id < talkingHeadFocalX.count else {
+            return .zero
+        }
+
+        return DunePoint(talkingHeadFocalX[id], talkingHeadFocalY[id])
+    }
+
+
+    static func zoomOrigin(focal: DunePoint, scale: Int) -> DunePoint {
+        guard scale >= 1 && scale < zoomHalfWidth.count else {
+            return .zero
+        }
+
+        let col = Int(focal.x) - zoomHalfWidth[scale]
+        let row = Int(focal.y) - zoomHalfHeight[scale]
+        return DunePoint(Int16(max(0, col)), Int16(max(0, row)))
+    }
+
+
+    // Nearest-neighbour upscale of a game-area sub-rectangle to 320×152.
+    // Source pixels are `d * den / num`. `yOffset` is applied only to the destination:
+    // scene buffers are already the 152-row game area.
+    static func vgaZoom(sourceBuffer: PixelBuffer, destBuffer: PixelBuffer, originX: Int, originY: Int, scale: Int, yOffset: Int = 0) {
+        guard scale >= 1 && scale < zoomNumerator.count else {
+            return
+        }
+
+        let num = zoomNumerator[scale]
+        let den = zoomDenominator[scale]
+        let col = max(0, originX)
+        let row = min(199, max(0, originY))
+        var destRowIndex = 0
+
+        while destRowIndex < zoomOutHeight {
+            let sourceY = row + (destRowIndex * den / num)
+            let destinationY = yOffset + destRowIndex
+
+            if destinationY >= destBuffer.height {
+                break
+            }
+
+            if sourceY >= 0 && sourceY < sourceBuffer.height {
+                let sourceRow = sourceY * sourceBuffer.width
+                let destinationRow = destinationY * destBuffer.width
+                var destColumn = 0
+
+                while destColumn < zoomOutWidth && destColumn < destBuffer.width {
+                    let sourceX = col + (destColumn * den / num)
+
+                    if sourceX >= 0 && sourceX < sourceBuffer.width {
+                        destBuffer.rawPointer[destinationRow + destColumn] = sourceBuffer.rawPointer[sourceRow + sourceX]
+                    }
+
+                    destColumn += 1
+                }
+            }
+
+            destRowIndex += 1
+        }
+    }
+
+
+    // 4× zoom of the room around a character anchor, used as the dialogue backdrop.
+    // The anchor is the top-left of the 80×38 window and is clamped so that window stays on screen.
+    // A negative anchor means the character was not drawn; the source is left unchanged.
+    static func vgaZoomRoomToSpeaker(sourceBuffer: PixelBuffer, destBuffer: PixelBuffer, anchorX: Int, anchorY: Int, yOffset: Int = 0) {
+        guard anchorX >= 0 else {
+            return
+        }
+
+        let col = min(anchorX, 0xf0)
+        let row = min(max(0, anchorY), 0x71)
+        vgaZoom(sourceBuffer: sourceBuffer, destBuffer: destBuffer, originX: col, originY: row, scale: 6, yOffset: yOffset)
     }
 }

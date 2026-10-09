@@ -12,11 +12,15 @@ enum DuneCharacter {
   case none
   case leto
   case jessica
+  case duncan
+  case thufir
+  case gurney
   case paul
   case chani
   case harah
   case stilgar
   case liet
+  case emperor
   case baron
   case feyd
   case fremen1
@@ -31,6 +35,12 @@ enum DuneCharacter {
       "LETO.HSQ"
     case .jessica:
       "JESS.HSQ"
+    case .duncan:
+      "IDAH.HSQ"
+    case .thufir:
+      "HAWA.HSQ"
+    case .gurney:
+      "GURN.HSQ"
     case .paul, .paulInMirror:
       "PAUL.HSQ"
     case .chani:
@@ -41,6 +51,8 @@ enum DuneCharacter {
       "STIL.HSQ"
     case .liet:
       "KYNE.HSQ"
+    case .emperor:
+      "EMPR.HSQ"
     case .baron:
       "BARO.HSQ"
     case .feyd:
@@ -120,6 +132,10 @@ final class Character: DuneNode {
       if !self.animations.isEmpty {
         self.idleAnimation = self.animations.last!
       }
+    }
+
+    if let offsetParam = params["offset"] {
+      self.characterOffset = offsetParam as! DunePoint
     }
   }
   

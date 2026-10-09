@@ -40,6 +40,7 @@ final class Palace: DuneNode {
     
     private var transitionIn: TransitionEffect = .none
     private var transitionOut: TransitionEffect = .none
+    private var playMusic = true
 
     init() {
         super.init("Palace")
@@ -66,6 +67,7 @@ final class Palace: DuneNode {
         contextBuffer.tag = 0x0000
         zoomRect = nil
         dayMode = .day
+        playMusic = true
     }
     
     
@@ -101,11 +103,15 @@ final class Palace: DuneNode {
         if let transitionOutParam = params["transitionOut"] {
             self.transitionOut = transitionOutParam as! TransitionEffect
         }
+
+        if let playMusicParam = params["playMusic"] {
+            self.playMusic = playMusicParam as! Bool
+        }
     }
     
     
     override func update(_ elapsedTime: TimeInterval) {
-        if currentTime == 0.0 {
+        if playMusic && currentTime == 0.0 {
             let music = Music("ARRAKIS.HSQ", player: engine.audioPlayer)
             engine.audioPlayer.play(music)
         }
@@ -172,6 +178,13 @@ final class Palace: DuneNode {
                     engine.palette.stash()
                 }
             }
+        } else {
+            if contextBuffer.tag != 0x0001 {
+                palaceScenery.drawRoom(currentRoom.rawValue, buffer: contextBuffer)
+                contextBuffer.tag = 0x0001
+            }
+
+            contextBuffer.render(to: intermediateFrameBuffer, effect: fx)
         }
         
         if let characterSprite = characterSprite {

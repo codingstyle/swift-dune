@@ -65,6 +65,8 @@ final class UI: DuneNode {
     private var menuItemBackgroundRect = DuneRect(93, 159, 134, 7)
     private var menuItemTextRect = DuneRect(97, 159, 120, 8)
   
+    private var rightCloseRect = DuneRect(255, 162, 40, 30)
+  
     private let palacePlanButtonRect = DuneRect(269, 173, 9, 7)
     private let palacePlanPositions: [SpritePosition] = [
       SpritePosition(0, DunePoint(182, 12)),
@@ -74,8 +76,11 @@ final class UI: DuneNode {
     ]
     private let palacePlanRect = DuneRect(160, 0, 160, 116)
   
-    private var headIndex: UInt16 = 26 /* 16-25 */
+    private var headIndex: UInt16 = 26
     private var headAnimation: DuneAnimation<UInt16>?
+  
+    private var pageFlipAnimation: DuneAnimation<UInt16>?
+    private var pageFlipStartIndex: UInt16 = 10
   
     private let bookRect = DuneRect(22, 152, 120, 26)
     private let bookLeftPageRect = DuneRect(13, 152, 30, 40)
@@ -167,6 +172,18 @@ final class UI: DuneNode {
             uiSprite.drawFrame(52, x: 20, y: 168, buffer: buffer)
             uiSprite.drawFrame(53, x: 36, y: 172, buffer: buffer)
             break
+        }
+  
+        // Book flip page animation
+        if let pageFlipAnimation = pageFlipAnimation {
+          let index = pageFlipStartIndex == 10 ?
+            pageFlipStartIndex + pageFlipAnimation.interpolate(currentTime) :
+            pageFlipStartIndex - pageFlipAnimation.interpolate(currentTime)
+          uiSprite.drawFrame(index, x: 27, y: 158, buffer: buffer)
+          
+          if currentTime > pageFlipAnimation.endTime {
+            self.pageFlipAnimation = nil
+          }
         }
       
         // Characters
@@ -315,10 +332,21 @@ final class UI: DuneNode {
       
         if leftPanel == .bookOpen {
             if bookLeftPageRect.contains(event.point) {
-                turnBookPageLeft()
+                turnBookPage(.turnPageLeft)
             } else if bookRightPageRect.contains(event.point) {
-                turnBookPageRight()
+                turnBookPage(.turnPageRight)
             }
+        }
+      
+        if rightPanel == .rect && rightCloseRect.contains(event.point) {
+            if leftPanel == .bookOpen {
+                hideBook()
+            }
+        }
+      
+        // Menus
+        if menuRect.contains(event.point) {
+            
         }
     }
   
@@ -333,17 +361,10 @@ final class UI: DuneNode {
     }
   
   
-    func turnBookPageLeft() {
-        // TODO: animate pages
-      
-        EventManager.bookStateChangedEvent.notify(.init(action: .turnPageLeft))
-    }
-  
-    
-    func turnBookPageRight() {
-        // TODO: animate pages
-      
-        EventManager.bookStateChangedEvent.notify(.init(action: .turnPageRight))
+    func turnBookPage(_ direction: BookAction) {
+        pageFlipAnimation = DuneAnimation(from: 0, to: 1, startTime: currentTime, endTime: currentTime + 0.3)
+        pageFlipStartIndex = direction == .turnPageLeft ? 11 : 10
+        EventManager.bookStateChangedEvent.notify(.init(action: direction))
     }
 }
 

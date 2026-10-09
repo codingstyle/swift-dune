@@ -9,7 +9,7 @@
 
 ## Scenes
 
-- [ ] ADD: Ornithopter flight animated dunes
+- [x] ADD: Ornithopter flight animated dunes
 - [ ] ADD: flat planet map with interpolation
 - [ ] UPDATE: improve sun rise animation
 
@@ -22,7 +22,7 @@
 ## Animations
 
 - [ ] UPDATE: new animation system on Stars planet pan
-- [ ] ADD: Page flip transition on frame buffer
+- [x] ADD: Page flip transition on frame buffer
 - [ ] ADD: Move up transition on frame buffer
 - [ ] ADD: Wobble effect on frame buffer (visions)
 
@@ -44,11 +44,11 @@
 - [ ] ADD: dialogue panels
 - [ ] ADD: implement day timer 
 - [ ] ADD: sietch positions on map
-- [ ] ADD: implement global game variables
+- [x] ADD: implement global game variables
 - [ ] ADD: implement save file format
 - [ ] ADD: support string formatting in sentences
-- [ ] ADD: reverse engineer CONDIT.HSQ
-- [ ] ADD: reverse engineer DIALOGUE.HSQ
+- [x] ADD: reverse engineer CONDIT.HSQ
+- [x] ADD: reverse engineer DIALOGUE.HSQ
 
 ## Platform
 

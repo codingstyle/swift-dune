@@ -49,7 +49,8 @@ final class GameFont {
     
     // TODO: justify text except last line
     // TODO: center vertically on the 48px height
-    func render(_ text: String, rect: DuneRect, buffer: PixelBuffer, alignment: FontAlignment = .left, style: FontSize = .normal) {
+    @discardableResult
+    func render(_ text: String, rect: DuneRect, buffer: PixelBuffer, alignment: FontAlignment = .left, style: FontSize = .normal, firstLineIndent: Int = 0) -> (firstLineY: Int, lastLineY: Int) {
         // TODO: Compute number of lines and space justification for each line
         
         // 1. Calculate the width of each word
@@ -65,6 +66,7 @@ final class GameFont {
 
         let words = text.split(separator: /\s/)
         var lineWidth = 0
+        var lineBudget = Int(rect.width) - firstLineIndent
         var i = 0
         
         var lines: [[SizedText]] = []
@@ -74,7 +76,7 @@ final class GameFont {
             let word = String(words[i])
             let wordWidth = self.width(for: word, style: style)
             
-            if lineWidth + (spaceWidth * (sizedText.count + 1)) + wordWidth < rect.width {
+            if lineWidth + (spaceWidth * (sizedText.count + 1)) + wordWidth < lineBudget {
                 sizedText.append(SizedText(text: word, size: wordWidth))
                 lineWidth += wordWidth
             } else {
@@ -82,6 +84,7 @@ final class GameFont {
                 
                 sizedText = [SizedText(text: word, size: wordWidth)]
                 lineWidth = wordWidth
+                lineBudget = Int(rect.width)
             }
             
             i += 1
@@ -91,15 +94,27 @@ final class GameFont {
 
         let yOffset = (Int(rect.height) - (lines.count * charHeight)) / 2
         var n = 0
+        var firstLineY = Int(rect.y)
+        var lastLineY = Int(rect.y)
         
         while n < lines.count {
-            let x = UInt16(rect.x)
-            let y = UInt16(Int(rect.y) + yOffset + (n * charHeight))
+            let indent = n == 0 ? firstLineIndent : 0
+            let x = UInt16(Int(rect.x) + indent)
+            let y = Int(rect.y) + yOffset + (n * charHeight)
+            let lineWidth = UInt16(max(0, Int(rect.width) - indent))
             let horizontalAlignment = n < lines.count - 1 || alignment != .justify ? alignment : .left
-            self.drawText(lines[n], x: x, y: y, width: rect.width, buffer: buffer, style: style, alignment: horizontalAlignment)
+
+            if n == 0 {
+                firstLineY = y
+            }
+
+            lastLineY = y
+            self.drawText(lines[n], x: x, y: UInt16(y), width: lineWidth, buffer: buffer, style: style, alignment: horizontalAlignment)
             
             n += 1
         }
+
+        return (firstLineY, lastLineY)
     }
     
     
@@ -121,6 +136,53 @@ final class GameFont {
         }
 
         return width
+    }
+
+
+    func advanceWidth(_ char: UInt8, style: FontSize) -> Int {
+        if style == .small {
+            let index = Int(char) &+ 0x80
+            if index < charWidths.count {
+                return Int(charWidths[index])
+            }
+        }
+
+        return Int(charWidths[Int(char)])
+    }
+
+
+    @discardableResult
+    func drawGlyph(_ char: UInt8, x: Int, y: Int, buffer: PixelBuffer, style: FontSize = .normal) -> Int {
+        let charHeight = style == .normal ? 9 : 7
+        let tableOffset = style == .normal ? 256 : 1408
+        let charWidth = advanceWidth(char, style: style)
+        let srcOffset = tableOffset + Int(char) * charHeight
+
+        resource.stream!.seek(UInt32(srcOffset))
+
+        var charY = 0
+
+        while charY < charHeight {
+            var charLine = resource.stream!.readByte()
+            let destY = y + charY
+            var charX = 0
+
+            while charX < charWidth {
+                if charLine & 0x80 > 0 && destY >= 0 && destY < buffer.height {
+                    let destX = x + charX
+                    if destX >= 0 && destX < buffer.width {
+                        buffer.rawPointer[(destY * buffer.width) + destX] = paletteIndex
+                    }
+                }
+
+                charLine <<= 1
+                charX += 1
+            }
+
+            charY += 1
+        }
+
+        return charWidth
     }
     
     

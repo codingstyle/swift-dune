@@ -14,8 +14,6 @@ final class Kiss: DuneNode {
     private let desertRect = DuneRect(0, 78, 320, 74)
     private let desertIndexPalette = 63
     
-    private let zoomRect = DuneRect(0, 52, 210, 100)
-
     private var kissSprite: Sprite?
     private var dunesSprite: Sprite?
     private var sky: Sky?
@@ -98,7 +96,7 @@ final class Kiss: DuneNode {
             intermediateFrameBuffer.render(to: contextBuffer, effect: .none)
             kissSprite.drawFrame(0, x: 78, y: 32, buffer: contextBuffer)
         } else {
-            intermediateFrameBuffer.render(to: contextBuffer, effect: .zoom(start: 5.0, duration: 5.0, current: currentTime, from: zoomRect, to: zoomRect))
+            Effects.vgaZoom(sourceBuffer: intermediateFrameBuffer, destBuffer: contextBuffer, originX: 0, originY: 0x32, scale: 3)
             kissSprite.drawFrame(1, x: 25, y: 4, buffer: contextBuffer)
         }
         

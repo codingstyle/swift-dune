@@ -20,6 +20,7 @@ final class Credits: DuneNode {
 
     private var scrollY: Int16 = 152
     private var scrollAnimation: DuneAnimation<Int16>?
+    var embedded = false
     
     // Frame index, X position, Y offset
     private let spritePositions = [
@@ -82,8 +83,8 @@ final class Credits: DuneNode {
 
         scrollAnimation = DuneAnimation<Int16>(from: 0, to: 1936, startTime: 2.0, endTime: 54.0)
       
-        let music = Music("WORMSUIT.HSQ", player: engine.audioPlayer)
-        engine.audioPlayer.play(music)
+        //let music = Music("WORMSUIT.HSQ", player: engine.audioPlayer)
+        //engine.audioPlayer.play(music)
     }
     
     
@@ -94,6 +95,15 @@ final class Credits: DuneNode {
         scrollAnimation = nil
         scrollY = 152
         currentTime = 0
+        embedded = false
+        backgroundBuffer.tag = 0x0000
+    }
+
+
+    override func onParamsChange() {
+        if let embeddedParam = params["embedded"] {
+            self.embedded = embeddedParam as! Bool
+        }
     }
     
     
@@ -126,7 +136,7 @@ final class Credits: DuneNode {
         }
 
         var fx: SpriteEffect {
-            if currentTime < 2.0 {
+            if currentTime < 2.0 && !embedded {
                 return .fadeIn(start: 0.0, duration: 2.0, current: currentTime)
             }
             
@@ -145,6 +155,7 @@ final class Credits: DuneNode {
             i += 1
         }
         
-        contextBuffer.copyPixels(to: buffer, offset: 24 * buffer.width)
+        let y = embedded ? 0 : 24
+        contextBuffer.copyPixels(to: buffer, offset: y * buffer.width)
     }
 }

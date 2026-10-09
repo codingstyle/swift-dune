@@ -85,6 +85,17 @@ final class PixelBuffer {
             let progress = Math.clampf((current - start) / duration, 0.0, 1.0)
             let rect = Math.lerpRect(from, to, progress)
             Effects.zoom(sourceBuffer: self, destBuffer: buffer, sourceRect: rect, yOffset: y)
+        case .zoomReveal(let start, let sequence, let focal, let current):
+            if focal.x == 0 && focal.y == 0 {
+                let size = max(0, min(height, buffer.height - y)) * rowSizeInBytes
+                self.copyPixels(to: buffer, offset: y * buffer.width, size: size)
+            } else if let scale = sequence.scale(at: current - start) {
+                let origin = Effects.zoomOrigin(focal: focal, scale: scale)
+                Effects.vgaZoom(sourceBuffer: self, destBuffer: buffer, originX: Int(origin.x), originY: Int(origin.y), scale: scale, yOffset: y)
+            } else {
+                let size = max(0, min(height, buffer.height - y)) * rowSizeInBytes
+                self.copyPixels(to: buffer, offset: y * buffer.width, size: size)
+            }
         case .pageFlip(let start, let duration, let current):
             if let previous {
                 let progress = (current - start) / duration

@@ -8,7 +8,9 @@
 import Foundation
 
 final class Game: DuneNode {
-    
+    private var transitionIn: TransitionEffect?
+    private var transitionOut: TransitionEffect?
+  
     init() {
         super.init("Game")
     }

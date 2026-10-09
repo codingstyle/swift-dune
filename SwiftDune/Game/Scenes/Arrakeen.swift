@@ -8,9 +8,14 @@
 import Foundation
 
 enum ArrakeenRoom: Int {
+  case fort = 0
+  case building1 = 1
+  case building2 = 2
+  case building3 = 3
+  case entrance = 4
   case prisonCell = 5
   case corridor = 6
-  case mainHall = 7
+  case throne = 7
 }
 
 
@@ -18,7 +23,7 @@ final class Arrakeen: DuneNode {
     private var contextBuffer = PixelBuffer(width: 320, height: 152)
 
     private var arrakeenScenery: Scenery?
-    private var currentRoom: ArrakeenRoom = .mainHall
+    private var currentRoom: ArrakeenRoom = .throne
     private var markers: Dictionary<Int, RoomCharacter> = [:]
   
     private var transitionIn: TransitionEffect = .none
@@ -39,7 +44,7 @@ final class Arrakeen: DuneNode {
     override func onDisable() {
         arrakeenScenery = nil
         markers = [:]
-        currentRoom = .mainHall
+        currentRoom = .throne
         currentTime = 0.0
         contextBuffer.tag = 0x0000
     }
