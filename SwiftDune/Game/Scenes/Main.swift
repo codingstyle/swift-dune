@@ -32,13 +32,13 @@ final class Main: DuneNode {
             self.onNodeEvent(nodeData)
         }
         
-        queue.enqueue(DuneNodeParams("Logo"))
+        /*queue.enqueue(DuneNodeParams("Logo"))
         queue.enqueue(DuneNodeParams("Intro"))
         queue.enqueue(DuneNodeParams("Credits"))
         queue.enqueue(DuneNodeParams("Prologue"))
-        queue.enqueue(DuneNodeParams("CopyProtection", [ "bypassProtection": true ]))
+        queue.enqueue(DuneNodeParams("CopyProtection", [ "bypassProtection": true ]))*/
         queue.enqueue(DuneNodeParams("Game"))
-        queue.enqueue(DuneNodeParams("Ending"))
+        //queue.enqueue(DuneNodeParams("Ending"))
 
         guard let itemConfig = queue.dequeueFirst() else {
             return

@@ -49,10 +49,12 @@ final class Music: AudioPlayerItem {
     player.oplTickCallback = { [weak self] in
       guard let self = self, self.isPlaying else { return false }
       
-      // Check if music has ended
-      if !(self.currentHeradTicks <= self.herad.maxTicks) {
+      // Check if music has ended. A loop rewinds at the last note so the
+      // end-of-track rest is not inserted between repeats.
+      let endTick = self.loops ? self.loopRestartTick : self.herad.maxTicks
+      if !(self.currentHeradTicks <= endTick) {
         if self.loops {
-          self.resetPlaybackState()
+          self.rewindLoop()
         } else {
           let fileName = self.resource.fileName
           self.stop()
@@ -87,7 +89,31 @@ final class Music: AudioPlayerItem {
   }
 
 
-  /// Releases sounding notes and rewinds tracks so playback can start or loop.
+  /// Last note event when looping, otherwise the file end. Avoids playing the trailing rest before a repeat.
+  private var loopRestartTick: UInt32 {
+    return herad.lastNoteTick > 0 ? herad.lastNoteTick : herad.maxTicks
+  }
+
+  /// Rewinds event cursors without releasing notes or reloading instruments, so the next tick continues from the start.
+  private func rewindLoop() {
+    var channelIdx = 0
+
+    while channelIdx < herad.channels.count {
+      herad.channels[channelIdx].pitchSlideDuration = 0
+      channelIdx += 1
+    }
+
+    self.currentHeradTicks = 0
+
+    var trackIdx = 0
+
+    while trackIdx < herad.tracks.count {
+      herad.tracks[trackIdx].eventCursor = 0
+      trackIdx += 1
+    }
+  }
+
+  /// Releases sounding notes and rewinds tracks so playback can start.
   private func resetPlaybackState() {
     var channelIdx = 0
 

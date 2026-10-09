@@ -11,6 +11,7 @@ This rule defines the desired architecture for the {ProjectName} project. All ne
 ```
 SwiftDune/
 ├─ SwiftDune.xcodeproj
+├─ DuneFiles/                  # Original game assets (do not touch anything in this folder)
 ├─ Engine/
 │  ├─ Audio/                   # Sound and music playback
 │  ├─ Graphics/                # Primitives, pixel buffers, effects, palette management
@@ -51,3 +52,11 @@ SwiftDune/
 ### 3. Editor
 - Each feature uses its own ListView and DetailView state
 - MVVM structure: View + ViewModel (+ State if needed)
+
+### 4. Performance
+
+- Do no use for/in loops which use an iterator and can be slow on debug and release mode. Favor "while" loops using an numeric variable that you increment whenever possible.
+- Mark a class or a var as final if they are not overriden
+- Use `private` and `fileprivate` keywords accordingly when declaration does not need to be accessed outside of file
+- Use ContiguousArray with reference types when NSArray bridging is unnecessary
+- More generally rely on [Swift language official performance tips](https://github.com/swiftlang/swift/blob/main/docs/OptimizationTips.rst) to apply good practices

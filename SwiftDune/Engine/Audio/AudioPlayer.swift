@@ -48,8 +48,12 @@ final class AudioPlayer {
     /// Audio generation timer
     private var oplTimer: DispatchSourceTimer?
     private let oplQueue = DispatchQueue(label: "com.swiftdune.opl3", qos: .userInteractive)
+    private let oplQueueKey = DispatchSpecificKey<UInt8>()
+    /// Set when playback is stopped from inside buffer generation, so the buffer is not scheduled afterward.
+    private var oplStopped = false
   
     init() {
+        oplQueue.setSpecific(key: oplQueueKey, value: 1)
         initAudioEngine()
     }
     
@@ -146,19 +150,25 @@ final class AudioPlayer {
         oplBufferPool.append(buffer)
     }
 
-    /// Starts the OPL3 audio generation timer
+    /// Starts OPL3 generation on the audio queue. Returns immediately so the caller is not blocked
+    /// while the first buffer is synthesized.
     func startOPL3() {
+        oplQueue.async { [weak self] in
+            self?.startOPL3OnQueue()
+        }
+    }
+
+    private func startOPL3OnQueue() {
         guard oplTimer == nil else { return }
 
+        oplStopped = false
         // Start at 0 so the first tick (tick 0) is processed immediately
         oplSamplesUntilNextTick = 0
 
-        // Pre-fill buffers to build ~1 second of headroom
-        var prefillIdx = 0
-        while prefillIdx < 6 {
-            generateAndScheduleOPL3Buffer()
-            prefillIdx += 1
-        }
+        // One buffer (~165ms) is enough to start. The timer keeps playback ahead after that.
+        generateAndScheduleOPL3Buffer()
+
+        guard !oplStopped else { return }
 
         if !oplNode.isPlaying {
             oplNode.play()
@@ -174,11 +184,24 @@ final class AudioPlayer {
         }
 
         timer.resume()
-        self.oplTimer = timer
+        oplTimer = timer
     }
     
-    /// Stops the OPL3 audio generation timer
+    /// Stops the OPL3 audio generation timer.
+    /// Synchronous when called off the audio queue so a following play() cannot be wiped by a late stop.
+    /// Inline when already on the queue: the tick callback stops playback from inside generation.
     func stopOPL3() {
+        if DispatchQueue.getSpecific(key: oplQueueKey) != nil {
+            stopOPL3OnQueue()
+        } else {
+            oplQueue.sync {
+                stopOPL3OnQueue()
+            }
+        }
+    }
+
+    private func stopOPL3OnQueue() {
+        oplStopped = true
         oplTimer?.cancel()
         oplTimer = nil
         oplTickCallback = nil
@@ -229,6 +252,9 @@ final class AudioPlayer {
             frame += samplesToGenerate
             oplSamplesUntilNextTick -= Double(samplesToGenerate)
         }
+
+        // A stop from the tick callback already tore playback down. Drop this buffer.
+        guard !oplStopped else { return }
 
         // Schedule buffer and return to pool when playback completes
         oplNode.scheduleBuffer(buffer) { [weak self] in

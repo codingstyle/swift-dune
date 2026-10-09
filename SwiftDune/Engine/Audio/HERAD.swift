@@ -170,6 +170,8 @@ public final class HERAD: CustomDebugStringConvertible {
   }
   
   var maxTicks: UInt32 = 0
+  /// Tick of the last note-on or note-off. Looping restarts here so the end-of-track rest is not played.
+  var lastNoteTick: UInt32 = 0
   var instruments: [HeradInstrument] = []
   var tracks: [HeradTrack] = []
   var channels: [HeradChannel] = [HeradChannel](repeating: .init(), count: 16)
@@ -212,6 +214,7 @@ public final class HERAD: CustomDebugStringConvertible {
     let maxOffset = header.chunkSize
     
     self.maxTicks = 0
+    self.lastNoteTick = 0
     
     var i = 0
     
@@ -266,6 +269,9 @@ public final class HERAD: CustomDebugStringConvertible {
                 ticks: ticks,
                 type: .noteOff(noteNumber: note, channel: trackIndex)
               ))
+              if ticks > self.lastNoteTick {
+                self.lastNoteTick = ticks
+              }
               n += 3
               break
             case 0x90:
@@ -274,6 +280,9 @@ public final class HERAD: CustomDebugStringConvertible {
                 ticks: ticks,
                 type: .noteOn(noteNumber: note, velocity: track.data[n + 2], channel: trackIndex)
               ))
+              if ticks > self.lastNoteTick {
+                self.lastNoteTick = ticks
+              }
               n += 3
               break
             case 0xA0:
