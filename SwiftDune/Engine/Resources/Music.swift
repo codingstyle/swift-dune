@@ -27,6 +27,7 @@ final class Music: AudioPlayerItem {
   
   private var currentHeradTicks: Int = 0
   private(set) var isPlaying: Bool = false
+  private var loops = false
   private var trackMuteMask: UInt32 = 0
   
   init(_ fileName: String, player: AudioPlayer) {
@@ -36,33 +37,11 @@ final class Music: AudioPlayerItem {
   }
   
   
-  func play() {
-    // Initialize channels with default program (instrument 0) if available
-    // This ensures notes can play even if no program change event is received
-    if !herad.instruments.isEmpty {
-      let defaultInstrument = herad.instruments[0]
-      
-      for channelIdx in 0..<herad.channels.count {
-        if herad.channels[channelIdx].playProgram == nil {
-          herad.channels[channelIdx].playProgram = defaultInstrument
-          herad.channels[channelIdx].program = defaultInstrument
-          // Also configure OPL3 for this channel with the default instrument
-          programChange(0, UInt8(channelIdx))
-        }
-      }
-    }
-    
+  func play(loop: Bool = false) {
+    self.loops = loop
+    resetPlaybackState()
     self.isPlaying = true
-    self.currentHeradTicks = 0
 
-    // Reset track cursors for sequential event processing
-    var trackIdx = 0
-    
-    while trackIdx < herad.tracks.count {
-      herad.tracks[trackIdx].eventCursor = 0
-      trackIdx += 1
-    }
-    
     // Configure AudioPlayer with tick rate for synchronized event processing
     player.oplSamplesPerTick = AudioPlayer.oplSampleRate / herad.ticksPerSecond
     
@@ -71,11 +50,15 @@ final class Music: AudioPlayerItem {
       guard let self = self, self.isPlaying else { return false }
       
       // Check if music has ended
-      guard self.currentHeradTicks <= self.herad.maxTicks else {
-        let fileName = self.resource.fileName
-        self.stop()
-        Logger.shared.log(.debug, "Music is finished: \(fileName)")
-        return false
+      if !(self.currentHeradTicks <= self.herad.maxTicks) {
+        if self.loops {
+          self.resetPlaybackState()
+        } else {
+          let fileName = self.resource.fileName
+          self.stop()
+          Logger.shared.log(.debug, "Music is finished: \(fileName)")
+          return false
+        }
       }
       
       // Process events for the current tick, then advance
@@ -101,6 +84,44 @@ final class Music: AudioPlayerItem {
     oplWriteRegister(0x08, 64)   // Enable Note-Sel
     oplWriteRegister(0x23, 238)  // Tremolo/Vibrato/etc
     oplWriteRegister(0xBD, 0)    // Disable Percussion Mode
+  }
+
+
+  /// Releases sounding notes and rewinds tracks so playback can start or loop.
+  private func resetPlaybackState() {
+    var channelIdx = 0
+
+    while channelIdx < herad.channels.count {
+      if herad.channels[channelIdx].keyOn {
+        herad.channels[channelIdx].keyOn = false
+        playNote(UInt8(channelIdx), herad.channels[channelIdx].note, .noteOff)
+      }
+      herad.channels[channelIdx] = HeradChannel()
+      channelIdx += 1
+    }
+
+    // Initialize channels with default program (instrument 0) if available.
+    // This ensures notes can play even if no program change event is received.
+    if !herad.instruments.isEmpty {
+      let defaultInstrument = herad.instruments[0]
+      channelIdx = 0
+
+      while channelIdx < herad.channels.count {
+        herad.channels[channelIdx].playProgram = defaultInstrument
+        herad.channels[channelIdx].program = defaultInstrument
+        programChange(0, UInt8(channelIdx))
+        channelIdx += 1
+      }
+    }
+
+    self.currentHeradTicks = 0
+
+    var trackIdx = 0
+
+    while trackIdx < herad.tracks.count {
+      herad.tracks[trackIdx].eventCursor = 0
+      trackIdx += 1
+    }
   }
   
   

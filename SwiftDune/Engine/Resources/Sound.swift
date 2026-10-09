@@ -64,7 +64,7 @@ final class Sound: AudioPlayerItem {
   }
   
   
-  func play() {
+  func play(loop _: Bool = false) {
     let node = player.node(for: .sound)
     
     if node.isPlaying {

@@ -13,7 +13,7 @@ protocol AudioPlayerItem {
   var fileName: String { get }
   
   init(_ fileName: String, player: AudioPlayer)
-  func play()
+  func play(loop: Bool)
   func stop()
   func dumpInfo()
 }
@@ -260,7 +260,7 @@ final class AudioPlayer {
     }
   
   
-    func play(_ item: AudioPlayerItem) {
+    func play(_ item: AudioPlayerItem, loop: Bool = false) {
       if item.type == .sound {
         if let currentAudioItem = currentAudioItem {
           currentAudioItem.stop()
@@ -275,7 +275,7 @@ final class AudioPlayer {
         self.currentMusicItem = item
       }
 
-      item.play()
+      item.play(loop: loop)
     }
   
   
