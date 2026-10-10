@@ -27,6 +27,8 @@ class GameViewController: NSViewController {
     view.needsLayout = true
     view.layoutSubtreeIfNeeded()
 
+    engine.mouse.track(engine.renderer.metalView)
+
     // Attach main node to the engine
     engine.rootNode.attachNode(Main())
     engine.rootNode.setNodeActive("Main", true)

@@ -12,6 +12,7 @@ final class Game: DuneNode {
     private var transitionOut: TransitionEffect?
   
     private var uiNode: UI?
+    private var cursor: Cursor?
   
     init() {
         super.init("Game")
@@ -41,6 +42,8 @@ final class Game: DuneNode {
       uiNode = UI()
       uiNode?.onEnable()
       uiNode?.isActive = true
+      
+      cursor = Cursor()
     }
   
   
@@ -73,6 +76,7 @@ final class Game: DuneNode {
     override func render(_ buffer: PixelBuffer) {
         super.render(buffer)
         uiNode?.render(buffer)
+        cursor?.render(buffer)
     }
   
   

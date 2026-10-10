@@ -66,6 +66,7 @@
 		068965B82B5F046A005A19D7 /* UI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 068965B72B5F046A005A19D7 /* UI.swift */; };
 		068E195D2B68420A0071DD36 /* Fresk.swift in Sources */ = {isa = PBXBuildFile; fileRef = 068E195C2B68420A0071DD36 /* Fresk.swift */; };
 		068E195F2B6928E90071DD36 /* Primitives.swift in Sources */ = {isa = PBXBuildFile; fileRef = 068E195E2B6928E90071DD36 /* Primitives.swift */; };
+		06C0C5022F8A10A100B47D13 /* Cursor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06C0C5012F8A10A100B47D13 /* Cursor.swift */; };
 		06939C3930570C2A00565DC3 /* Smuggler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06939C3830570C2800565DC3 /* Smuggler.swift */; };
 		06939C3B30570CEA00565DC3 /* RoomPerson.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06939C3A30570CE700565DC3 /* RoomPerson.swift */; };
 		06939C3D30570DDA00565DC3 /* Troop.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06939C3C30570DD700565DC3 /* Troop.swift */; };
@@ -116,6 +117,7 @@
 		06CA2BB22C7B350F00B47D13 /* PixelBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06C16D862B1C8F0100CBEAA2 /* PixelBuffer.swift */; };
 		06CA2BB32C7B350F00B47D13 /* Effects.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06C16D882B1CB01700CBEAA2 /* Effects.swift */; };
 		06CA2BB42C7B350F00B47D13 /* Primitives.swift in Sources */ = {isa = PBXBuildFile; fileRef = 068E195E2B6928E90071DD36 /* Primitives.swift */; };
+		06C0C5032F8A10A100B47D13 /* Cursor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06C0C5012F8A10A100B47D13 /* Cursor.swift */; };
 		06CA2BB52C7B350F00B47D13 /* Resource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0699D2762A93C702006287E0 /* Resource.swift */; };
 		06CA2BB62C7B350F00B47D13 /* Sentence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06243A1D2A9B798300981BCC /* Sentence.swift */; };
 		06CA2BB72C7B350F00B47D13 /* Sprite.swift in Sources */ = {isa = PBXBuildFile; fileRef = 062439F92A97E5A200981BCC /* Sprite.swift */; };
@@ -205,6 +207,7 @@
 		068965B72B5F046A005A19D7 /* UI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UI.swift; sourceTree = "<group>"; };
 		068E195C2B68420A0071DD36 /* Fresk.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Fresk.swift; sourceTree = "<group>"; };
 		068E195E2B6928E90071DD36 /* Primitives.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Primitives.swift; sourceTree = "<group>"; };
+		06C0C5012F8A10A100B47D13 /* Cursor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cursor.swift; sourceTree = "<group>"; };
 		06939C3830570C2800565DC3 /* Smuggler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Smuggler.swift; sourceTree = "<group>"; };
 		06939C3A30570CE700565DC3 /* RoomPerson.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomPerson.swift; sourceTree = "<group>"; };
 		06939C3C30570DD700565DC3 /* Troop.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Troop.swift; sourceTree = "<group>"; };
@@ -281,6 +284,7 @@
 				06243A1B2A9B6E8800981BCC /* Palette.swift */,
 				06C16D862B1C8F0100CBEAA2 /* PixelBuffer.swift */,
 				06C16D882B1CB01700CBEAA2 /* Effects.swift */,
+				06C0C5012F8A10A100B47D13 /* Cursor.swift */,
 				068E195E2B6928E90071DD36 /* Primitives.swift */,
 			);
 			path = Graphics;
@@ -616,6 +620,7 @@
 				068E195D2B68420A0071DD36 /* Fresk.swift in Sources */,
 				06A023452A9FC5BA0091D581 /* AudioPlayer.swift in Sources */,
 				068E195F2B6928E90071DD36 /* Primitives.swift in Sources */,
+				06C0C5022F8A10A100B47D13 /* Cursor.swift in Sources */,
 				062779662B9AEB940046E068 /* Sky.swift in Sources */,
 				0638C2532AD1FD2E006B00CF /* Logo.swift in Sources */,
 				068300842A9D080800414896 /* Sound.swift in Sources */,
@@ -730,6 +735,7 @@
 				06CA2BB32C7B350F00B47D13 /* Effects.swift in Sources */,
 				069B747A2D1822660071E68C /* Event.swift in Sources */,
 				06CA2BB42C7B350F00B47D13 /* Primitives.swift in Sources */,
+				06C0C5032F8A10A100B47D13 /* Cursor.swift in Sources */,
 				06CA2BB52C7B350F00B47D13 /* Resource.swift in Sources */,
 				06CA2BB62C7B350F00B47D13 /* Sentence.swift in Sources */,
 				06CA2BB72C7B350F00B47D13 /* Sprite.swift in Sources */,
