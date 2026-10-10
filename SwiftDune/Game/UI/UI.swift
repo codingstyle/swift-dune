@@ -77,6 +77,7 @@ final class UI: DuneNode {
     private let palacePlanRect = DuneRect(160, 0, 160, 116)
   
     private var headIndex: UInt16 = 26
+    private var startHeadIndex: UInt16 = 26
     private var headAnimation: DuneAnimation<UInt16>?
   
     private var pageFlipAnimation: DuneAnimation<UInt16>?
@@ -123,6 +124,25 @@ final class UI: DuneNode {
   
     override func update(_ elapsedTime: TimeInterval) {
         currentTime += elapsedTime
+
+        if let headAnimation = headAnimation {
+            if startHeadIndex == 26 {
+                headIndex = startHeadIndex - headAnimation.interpolate(currentTime)
+            } else {
+                headIndex = startHeadIndex + headAnimation.interpolate(currentTime)
+            }
+            
+            if headIndex == 16 && headIndex != startHeadIndex {
+                EventManager.uiStateChangedEvent.notify(UIStateEventData(leftPanel: .bookOpen, rightPanel: .rect))
+                self.headAnimation = nil
+                startHeadIndex = headIndex
+            } else if headIndex == 26 && headIndex != startHeadIndex {
+                EventManager.uiStateChangedEvent.notify(UIStateEventData(leftPanel: .bookClosed, rightPanel: .roomDirections))
+                EventManager.bookStateChangedEvent.notify(BookStateEventData(action: .close))
+                self.headAnimation = nil
+                startHeadIndex = headIndex
+            }
+        }
     }
     
     
@@ -136,15 +156,6 @@ final class UI: DuneNode {
         uiSprite.drawFrame(14, x: 92, y: 152, buffer: buffer)
         
         // Head
-        if let headAnimation = headAnimation {
-            headIndex = 26 - headAnimation.interpolate(currentTime)
-          
-          if headIndex == 16 {
-              EventManager.uiStateChangedEvent.notify(UIStateEventData(leftPanel: .bookOpen, rightPanel: .rect))
-              self.headAnimation = nil
-          }
-        }
-      
         uiSprite.drawFrame(headIndex, x: 150, y: 137, buffer: buffer)
         uiSprite.drawFrame(12, x: 2, y: 154, buffer: buffer)
         uiSprite.drawFrame(12, x: 317, y: 154, buffer: buffer)
@@ -322,7 +333,7 @@ final class UI: DuneNode {
   
   
     override func onClick(_ event: DuneMouseClickEvent) {
-        if palacePlanButtonRect.contains(event.point) {
+        if leftPanel == .bookClosed && palacePlanButtonRect.contains(event.point) {
             palacePlanVisible = !palacePlanVisible
         }
       
@@ -352,11 +363,13 @@ final class UI: DuneNode {
   
   
     func showBook() {
+        startHeadIndex = 26
         headAnimation = DuneAnimation(from: 0, to: 10, startTime: currentTime, endTime: currentTime + 0.5)
     }
   
   
     func hideBook() {
+        startHeadIndex = 16
         headAnimation = DuneAnimation(from: 0, to: 10, startTime: currentTime, endTime: currentTime + 0.5)
     }
   

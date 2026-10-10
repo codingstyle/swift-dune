@@ -113,6 +113,12 @@ class DuneNode: @MainActor Comparable {
         node?.isActive = active
         node?.renderPriority = active ? renderPriority : .none
     }
+  
+  
+    final func setNodeParams(_ name: String, _ params: Dictionary<String, Any>) {
+        let node = nodesMap[name]
+        node?.params = params
+    }
     
     
     final func isChildNode(_ name: String) -> Bool {

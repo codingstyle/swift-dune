@@ -11,6 +11,8 @@ final class Game: DuneNode {
     private var transitionIn: TransitionEffect?
     private var transitionOut: TransitionEffect?
   
+    private var uiNode: UI?
+  
     init() {
         super.init("Game")
     }
@@ -24,12 +26,26 @@ final class Game: DuneNode {
         self.onUIEvent(state)
       }
       
+      
+      EventManager.bookStateChangedEvent.addListener(self) { [weak self] state in
+        guard let self = self else { return }
+        self.onBookEvent(state)
+      }
+      
+      attachNode(Palace())
+      attachNode(Fresk())
+      attachNode(Book())
+      
       showRoom()
-      showUI()
+
+      uiNode = UI()
+      uiNode?.onEnable()
+      uiNode?.isActive = true
     }
   
   
     override func onDisable() {
+        uiNode?.onDisable()
         EventManager.uiStateChangedEvent.removeListener(self)
     }
   
@@ -41,29 +57,46 @@ final class Game: DuneNode {
     }
   
   
+    func onBookEvent(_ e: BookStateEventData) {
+        if e.action == .close {
+            showRoom()
+        }
+    }
+  
+  
+    override func update(_ elapsedTime: TimeInterval) {
+        super.update(elapsedTime)
+        uiNode?.update(elapsedTime)
+    }
+  
+  
+    override func render(_ buffer: PixelBuffer) {
+        super.render(buffer)
+        uiNode?.render(buffer)
+    }
+  
+  
+    override func onClick(_ event: DuneMouseClickEvent) {
+        super.onClick(event)
+        uiNode?.onClick(event)
+    }
+  
+  
     func showRoom() {
-        let palaceNode = Palace()
-        palaceNode.params = [
+        setNodeActive("Fresk", false)
+        setNodeActive("Book", false)
+      
+        setNodeActive("Palace", true)
+        setNodeParams("Palace", [
           "room": PalaceRoom.porch,
           "markers": [
             8: RoomCharacter.leto
           ]
-        ]
-        attachNode(palaceNode)
-        setNodeActive("Fresk", false)
-        setNodeActive("Book", false)
-        setNodeActive("Palace", true)
+        ])
     }
 
     
-    func showUI() {
-        attachNode(UI())
-        setNodeActive("UI", true)
-    }
-    
-    
     func showFresk() {
-        attachNode(Fresk())
         setNodeActive("Book", false)
         setNodeActive("Palace", false)
         setNodeActive("Fresk", true)
@@ -71,7 +104,6 @@ final class Game: DuneNode {
     
     
     func showBook() {
-      attachNode(Book())
       setNodeActive("Fresk", false)
       setNodeActive("Palace", false)
       setNodeActive("Book", true)
