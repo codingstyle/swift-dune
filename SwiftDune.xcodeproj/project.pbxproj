@@ -170,6 +170,7 @@
 		069B5B27307BC50200AA8FE1 /* NSColor+Palette.swift in Sources */ = {isa = PBXBuildFile; fileRef = 069B5B25307BC4ED00AA8FE1 /* NSColor+Palette.swift */; };
 		069B5B28307C06A700AA8FE1 /* DuneInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 067CE994307BAD4C00186AC3 /* DuneInput.swift */; };
 		069B5B29307C31A500AA8FE1 /* DuneFiles in Resources */ = {isa = PBXBuildFile; fileRef = 0699D2732A93C6D7006287E0 /* DuneFiles */; };
+		069B5B2A307C34E400AA8FE1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0699D2682A93C685006287E0 /* Assets.xcassets */; };
 		069B74792D1822660071E68C /* Event.swift in Sources */ = {isa = PBXBuildFile; fileRef = 069B74782D1822660071E68C /* Event.swift */; };
 		069B747A2D1822660071E68C /* Event.swift in Sources */ = {isa = PBXBuildFile; fileRef = 069B74782D1822660071E68C /* Event.swift */; };
 		06A023442A9FC5BA0091D581 /* Video.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06A023422A9FC5BA0091D581 /* Video.swift */; };
@@ -355,14 +356,6 @@
 		06FC4EF22E657A0800F68119 /* HERAD.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HERAD.swift; sourceTree = "<group>"; };
 		06FC4EF52E66C6A600F68119 /* CreativeVoice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreativeVoice.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
-
-/* Begin PBXFileSystemSynchronizedRootGroup section */
-		067CE9A2307BAF9D00186AC3 /* Dune */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = Dune;
-			sourceTree = "<group>";
-		};
-/* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		067CE99E307BAF9D00186AC3 /* Frameworks */ = {
@@ -593,7 +586,6 @@
 				06AB96D12BE814AF00482823 /* README.md */,
 				0699D2732A93C6D7006287E0 /* DuneFiles */,
 				0699D2632A93C682006287E0 /* SwiftDune */,
-				067CE9A2307BAF9D00186AC3 /* Dune */,
 				0699D2622A93C682006287E0 /* Products */,
 			);
 			indentWidth = 4;
@@ -726,9 +718,6 @@
 			);
 			dependencies = (
 			);
-			fileSystemSynchronizedGroups = (
-				067CE9A2307BAF9D00186AC3 /* Dune */,
-			);
 			name = DuneIOS;
 			packageProductDependencies = (
 			);
@@ -816,6 +805,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				069B5B2A307C34E400AA8FE1 /* Assets.xcassets in Resources */,
 				069B5B29307C31A500AA8FE1 /* DuneFiles in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1105,6 +1095,7 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_OPTIMIZATION_LEVEL = s;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Dune;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.strategy-games";
