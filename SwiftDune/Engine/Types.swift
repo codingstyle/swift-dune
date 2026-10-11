@@ -7,7 +7,6 @@
 
 import Foundation
 
-
 struct DuneColor {
     let r: UInt8
     let g: UInt8

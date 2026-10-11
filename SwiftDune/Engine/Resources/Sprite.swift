@@ -7,7 +7,6 @@
 
 import Foundation
 import CoreGraphics
-import AppKit
 
 
 class SpriteFrameInfo {
@@ -71,8 +70,7 @@ final class Sprite: @MainActor Equatable {
     
     private let animationFrameRate: Double = 12.0
     
-    private let rect = NSRect(x: 0, y: 0, width: 320, height: 200)
-    
+    private let rect = DuneRect(0, 0, 320, 200)
   
     init(_ fileName: String) {
         self.resource = Resource(fileName)

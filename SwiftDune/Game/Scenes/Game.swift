@@ -80,7 +80,7 @@ final class Game: DuneNode {
     }
   
   
-    override func onClick(_ event: DuneMouseClickEvent) {
+    override func onClick(_ event: DuneClickEvent) {
         super.onClick(event)
         uiNode?.onClick(event)
     }

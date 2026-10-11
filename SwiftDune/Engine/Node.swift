@@ -155,7 +155,8 @@ class DuneNode: @MainActor Comparable {
         
     }
   
-  
+
+    // DEPRECATED: will be replaced by onInput
     func onKey(_ event: DuneKeyEvent) {
         activeNodes.forEach { node in
             node.onKey(event)
@@ -163,9 +164,22 @@ class DuneNode: @MainActor Comparable {
     }
   
   
-    func onClick(_ event: DuneMouseClickEvent) {
+    // DEPRECATED: will be replaced by onInput
+    func onClick(_ event: DuneClickEvent) {
         activeNodes.forEach { node in
             node.onClick(event)
+        }
+    }
+  
+  
+    func onInput(_ event: DuneInputEvent) {
+        switch event.eventType {
+          case .click:
+            onClick(event as! DuneClickEvent)
+          case .key:
+            onKey(event as! DuneKeyEvent)
+          default:
+            return
         }
     }
   

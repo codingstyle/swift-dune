@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import AppKit
 import UniformTypeIdentifiers
 
 
@@ -16,8 +15,7 @@ final class DuneEngine {
     
     var palette: Palette
     var audioPlayer: AudioPlayer
-    var keyboard: Keyboard
-    var mouse: Mouse
+    var input: Input
     var renderer: Renderer
     let logger = Logger.shared
 
@@ -44,8 +42,7 @@ final class DuneEngine {
     private init() {
         palette = Palette()
         audioPlayer = AudioPlayer()
-        keyboard = Keyboard()
-        mouse = Mouse()
+        input = Input()
         renderer = Renderer()
 
         intermediateFrameBuffer = PixelBuffer(width: 320, height: 200)
@@ -100,26 +97,12 @@ final class DuneEngine {
                 let elapsedTime = currentTime - lastTime
                 gameTime += elapsedTime
                 
-                processInput()
-                
+                input.update(self)
                 update(elapsedTime)
             }
 
             // Sleeping suspends the main actor so AppKit can deliver input between frames.
             await render()
-        }
-    }
-    
-    
-    func processInput() {
-        // Process mouse clicks
-        while let clickEvent = mouse.mouseClicks.dequeueFirst() {
-            rootNode.onClick(clickEvent)
-        }
-        
-        // Process keyboard input
-        while let keyEvent = keyboard.keysPressed.dequeueFirst() {
-            rootNode.onKey(keyEvent)
         }
     }
     
@@ -158,19 +141,6 @@ final class DuneEngine {
     func exitProgram(_ message: String?) {
         stop()
         
-        if let message = message {
-            for window in NSApplication.shared.windows {
-                window.close()
-            }
-            
-            let alert = NSAlert()
-            alert.messageText = "Dune"
-            alert.informativeText = message
-            alert.alertStyle = .informational
-            alert.addButton(withTitle: "OK")
-            alert.runModal()
-        }
-        
-        exit(1)
+        EventManager.appStateChangedEvent.notify(AppStateEventData(.closed, message))
     }
 }

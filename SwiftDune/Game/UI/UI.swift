@@ -269,9 +269,10 @@ final class UI: DuneNode {
         var i: Int = 0
         var selectedMenuIndex: Int = -1
         
-        if menuRect.contains(engine.mouse.coordinates) {
+        // TODO: find a way to highlight mouse coordinate update
+        /*if menuRect.contains(engine.mouse.coordinates) {
             selectedMenuIndex = Math.clamp(Int((engine.mouse.coordinates.y - 159) / 8), 0, 5)
-        }
+        }*/
         
         menuItemBackgroundRect.y = 159
         menuItemTextRect.y = 159
@@ -332,7 +333,7 @@ final class UI: DuneNode {
     }
   
   
-    override func onClick(_ event: DuneMouseClickEvent) {
+    override func onClick(_ event: DuneClickEvent) {
         if leftPanel == .bookClosed && palacePlanButtonRect.contains(event.point) {
             palacePlanVisible = !palacePlanVisible
         }

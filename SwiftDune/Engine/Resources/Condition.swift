@@ -5,6 +5,8 @@
 //  Created by Christophe Buguet on 13/09/2026.
 //
 
+import Foundation
+
 enum ConditionOp: UInt16, CustomDebugStringConvertible {
   case equals = 0x00
   case lessThan = 0x02

@@ -8,12 +8,7 @@
 import Foundation
 import AppKit
 
-
-struct DuneMouseClickEvent {
-    var point: DunePoint
-}
-
-final class Mouse {
+final class Mouse: DuneInputMethod {
     private var monitorID: Any?
     private var activityObservers: [NSObjectProtocol] = []
     private var trackingView: NSView?
@@ -22,7 +17,7 @@ final class Mouse {
     var coordinates: DunePoint = .zero
     var cursorVisible = false
 
-    var mouseClicks = Queue<DuneMouseClickEvent>()
+    var mouseClicks = Queue<DuneClickEvent>()
 
     init() {
         self.monitorID = NSEvent.addLocalMonitorForEvents(matching: [.mouseEntered, .mouseExited, .mouseMoved, .leftMouseDragged, .leftMouseUp]) { event in
@@ -60,7 +55,14 @@ final class Mouse {
             index += 1
         }
     }
-
+  
+  
+    @MainActor func update(_ input: Input) {
+        while let click = mouseClicks.dequeueFirst() {
+            input.enqueueEvent(click)
+        }
+    }
+  
 
     /// Hides the system pointer while it is over `view`. Movement and clicks still update `coordinates`.
     func track(_ view: NSView) {
@@ -149,7 +151,7 @@ final class Mouse {
         coordinates.y = Int16(eventLocation.y - renderFrame.minY) / 2
         
         if event.type == .leftMouseUp {
-            mouseClicks.enqueue(DuneMouseClickEvent(point: coordinates))
+            mouseClicks.enqueue(DuneClickEvent(point: coordinates))
         }
         
         return true

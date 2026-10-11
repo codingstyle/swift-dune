@@ -6,8 +6,6 @@
 //
 
 import Foundation
-import AppKit
-
 
 enum StarsMode {
     case stars

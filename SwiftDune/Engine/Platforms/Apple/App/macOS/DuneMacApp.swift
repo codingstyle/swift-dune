@@ -9,10 +9,20 @@ import Cocoa
 
 class GameViewController: NSViewController {
   let engine = DuneEngine.shared
+  var mouse = Mouse()
+  var keyboard = Keyboard()
   
   override func viewDidLoad() {
     super.viewDidLoad()
 
+    EventManager.appStateChangedEvent.addListener(self) { [weak self] event in
+        guard let self = self else {
+            return
+        }
+  
+        self.exitProgram(event)
+    }
+    
     engine.renderer.metalView.translatesAutoresizingMaskIntoConstraints = false
 
     view.addSubview(engine.renderer.metalView)
@@ -27,7 +37,9 @@ class GameViewController: NSViewController {
     view.needsLayout = true
     view.layoutSubtreeIfNeeded()
 
-    engine.mouse.track(engine.renderer.metalView)
+    engine.input.registerInputMethod(keyboard)
+    engine.input.registerInputMethod(mouse)
+    mouse.track(engine.renderer.metalView)
 
     // Attach main node to the engine
     engine.rootNode.attachNode(Main())
@@ -42,6 +54,26 @@ class GameViewController: NSViewController {
   
   func stopEngine() {
     engine.stop()
+  }
+  
+  
+  func exitProgram(_ e: AppStateEventData) {
+      for window in NSApplication.shared.windows {
+          window.close()
+      }
+      
+      let alert = NSAlert()
+      alert.messageText = "Dune"
+    
+      if let message = e.message {
+          alert.informativeText = message
+      }
+
+      alert.alertStyle = .informational
+      alert.addButton(withTitle: "OK")
+      alert.runModal()
+
+      exit(1)
   }
 }
 
@@ -89,7 +121,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 }
 
 
-@main struct DuneApp {
+@main struct DuneMacApp {
     static func main() throws {
         let delegate = AppDelegate()
         NSApplication.shared.delegate = delegate

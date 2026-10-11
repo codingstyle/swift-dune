@@ -33,9 +33,9 @@ final class Cursor {
     private let engine = DuneEngine.shared
 
     var shape: CursorShape = .arrow
-
+  
     func render(_ buffer: PixelBuffer) {
-        let mouseCoords = engine.mouse.coordinates
+        let mouseCoords = DunePoint.zero // engine.mouse.coordinates
       
         let image = CursorImage.image(for: shape)
         let originX = max(0, Int(mouseCoords.x) &- image.hotspotX)

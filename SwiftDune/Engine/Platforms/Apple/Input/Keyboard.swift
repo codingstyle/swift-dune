@@ -8,21 +8,9 @@
 import Foundation
 import AppKit
 
-enum DuneSpecialKey: UInt16, CaseIterable {
-    case keyReturn = 36
-    case keyDelete = 51
-    case keyEscape = 53
-    case none = 0
-}
 
-
-struct DuneKeyEvent {
-    var specialKey: DuneSpecialKey = .none
-    var char: String = ""
-}
-
-
-final class Keyboard {
+@MainActor
+final class Keyboard: DuneInputMethod {
     private var monitorID: Any?
     var keysPressed = Queue<DuneKeyEvent>()
     
@@ -40,6 +28,13 @@ final class Keyboard {
     deinit {
         if let monitorID = self.monitorID {
             NSEvent.removeMonitor(monitorID)
+        }
+    }
+  
+  
+    func update(_ input: Input) {
+        while let keyPressed = keysPressed.dequeueFirst() {
+            input.enqueueEvent(keyPressed)
         }
     }
     

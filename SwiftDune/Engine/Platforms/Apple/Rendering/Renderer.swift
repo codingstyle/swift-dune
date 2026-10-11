@@ -11,7 +11,7 @@ import MetalKit
 import UniformTypeIdentifiers
 
 
-final class Renderer: NSObject, ObservableObject, MTKViewDelegate {
+final class Renderer: NSObject, MTKViewDelegate {
     private let region = MTLRegionMake2D(0, 0, 320, 200)
     private let frameSize = 320 * 200 * 4
   

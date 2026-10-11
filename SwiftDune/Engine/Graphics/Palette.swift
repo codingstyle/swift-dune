@@ -7,7 +7,6 @@
 
 import Foundation
 import CoreGraphics
-import AppKit
 
 
 struct PaletteChunk {
@@ -18,7 +17,7 @@ struct PaletteChunk {
 
 
 final class Palette {
-    private let paletteSize = 256
+    public let paletteSize = 256
     private let colorAlignment = MemoryLayout<UInt32>.alignment
     private let colorSize = MemoryLayout<UInt32>.size
     private let paletteByteSize = 256 * MemoryLayout<UInt32>.size
@@ -76,45 +75,5 @@ final class Palette {
             UInt8((color >> 16) & 0xFF),
             UInt8((color >> 24) & 0xFF)
         )
-    }
-    
-    
-    func nsColor(at index: Int) -> NSColor {
-        let color: UInt32 = rawPointer[index]
-
-        return NSColor(
-            deviceRed: CGFloat(color & 0xFF) / 255.0,
-            green: CGFloat((color >> 8) & 0xFF) / 255.0,
-            blue: CGFloat((color >> 16) & 0xFF) / 255.0,
-            alpha: CGFloat(color >> 24) / 255.0
-        )
-    }
-    
-    
-    func allColors() -> [NSColor] {
-        var i = 0
-        var colors: [NSColor] = []
-        
-        while i < paletteSize {
-            let color = nsColor(at: Int(i))
-            colors.append(color)
-            i += 1
-        }
-        
-        return colors
-    }
-}
-
-
-extension NSColor {
-    var asHexString: String {
-        return "#000000"
-        /*
-        let r = String.fromByte(UInt8(255.0 * self.redComponent))
-        let g = String.fromByte(UInt8(255.0 * self.blueComponent))
-        let b = String.fromByte(UInt8(255.0 * self.greenComponent))
-        
-        return "#\(r)\(g)\(b)"
-        */
     }
 }
