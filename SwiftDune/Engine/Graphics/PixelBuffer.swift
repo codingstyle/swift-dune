@@ -6,9 +6,6 @@
 //
 
 import Foundation
-import CoreGraphics
-import UniformTypeIdentifiers
-import ImageIO
 
 final class PixelBuffer {
     var tag: UInt32 = 0x0000

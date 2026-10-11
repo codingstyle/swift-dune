@@ -34,9 +34,11 @@ final class Mouse {
         }
 
         let center = NotificationCenter.default
+      
         activityObservers.append(center.addObserver(forName: NSApplication.didResignActiveNotification, object: nil, queue: .main) { [weak self] _ in
             self?.setNativeCursorHidden(false)
         })
+      
         activityObservers.append(center.addObserver(forName: NSApplication.didBecomeActiveNotification, object: nil, queue: .main) { [weak self] _ in
             self?.syncNativeCursor()
         })
