@@ -164,6 +164,9 @@ public final class OPL3Chip {
     
     // MARK: - Phase Generator
     
+#if os(iOS)
+    @_optimize(speed)
+#endif
     @inline(__always)
     private func phaseGenerate(_ slot: OPL3Operator) {
         let channel = slot.channel!
@@ -284,11 +287,17 @@ public final class OPL3Chip {
     
     // MARK: - Slot Processing
     
+#if os(iOS)
+    @_optimize(speed)
+#endif
     @inline(__always)
     private func slotGenerate(_ slot: OPL3Operator) {
         slot.out = OPL3Envelope.generateWaveform(slot)
     }
     
+#if os(iOS)
+    @_optimize(speed)
+#endif
     @inline(__always)
     private func slotCalcFeedback(_ slot: OPL3Operator) {
         let channel = slot.channel!
@@ -302,8 +311,25 @@ public final class OPL3Chip {
       slot.previousOutputSample = slot.out
     }
     
+#if os(iOS)
+    @_optimize(speed)
+#endif
     @inline(__always)
     private func processSlot(_ slot: OPL3Operator) {
+        // A released operator that has already reached full attenuation contributes nothing.
+        // Dune leaves most of the 36 operators here, and running them on every sample is what
+        // lets playback catch the synthesizer after a few seconds on iOS debug builds.
+        // Rhythm mode still needs every slot's phase, so this skip stays off while it is enabled.
+        if slot.regKeyState == 0 && (rhythm & 0x20) == 0 && (slot.envelopeGeneratorOutput & 0x1F8) == 0x1F8 {
+            slot.out = 0
+            slot.previousOutputSample = 0
+            slot.feedbackModifiedSignal = 0
+            let currentNoise = noise
+            let nBit = ((currentNoise >> 14) ^ currentNoise) & 0x01
+            noise = (currentNoise >> 1) | (nBit << 22)
+            return
+        }
+
         // NukedOPL3 order: CalcFB first (uses PREVIOUS output for feedback),
         // then envelope, phase, and generate (produces NEW output)
         slotCalcFeedback(slot)
@@ -816,6 +842,9 @@ public final class OPL3Chip {
     /// Called by both `generateCore` (external buffer path) and `generateResampledCore`
     /// (resampler path). Using scalar output fields avoids passing an inout heap array
     /// through the resampler, eliminating COW checks and bounds-checked subscripts.
+#if os(iOS)
+    @_optimize(speed)
+#endif
     @inline(__always)
     private func generateCoreCompute() {
         slots.withUnsafeBufferPointer { slotsPtr in
@@ -997,6 +1026,9 @@ public final class OPL3Chip {
     /// an `inout [Int16]` buffer. Eliminates the COW uniqueness check and two bounds-checked
     /// subscripts that occur every call when writing through a heap-allocated array.
     /// Called by `OPL3Fm.generateFrames` — the audio playback hot path.
+#if os(iOS)
+    @_optimize(speed)
+#endif
     @inline(__always)
     func generateResampledDirect(left: inout Int16, right: inout Int16) {
         while rateRatio != 0 && sampleCounter >= rateRatio {

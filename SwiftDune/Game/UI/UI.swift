@@ -270,9 +270,9 @@ final class UI: DuneNode {
         var selectedMenuIndex: Int = -1
         
         // TODO: find a way to highlight mouse coordinate update
-        /*if menuRect.contains(engine.mouse.coordinates) {
-            selectedMenuIndex = Math.clamp(Int((engine.mouse.coordinates.y - 159) / 8), 0, 5)
-        }*/
+        if engine.input.mouseEnabled && menuRect.contains(engine.input.coordinates) {
+            selectedMenuIndex = Math.clamp(Int((engine.input.coordinates.y - 159) / 8), 0, 5)
+        }
         
         menuItemBackgroundRect.y = 159
         menuItemTextRect.y = 159

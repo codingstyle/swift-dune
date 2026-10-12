@@ -24,6 +24,9 @@ struct OPL3Lfo {
     }
     
     /// Advances LFO state (called each sample)
+#if os(iOS)
+    @_optimize(speed)
+#endif
     @inline(__always)
     static func advance(_ chip: OPL3Chip) {
         // Tremolo update (every 64 samples)

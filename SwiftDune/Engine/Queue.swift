@@ -7,6 +7,7 @@
 
 import Foundation
 
+@preconcurrency
 final class Queue<T> {
     private var items: Array<T> = []
     

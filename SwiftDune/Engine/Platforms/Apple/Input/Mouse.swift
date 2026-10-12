@@ -9,12 +9,14 @@ import Foundation
 import AppKit
 
 final class Mouse: DuneInputMethod {
+    let inputMethodType: DuneInputMethodType = .mouse
+    var coordinates: DunePoint = .zero
+
     private var monitorID: Any?
     private var activityObservers: [NSObjectProtocol] = []
     private var trackingView: NSView?
     private var nativeCursorHidden = false
 
-    var coordinates: DunePoint = .zero
     var cursorVisible = false
 
     var mouseClicks = Queue<DuneClickEvent>()
@@ -65,7 +67,7 @@ final class Mouse: DuneInputMethod {
   
 
     /// Hides the system pointer while it is over `view`. Movement and clicks still update `coordinates`.
-    func track(_ view: NSView) {
+    @MainActor func track(_ view: NSView) {
         if trackingView === view {
             return
         }
@@ -81,7 +83,7 @@ final class Mouse: DuneInputMethod {
     }
 
 
-    private func syncNativeCursor() {
+    @MainActor private func syncNativeCursor() {
         guard let view = trackingView, let window = view.window, window.isKeyWindow else {
             setNativeCursorHidden(false)
             return
@@ -107,7 +109,7 @@ final class Mouse: DuneInputMethod {
     }
     
     
-    private func findRenderView(_ parentView: NSView) -> NSView? {
+    @MainActor private func findRenderView(_ parentView: NSView) -> NSView? {
         for view in parentView.subviews {
             if view.className == "MTKView" {
                 return view
@@ -122,7 +124,7 @@ final class Mouse: DuneInputMethod {
     }
     
     
-    private func processMouseEvent(_ event: NSEvent) -> Bool {
+    @MainActor private func processMouseEvent(_ event: NSEvent) -> Bool {
         guard let contentView = event.window?.contentView else {
             coordinates.reset()
             setNativeCursorHidden(false)

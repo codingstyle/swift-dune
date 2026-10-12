@@ -35,6 +35,7 @@ final class GameViewController: UIViewController {
             matchHeight
         ])
 
+        engine.input.mouseEnabled = false
         engine.rootNode.attachNode(Main())
         engine.rootNode.setNodeActive("Main", true)
     }

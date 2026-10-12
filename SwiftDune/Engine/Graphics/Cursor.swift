@@ -35,7 +35,7 @@ final class Cursor {
     var shape: CursorShape = .arrow
   
     func render(_ buffer: PixelBuffer) {
-        let mouseCoords = DunePoint.zero // engine.mouse.coordinates
+        let mouseCoords = engine.input.coordinates
       
         let image = CursorImage.image(for: shape)
         let originX = max(0, Int(mouseCoords.x) &- image.hotspotX)

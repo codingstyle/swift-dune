@@ -12,8 +12,18 @@ enum DuneInputEventType {
 }
 
 
+enum DuneInputMethodType {
+  case mouse
+  case keyboard
+  case touch
+}
+
+
 protocol DuneInputMethod {
-  func update(_ input: Input)
+  var inputMethodType: DuneInputMethodType { get }
+  var coordinates: DunePoint { get }
+
+  @MainActor func update(_ input: Input)
 }
 
 
@@ -47,6 +57,8 @@ final class Input {
     private var events = Queue<DuneInputEvent>()
     private var inputMethods: [DuneInputMethod] = []
   
+    var mouseEnabled = true
+    var coordinates = DunePoint.zero
   
     func registerInputMethod(_ method: DuneInputMethod) {
         inputMethods.append(method)
@@ -63,6 +75,12 @@ final class Input {
       
         while i < inputMethods.count {
             inputMethods[i].update(self)
+          
+            if inputMethods[i].inputMethodType == .mouse {
+                self.coordinates.x = inputMethods[i].coordinates.x
+                self.coordinates.y = inputMethods[i].coordinates.y
+            }
+          
             i += 1
         }
       

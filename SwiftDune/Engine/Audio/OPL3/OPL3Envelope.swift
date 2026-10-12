@@ -163,6 +163,9 @@ struct OPL3Envelope {
     // MARK: - Waveform Generation
     
     /// Generates waveform output for the given operator
+#if os(iOS)
+    @_optimize(speed)
+#endif
     @inline(__always)
     static func generateWaveform(_ slot: OPL3Operator) -> Int16 {
         let index = Int(slot.regWaveformSelect & 0x07)
@@ -199,6 +202,9 @@ struct OPL3Envelope {
     // MARK: - Envelope Calculation
     
     /// Calculates envelope for the given operator
+#if os(iOS)
+    @_optimize(speed)
+#endif
     @inline(__always)
     static func envelopeCalc(_ slot: OPL3Operator) {
         let chip = slot.chip!

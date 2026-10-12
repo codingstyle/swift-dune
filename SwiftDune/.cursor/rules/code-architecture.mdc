@@ -12,12 +12,16 @@ This rule defines the desired architecture for the {ProjectName} project. All ne
 SwiftDune/
 ├─ SwiftDune.xcodeproj
 ├─ DuneFiles/                  # Original game assets (do not touch anything in this folder)
-├─ Engine/
+├─ Engine/                     
 │  ├─ Audio/                   # Sound and music playback
 │  ├─ Graphics/                # Primitives, pixel buffers, effects, palette management
 │  ├─ Input/                   # Keyboard and mouse handling
 │  ├─ Rendering/               # Renderer into a GPU backed view
 │  ├─ Resources/               # Parser and models for the original game assets
+│  └─ Platforms/               # Platform-specific code
+│  │  └─ Apple/                # iOS and macOS implementation with Metal / AVAudioFoundation rendering
+│  │  └─ Windows/              # Windows implementation with DirectX renderer
+│  │  └─ Linux/                # Linux implementation with OpenGL renderer
 │  └─ README.md                # Design system documentation
 │
 ├─ Game/
@@ -28,7 +32,7 @@ SwiftDune/
 │    └─ Icons/
 │        └─ AppIcon.appiconset
 │
-└─ Editor/
+└─ Editor/                     # macOS viewer for original game assets
    ├─ Views                    # Dune editor asset views
    └─ Assets.xcassets
      └─ Icons/
@@ -39,24 +43,19 @@ SwiftDune/
 ## Architecture Principles
 
 ### 1. Separation of Concerns
+
 - **Engine/** : Everything used to parse original assets, then render audio, sound, and GFX
 - **Game/** : Reimplementation of the game loop and logic, including its screens and UI
 - **Editor/** : Used for testing the Engine asset parsing and used as a viewer
 
 ### 2. Game
+
 - Game is reinterpreted using a modern node graph pattern, similarly to Unity
 - All game screens and UI elements inherit from `DuneNode` and use a final class
 - Use `update()` to update the variable state and `render()` to draw into the pixel buffer
 - Use `PixelBuffer` context property in case you need to draw different stages of the buffer
 
 ### 3. Editor
+
 - Each feature uses its own ListView and DetailView state
 - MVVM structure: View + ViewModel (+ State if needed)
-
-### 4. Performance
-
-- Do no use for/in loops which use an iterator and can be slow on debug and release mode. Favor "while" loops using an numeric variable that you increment whenever possible.
-- Mark a class or a var as final if they are not overriden
-- Use `private` and `fileprivate` keywords accordingly when declaration does not need to be accessed outside of file
-- Use ContiguousArray with reference types when NSArray bridging is unnecessary
-- More generally rely on [Swift language official performance tips](https://github.com/swiftlang/swift/blob/main/docs/OptimizationTips.rst) to apply good practices

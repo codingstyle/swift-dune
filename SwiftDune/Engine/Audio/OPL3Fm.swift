@@ -183,6 +183,9 @@ public final class OPL3Fm {
     ///   - rightChannel: Pointer to right channel float buffer
     ///   - offset: Starting offset in the output buffers
     ///   - scale: Scaling factor for Int16 → Float conversion
+#if os(iOS)
+    @_optimize(speed)
+#endif
     @inline(__always)
     public func generateFrames(count: Int,
                                leftChannel: UnsafeMutablePointer<Float>,

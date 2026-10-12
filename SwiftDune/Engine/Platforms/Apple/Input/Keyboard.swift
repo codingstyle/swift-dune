@@ -9,8 +9,10 @@ import Foundation
 import AppKit
 
 
-@MainActor
 final class Keyboard: DuneInputMethod {
+    let inputMethodType: DuneInputMethodType = .keyboard
+    let coordinates: DunePoint = DunePoint.zero
+  
     private var monitorID: Any?
     var keysPressed = Queue<DuneKeyEvent>()
     
@@ -32,7 +34,7 @@ final class Keyboard: DuneInputMethod {
     }
   
   
-    func update(_ input: Input) {
+    @MainActor func update(_ input: Input) {
         while let keyPressed = keysPressed.dequeueFirst() {
             input.enqueueEvent(keyPressed)
         }

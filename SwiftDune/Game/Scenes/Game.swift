@@ -43,7 +43,9 @@ final class Game: DuneNode {
       uiNode?.onEnable()
       uiNode?.isActive = true
       
-      cursor = Cursor()
+      if engine.input.mouseEnabled {
+          cursor = Cursor()
+      }
     }
   
   
