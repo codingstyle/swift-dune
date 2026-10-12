@@ -148,6 +148,14 @@ public final class OPL3Fm {
         chip.writeRegister(register, value)
     }
 
+    /// Lock-free queued write. Lands at least two native samples after the previous
+    /// queued write, matching the port timing the Dune driver relies on so a
+    /// note-on and note-off in the same tick still produce an attack.
+    @inline(__always)
+    public func writeRegisterBufferedDirect(_ register: UInt16, _ value: UInt8) {
+        chip.writeRegisterBuffered(register, value)
+    }
+
     /// Writes a value to an OPL3 register with buffering for timing accuracy
     /// - Parameters:
     ///   - register: Register address (0x000-0x1FF)
@@ -299,6 +307,10 @@ public final class OPL3Fm {
     public func silence() {
         chipLock.lock()
         defer { chipLock.unlock() }
+
+        // Drop note-ons that have not reached the chip yet, or they key on again
+        // after this silence once generation resumes.
+        chip.discardPendingWrites()
 
         // Turn off all keys on channels 0-8 (first register bank)
         var ch = 0

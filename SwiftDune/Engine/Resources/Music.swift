@@ -277,9 +277,9 @@ final class Music: AudioPlayerItem {
   
   
   private func oplWriteRegister(_ register: UInt16, _ value: UInt8) {
-    // Lock-free direct writes since events are processed synchronously
-    // on the same serial queue as audio generation
-    player.opl3fm.writeRegisterDirect(register, value)
+    // Queue writes the way the Dune driver does. A same-tick note-off used to
+    // clear the key bit before any sample, so short percussion never attacked.
+    player.opl3fm.writeRegisterBufferedDirect(register, value)
   }
   
   
@@ -301,13 +301,13 @@ final class Music: AudioPlayerItem {
     herad.channels[idx].note = note
     herad.channels[idx].keyOn = true
     herad.channels[idx].bend = herad.bendCenter
-    playNote(channelIndex, note, .noteOn)
 
     guard let instrument = herad.channels[idx].playProgram else {
       Logger.shared.log(.error, "eventNoteOn(): Invalid instrument/playProgram for channel \(channelIndex)")
       return
     }
 
+    // Level before the key edge, matching DNADL: the attack uses the velocity level.
     if instrument.modOutputLevelScaling != 0 {
       macroModOutput(channelIndex, instrument, instrument.modOutputLevelScaling, velocity)
     }
@@ -319,6 +319,8 @@ final class Music: AudioPlayerItem {
     if instrument.feedbackScalingVelocity != 0 {
       macroFeedback(channelIndex, instrument, instrument.feedbackScalingVelocity, velocity)
     }
+
+    playNote(channelIndex, note, .noteOn)
   }
     
 
@@ -356,17 +358,18 @@ final class Music: AudioPlayerItem {
       Logger.shared.log(.error, "eventAftertouch(): Invalid instrument/playProgram for channel \(channel)")
       return
     }
-    
+
+    // DNADL opcode 5 lowers attenuation (louder). Velocity on note-on raises it.
     if instrument.modOutputLevelAftertouchScaling != 0 {
-      macroModOutput(channel, instrument, instrument.modOutputLevelAftertouchScaling, Int8(velocity))
+      macroModOutputVolume(channel, instrument, instrument.modOutputLevelAftertouchScaling, velocity)
     }
-    
+
     if instrument.carrierOutputLevelAftertouchScaling != 0 {
-      macroCarrierOutput(channel, instrument, instrument.carrierOutputLevelAftertouchScaling, Int8(velocity))
+      macroCarrierOutputVolume(channel, instrument, instrument.carrierOutputLevelAftertouchScaling, velocity)
     }
-    
+
     if instrument.feedbackScalingAftertouch != 0 {
-      macroFeedback(channel, instrument, instrument.feedbackScalingAftertouch, Int8(velocity))
+      macroFeedback(channel, instrument, instrument.feedbackScalingAftertouch, Int8(bitPattern: velocity))
     }
   }
   
@@ -537,11 +540,13 @@ final class Music: AudioPlayerItem {
     val = (instrument.modOutputLevel & 63) |
       ((instrument.modKeyScalingLevel & 3) << 6)
     oplWriteRegister(reg, val)
+    herad.channels[Int(channel)].modLevel = instrument.modOutputLevel & 63
     
     reg += 3
     val = (instrument.carrierOutputLevel & 63) |
       ((instrument.carrierKeyScalingLevel & 3) << 6)
     oplWriteRegister(reg, val)
+    herad.channels[Int(channel)].carrierLevel = instrument.carrierOutputLevel & 63
     
     // Attack Rate / Decay Rate
     reg = 0x60 + UInt16(slotOffset)
@@ -645,7 +650,24 @@ final class Music: AudioPlayerItem {
 
     reg = 0x40 + slotOffset
     val = UInt8(output & 63) | ((instrument.modKeyScalingLevel & 3) << 6)
+    herad.channels[Int(channel)].modLevel = val & 63
     oplWriteRegister(UInt16(reg), val)
+  }
+
+
+  /// DNADL volume modulation: subtract attenuation from the level last written.
+  private func macroModOutputVolume(_ channel: UInt8, _ instrument: HeradInstrument, _ direction: Int8, _ level: UInt8) {
+    guard let atten = macroAttenuation(direction, level) else { return }
+
+    var output = Int(herad.channels[Int(channel)].modLevel) - atten
+    if output < 0 {
+      output = 0
+    }
+
+    let slotOffset = UInt16(herad.slotOffset[Int(channel) % herad.voicesSize])
+    let val = UInt8(output) | ((instrument.modKeyScalingLevel & 3) << 6)
+    herad.channels[Int(channel)].modLevel = UInt8(output)
+    oplWriteRegister(0x40 + slotOffset, val)
   }
 
 
@@ -683,7 +705,48 @@ final class Music: AudioPlayerItem {
 
     reg = 0x43 + slotOffset
     val = UInt8(output & 63) | ((instrument.carrierKeyScalingLevel & 3) << 6)
+    herad.channels[Int(channel)].carrierLevel = val & 63
     oplWriteRegister(UInt16(reg), val)
+  }
+
+
+  private func macroCarrierOutputVolume(_ channel: UInt8, _ instrument: HeradInstrument, _ direction: Int8, _ level: UInt8) {
+    guard let atten = macroAttenuation(direction, level) else { return }
+
+    var output = Int(herad.channels[Int(channel)].carrierLevel) - atten
+    if output < 0 {
+      output = 0
+    }
+
+    let slotOffset = UInt16(herad.slotOffset[Int(channel) % herad.voicesSize])
+    let val = UInt8(output) | ((instrument.carrierKeyScalingLevel & 3) << 6)
+    herad.channels[Int(channel)].carrierLevel = UInt8(output)
+    oplWriteRegister(0x43 + slotOffset, val)
+  }
+
+
+  /// Attenuation a volume event subtracts. Positive sensitivity uses the event byte;
+  /// negative sensitivity uses `0x80 - byte`, the opposite of the note-on velocity macro.
+  private func macroAttenuation(_ direction: Int8, _ level: UInt8) -> Int? {
+    if direction < -4 || direction > 4 || direction == 0 {
+      return nil
+    }
+
+    let shift: Int
+    let source: Int
+    if direction < 0 {
+      shift = 4 - Int(-direction)
+      source = Int(0x80 &- level)
+    } else {
+      shift = 4 - Int(direction)
+      source = Int(level)
+    }
+
+    let magnitude = source >> shift
+    if magnitude > 63 {
+      return 63
+    }
+    return magnitude
   }
   
   

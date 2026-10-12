@@ -130,6 +130,20 @@ public final class OPL3Chip {
     public func writeRegisterBuffered(_ register: UInt16, _ value: UInt8) {
         writeRegisterBufferedInternal(register, value)
     }
+
+    /// Drops queued register writes without changing registers already applied.
+    func discardPendingWrites() {
+        var index = 0
+        while index < writeBuffer.count {
+            writeBuffer[index].register = 0
+            writeBuffer[index].data = 0
+            writeBuffer[index].time = 0
+            index += 1
+        }
+
+        writeBufferLastTime = writeBufferSampleCounter
+        writeBufferCurrent = (writeBufferLast &+ 1) % UInt32(Self.writeBufferSize)
+    }
     
     /// Generates 4 channels of audio
     public func generate4Channels(_ buffer: inout [Int16]) {

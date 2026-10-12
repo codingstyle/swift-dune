@@ -123,6 +123,9 @@ public struct HeradChannel {
   var keyOn: Bool = false
   var bend: UInt8 = 0
   var pitchSlideDuration: UInt8 = 0
+  /// Last output level written to the operator (0 = loudest). Volume events adjust this.
+  var modLevel: UInt8 = 0
+  var carrierLevel: UInt8 = 0
 }
 
 
