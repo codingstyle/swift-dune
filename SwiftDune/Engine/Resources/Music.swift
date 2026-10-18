@@ -38,6 +38,10 @@ final class Music: AudioPlayerItem {
   
   
   func play(loop: Bool = false) {
+    // Drop the song already sounding. Its audio thread would otherwise keep
+    // advancing these cursors, and its queued note-ons would play into this song.
+    stop()
+
     self.loops = loop
     resetPlaybackState()
     self.isPlaying = true
@@ -52,6 +56,7 @@ final class Music: AudioPlayerItem {
       // Check if music has ended. A loop rewinds at the last note so the
       // end-of-track rest is not inserted between repeats.
       let endTick = self.loops ? self.loopRestartTick : self.herad.maxTicks
+      
       if !(self.currentHeradTicks <= endTick) {
         if self.loops {
           self.rewindLoop()
@@ -77,15 +82,36 @@ final class Music: AudioPlayerItem {
   func stop() {
     self.isPlaying = false
 
-    // Stop OPL3 audio generation and silence all channels
+    // Stop OPL3 audio generation and silence all channels. This also drops
+    // note-ons still waiting in the register queue.
     player.stopOPL3()
-    
+    rewindTracks()
+
+    // Apply while the generator is stopped. Queued writes would sit until the
+    // next play and run ahead of that song's program changes.
+    player.opl3fm.writeRegisterDirect(0x08, 64)   // Enable Note-Sel
+    player.opl3fm.writeRegisterDirect(0x23, 238)  // Tremolo/Vibrato/etc
+    player.opl3fm.writeRegisterDirect(0xBD, 0)    // Disable Percussion Mode
+  }
+
+
+  /// Puts every track and channel back at the start of the song.
+  private func rewindTracks() {
     self.currentHeradTicks = 0
 
-    // Reset OPL3
-    oplWriteRegister(0x08, 64)   // Enable Note-Sel
-    oplWriteRegister(0x23, 238)  // Tremolo/Vibrato/etc
-    oplWriteRegister(0xBD, 0)    // Disable Percussion Mode
+    var channelIdx = 0
+
+    while channelIdx < herad.channels.count {
+      herad.channels[channelIdx] = HeradChannel()
+      channelIdx += 1
+    }
+
+    var trackIdx = 0
+
+    while trackIdx < herad.tracks.count {
+      herad.tracks[trackIdx].eventCursor = 0
+      trackIdx += 1
+    }
   }
 
 

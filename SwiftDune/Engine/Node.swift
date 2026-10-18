@@ -80,6 +80,9 @@ class DuneNode: @MainActor Comparable {
     open var nodes: [DuneNode] = []
     open var activeNodes: [DuneNode] = []
   
+    var transitionIn: TransitionEffect = .none
+    var transitionOut: TransitionEffect = .none
+  
     open var params: Dictionary<String, Any> = [:] {
         didSet {
             onParamsChange()

@@ -143,5 +143,11 @@ struct StatsView: View {
         .preferredColorScheme(.dark)
         .navigationTitle(toolsViewName)
         .padding()
+        .task {
+            while !Task.isCancelled {
+                viewModel.renderDidFinish()
+                try? await Task.sleep(nanoseconds: 100_000_000)
+            }
+        }
     }
 }

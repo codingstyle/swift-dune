@@ -5,12 +5,97 @@
 //  Created by Christophe Buguet on 13/09/2026.
 //
 
-struct DuneMap {
-  
+/// TABLAT.BIN row plus the MAP.HSQ terrain used by the flat map and desert walk.
+final class DuneMap {
+  private struct Row {
+    var offset: UInt16
+    var len: UInt16
+  }
+
+  private(set) var bytes: [UInt8] = []
+  private var rows: [Row] = []
+  private(set) var ready = false
+
+  func load() {
+    if ready { return }
+    let tablat = Resource("TABLAT.BIN", uncompressed: true).unpackedData
+    let map = Resource("MAP.HSQ").unpackedData
+    guard tablat.count >= 99 * 8, !map.isEmpty else { return }
+
+    var parsed: [Row] = []
+    parsed.reserveCapacity(99)
+    var i = 0
+    while i < 99 {
+      let base = i * 8
+      parsed.append(Row(
+        offset: UInt16.fromBytes(tablat, base),
+        len: UInt16.fromBytes(tablat, base + 2)
+      ))
+      i += 1
+    }
+    rows = parsed
+    bytes = map
+    ready = true
+  }
+
+  func rowOffset(_ y: UInt16) -> Int {
+    let entry = row(y)
+    if y < 99 {
+      return 0x62FC - Int(entry.offset)
+    }
+    return 0x62FC + Int(entry.offset)
+  }
+
+  func rowLength(_ y: UInt16) -> UInt16 {
+    row(y).len &* 2
+  }
+
+  /// MAP.HSQ byte offset for a longitude and a latitude row, plus the cell and the row length.
+  func position(x: UInt16, lat: Int16) -> (offset: Int, cell: UInt16, rowLen: UInt16) {
+    let y = UInt16(bitPattern: lat &+ 98)
+    let start = rowOffset(y)
+    let rowLen = UInt32(rowLength(y))
+    let cell = (rowLen &* UInt32(x) &+ 0x8000) >> 16
+    return (start + Int(cell), UInt16(cell), UInt16(truncatingIfNeeded: rowLen))
+  }
+
+  func snap(x: UInt16, lat: Int16) -> (offset: Int, x: UInt16) {
+    let positioned = position(x: x, lat: lat)
+    let rowLen = UInt32(positioned.rowLen)
+    if rowLen == 0 {
+      return (positioned.offset, x)
+    }
+    let snapped = UInt16((UInt32(positioned.cell) << 16) / rowLen)
+    return (positioned.offset, snapped)
+  }
+
+  func markLocation(at offset: Int) {
+    guard bytes.indices.contains(offset) else { return }
+    bytes[offset] |= 0x40
+  }
+
+  func byte(x: UInt16, lat: Int16) -> UInt8 {
+    let offset = position(x: x, lat: lat).offset
+    guard bytes.indices.contains(offset) else { return 0 }
+    return bytes[offset]
+  }
+
+  private func row(_ y: UInt16) -> Row {
+    if y < 99 {
+      return rows[Int(98 &- y)]
+    }
+    return rows[Int(y &- 98)]
+  }
 }
 
 
 struct DuneLocation {
+  var firstName: UInt8 = 0
+  var lastName: UInt8 = 0
+  var mapX: Int16 = 0
+  var mapY: Int16 = 0
+  var mapOffset: UInt16 = 0
+  var appearance: UInt8 = 0
   var status: UInt8 = 0
 }
 
@@ -65,7 +150,11 @@ extension DuneNearestLocation: DuneDataSegmentValue {
 
 
 struct GameState {
-  var mapState: DuneMap
+  @MainActor static var shared = GameState()
+
+  var mapState = DuneMap()
+  var lastLocationIndex: Int = 0
+  var desertStepCounter: UInt8 = 0
   
   // = seg001:0000 rand_bits — the last word `rand` returned. game_loop
   // refreshes it every pass; seg001:0000 also serves as the seg001 segment
@@ -84,31 +173,31 @@ struct GameState {
   // code (the DOS `dx`). draw_location_room records it here; loc_0d41b reads
   // it back via the room navigation stack (get_location_and_room), and
   // add_room_frame_task gates on it.
-  @DuneDataSegment(0x0004) var locationAndRoom: UInt16
+  @DuneDataSegment(0x0004) var locationAndRoom: UInt16 = 0x200A
   
   // = seg001:0006 data_00006 — the current location slot/index (static init
   // 0x180). open_SAL_resource (loc_008f0) sets it from bx; its high byte picks
   // the location's apparence (which SAL file to draw). = `location_appearance` passed
   // to draw_location_room.
-  @DuneDataSegment(0x0006) var locationAppearance: UInt16
+  @DuneDataSegment(0x0006) var locationAppearance: UInt16 = 0x0180
   
   // = seg001:0008 data_00008 — current room/apparence selector byte (static
   // init 0x20). draw_room_scene and draw_room_game_screen treat 0xff as "no
   // room scene to draw"; the desert walk-out (loc_03fd2) sets it to 0xff and
   // the walk-in arrival (arrive_at_location) restores the location code.
-  @DuneDataSegment(0x0008) var data_0008: UInt8
+  @DuneDataSegment(0x0008) var data_0008: UInt8 = 0x20
   
   // = seg001:0009 data_00009 — the current location slot byte (the
   // location_appearance high byte), 0xff while out in the desert. Written
   // alongside data_00008 by the walk-out/arrival paths; the NPC shuffle
   // (npc_shuffle_on_arrival) reads it as "where the player is now".
-  @DuneDataSegment(0x0009) var data_0009: UInt8
+  @DuneDataSegment(0x0009) var data_0009: UInt8 = 0x01
   
   // = seg001:000a bitfield_Paul_events — Paul's story-progress bitfield. Bit 0x10
   // gates the person-0x0e dialogue verb (seg000:90ed: 0x96 vs 0x97).
   @DuneDataSegment(0x000a) var paulFlags: UInt8
   
-  @DuneDataSegment(0x000b) var currentRoom: UInt8
+  @DuneDataSegment(0x000b) var currentRoom: UInt8 = 0x0A
   @DuneDataSegment(0x000c) var pendingDestinationRoom: UInt8
   @DuneDataSegment(0x000d) var previousRoom: UInt8
   @DuneDataSegment(0x000e) var personsMet: UInt16 // DuneCharacter flags
@@ -456,7 +545,7 @@ struct GameState {
   // hook (run_events_new_day, seg000:1c46).
   @DuneDataSegment(0x00ff) var daysSinceLastGamePhaseChange: UInt8
   
-  @DuneDataSegment(0x0100) var locations: [DuneLocation] = Array.init(repeating: DuneLocation(), count: 70)
+  @DuneDataSegment(0x0100) var locations: [DuneLocation] = initialDuneLocations
   @DuneDataSegment(0x08aa) var troops: [DuneTroop] = initialTroops
   
   // = seg001:0e30/0e32 _word_20E30_globe_param_3 / _word_20E32_globe_param_4

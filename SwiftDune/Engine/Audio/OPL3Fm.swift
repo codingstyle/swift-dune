@@ -312,9 +312,23 @@ public final class OPL3Fm {
         // after this silence once generation resumes.
         chip.discardPendingWrites()
 
+        // Force every operator silent. Key-off alone leaves a slow release
+        // from the previous song ringing into the next one.
+        let slotOffsets: [UInt16] = [0, 1, 2, 3, 4, 5, 8, 9, 10, 11, 12, 13, 16, 17, 18, 19, 20, 21]
+        var slotIdx = 0
+        while slotIdx < slotOffsets.count {
+            let slot = slotOffsets[slotIdx]
+            chip.writeRegister(0x40 + slot, 0x3F)
+            chip.writeRegister(0x80 + slot, 0xFF)
+            chip.writeRegister(0x140 + slot, 0x3F)
+            chip.writeRegister(0x180 + slot, 0xFF)
+            slotIdx += 1
+        }
+
         // Turn off all keys on channels 0-8 (first register bank)
         var ch = 0
         while ch < 9 {
+            chip.writeRegister(UInt16(0xA0 + ch), 0x00)
             chip.writeRegister(UInt16(0xB0 + ch), 0x00)
             ch += 1
         }
@@ -322,6 +336,7 @@ public final class OPL3Fm {
         // Turn off all keys on channels 9-17 (second register bank, 0x100 offset)
         ch = 0
         while ch < 9 {
+            chip.writeRegister(UInt16(0x1A0 + ch), 0x00)
             chip.writeRegister(UInt16(0x1B0 + ch), 0x00)
             ch += 1
         }

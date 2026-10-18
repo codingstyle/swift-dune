@@ -56,8 +56,11 @@ final class UI: DuneNode {
     private var leftPanel: UILeftPanel = .bookClosed
     private var rightPanel: UIRightPanel = .roomDirections
     private var directions: UIDirection = [.up, .down, .right]
-    private var menuItems: [UInt16] = []
-    
+
+    private let compassUpRect = DuneRect(264, 160, 18, 12)
+    private let compassDownRect = DuneRect(264, 180, 18, 12)
+    private let compassLeftRect = DuneRect(250, 170, 16, 14)
+    private let compassRightRect = DuneRect(280, 170, 16, 14)
     private var commands: Sentence?
     private var font: GameFont?
     
@@ -73,6 +76,12 @@ final class UI: DuneNode {
       SpritePosition(3, DunePoint(266, 65)),
       SpritePosition(4, DunePoint(238, 65)),
       SpritePosition(5, DunePoint(193, 65))
+    ]
+    private let palacePlanOrigin = DunePoint(182, 12)
+    // Offsets for DOS palace rooms 2...12, added to the plan origin.
+    private let palacePlanRoomOffsets: [(UInt8, UInt8)] = [
+      (29, 65), (85, 49), (29, 33), (57, 17), (57, 65),
+      (29, 49), (1, 49), (29, 1), (29, 17), (57, 49), (1, 65)
     ]
     private let palacePlanRect = DuneRect(160, 0, 160, 116)
   
@@ -90,8 +99,9 @@ final class UI: DuneNode {
     private let dayTextRect = DuneRect(7, 189, 22, 10)
     
     // Colors for text and background
-    private let lightColorIndex: UInt8 = 250
-    private let darkColorIndex: UInt8 = 243
+    private let menuTextColor: UInt8 = 0xfa
+    private let menuBackgroundColor: UInt8 = 0xf3
+    private let menuGreyColor: UInt8 = 0xf5
   
     init() {
         super.init("UI")
@@ -247,7 +257,7 @@ final class UI: DuneNode {
             return
         }
       
-        font.paletteIndex = lightColorIndex
+        font.paletteIndex = menuTextColor
         font.render("1", rect: dayTextRect, buffer: buffer, alignment: .center, style: .small)
       
         uiSprite.drawFrame(74, x: 6, y: 184, buffer: buffer)
@@ -261,36 +271,36 @@ final class UI: DuneNode {
             let font = font else {
             return
         }
-        
-        // Commands list
-        Primitives.fillRect(menuRect, 250, buffer, isOffset: false)
-        
-        // Menu item captions
-        var i: Int = 0
-        var selectedMenuIndex: Int = -1
-        
-        // TODO: find a way to highlight mouse coordinate update
+
+        let rows = Menus.shared.visibleRows()
+        var hover = -1
         if engine.input.mouseEnabled && menuRect.contains(engine.input.coordinates) {
-            selectedMenuIndex = Math.clamp(Int((engine.input.coordinates.y - 159) / 8), 0, 5)
+            hover = Int((engine.input.coordinates.y - menuRect.y) / 8)
         }
-        
-        menuItemBackgroundRect.y = 159
-        menuItemTextRect.y = 159
-        
+
+        Primitives.fillRect(menuRect, Int(menuBackgroundColor), buffer, isOffset: false)
+
+        var i = 0
         while i < 5 {
-            let y = 159 + Int16(8 * i)
+            let y = menuRect.y + Int16(8 * i)
             menuItemBackgroundRect.y = y + 1
             menuItemTextRect.y = y + 1
-
             uiSprite.drawFrame(27, x: 92, y: y, buffer: buffer)
 
-            if i == selectedMenuIndex {
-                Primitives.fillRect(menuItemBackgroundRect, 250, buffer, isOffset: false)
-            }
+            let row = i < rows.count ? rows[i] : MenuRow(textId: 0, greyed: false, highlighted: false)
+            let highlighted = row.highlighted || (hover == i && row.textId != 0 && !row.greyed)
+            let background = highlighted && !row.greyed ? menuTextColor : menuBackgroundColor
+            Primitives.fillRect(menuItemBackgroundRect, Int(background), buffer, isOffset: false)
 
-            if i < menuItems.count {
-                let sentence = commands.sentence(at: menuItems[i])
-                font.paletteIndex = i == selectedMenuIndex ? darkColorIndex : lightColorIndex
+            if row.textId != 0 {
+                if row.greyed {
+                    font.paletteIndex = menuGreyColor
+                } else if highlighted {
+                    font.paletteIndex = menuBackgroundColor
+                } else {
+                    font.paletteIndex = menuTextColor
+                }
+                let sentence = commands.sentence(at: row.textId)
                 font.render(sentence, rect: menuItemTextRect, buffer: buffer, style: .small)
             }
 
@@ -301,28 +311,100 @@ final class UI: DuneNode {
   
     func renderPalacePlan(_ buffer: PixelBuffer) {
         guard let palacePlanSprite = palacePlanSprite else {
-          return
+            return
         }
-      
+
         Primitives.fillRect(palacePlanRect, 0xf1, buffer, isOffset: false)
         Primitives.drawNestedRect(palacePlanRect, 0xf7, buffer, isOffset: false)
-      
+
+        let iconCount = palacePlanIconCount()
         var i = 0
-      
-        while i < palacePlanPositions.count {
-          palacePlanSprite.drawFrame(palacePlanPositions[i].spriteIndex, x: palacePlanPositions[i].pt.x, y: palacePlanPositions[i].pt.y, buffer: buffer)
-          i += 1
+        while i < iconCount && i < palacePlanPositions.count {
+            let icon = palacePlanPositions[i]
+            palacePlanSprite.drawFrame(icon.spriteIndex, x: icon.pt.x, y: icon.pt.y, buffer: buffer)
+            i += 1
         }
-      
-        // TODO: render characters X in room + current position
+
+        drawPalacePlanPopulation(palacePlanSprite, buffer)
+    }
+
+
+    func closePalacePlan() {
+        palacePlanVisible = false
+    }
+
+
+    /// Locked-door covers hide the sealed rooms, including the greenhouse.
+    /// A new game draws all three. Phases 0x0c, 0x1c and 0x54 each drop one,
+    /// from the end of the icon list, until the secret room is visible.
+    private func palacePlanIconCount() -> Int {
+        let phase = GameState.shared.gamePhase
+        if phase >= 0x54 { return 1 }
+        if phase >= 0x1c { return 2 }
+        if phase >= 0x0c { return 3 }
+        return 4
+    }
+
+
+    private func drawPalacePlanPopulation(_ sprite: Sprite, _ buffer: PixelBuffer) {
+        var inRoom = [UInt8](repeating: 0, count: 12)
+        var travelling = [UInt8](repeating: 0, count: 12)
+        var player = [UInt8](repeating: 0, count: 12)
+
+        let state = GameState.shared
+        let appearanceHi = UInt8(truncatingIfNeeded: state.locationAppearance >> 8)
+        for person in state.roomPersons {
+            if UInt8(truncatingIfNeeded: person.locationAppearance >> 8) != appearanceHi {
+                continue
+            }
+            if person.personIndex == 4 && state.gamePhase >= 0x15 && state.gamePhase < 0x20 {
+                continue
+            }
+            let index = Int(person.locationAndRoom & 0xFF) - 1
+            guard inRoom.indices.contains(index) else { continue }
+            if person.flags.contains(.npcCompanion) {
+                travelling[index] &+= 1
+            } else {
+                inRoom[index] &+= 1
+            }
+        }
+
+        let currentRoom = Int(state.locationAndRoom & 0xFF)
+        if (1...12).contains(currentRoom) {
+            player[currentRoom - 1] &+= 1
+        }
+
+        var i = 0
+        while i < palacePlanRoomOffsets.count {
+            let offset = palacePlanRoomOffsets[i]
+            var x = palacePlanOrigin.x + Int16(offset.0) + 3
+            var y = palacePlanOrigin.y + Int16(offset.1) + 2
+            drawPopulationDots(inRoom[i + 1], x: x, y: y, sprite: sprite, buffer: buffer)
+            y += 7
+            drawPopulationDots(travelling[i + 1], x: x, y: y, sprite: sprite, buffer: buffer)
+            x += 9
+            y -= 4
+            if player[i + 1] != 0 {
+                sprite.drawFrame(1, x: x, y: y, buffer: buffer)
+            }
+            i += 1
+        }
+    }
+
+
+    private func drawPopulationDots(_ count: UInt8, x: Int16, y: Int16, sprite: Sprite, buffer: PixelBuffer) {
+        let total = min(Int(count), 5)
+        var dotX = x
+        var n = 0
+        while n < total {
+            sprite.drawFrame(2, x: dotX, y: y, buffer: buffer)
+            dotX += 4
+            n += 1
+        }
     }
     
     
     func onUIEvent(_ e: UIStateEventData) {
-        if let items = e.items {
-            self.menuItems = items
-        }
-
         if let leftPanel = e.leftPanel {
             self.leftPanel = leftPanel
         }
@@ -330,12 +412,41 @@ final class UI: DuneNode {
         if let rightPanel = e.rightPanel {
             self.rightPanel = rightPanel
         }
+
+        if let directions = e.directions {
+            self.directions = directions
+        }
     }
   
   
     override func onClick(_ event: DuneClickEvent) {
-        if leftPanel == .bookClosed && palacePlanButtonRect.contains(event.point) {
-            palacePlanVisible = !palacePlanVisible
+        if rightPanel == .roomDirections {
+            let direction: Int?
+            if compassUpRect.contains(event.point) && directions.contains(.up) {
+                direction = 1
+            } else if compassRightRect.contains(event.point) && directions.contains(.right) {
+                direction = 2
+            } else if compassDownRect.contains(event.point) && directions.contains(.down) {
+                direction = 3
+            } else if compassLeftRect.contains(event.point) && directions.contains(.left) {
+                direction = 4
+            } else {
+                direction = nil
+            }
+            if let direction {
+                EventManager.navigationEvent.notify(NavigationEventData(direction: direction))
+                return
+            }
+        }
+
+        if leftPanel == .bookClosed && rightPanel == .roomDirections && palacePlanButtonRect.contains(event.point) {
+            if palacePlanVisible {
+                palacePlanVisible = false
+                Menus.shared.pop()
+            } else if canOpenPalacePlan() {
+                palacePlanVisible = true
+                Menus.shared.push(.done)
+            }
         }
       
         if bookRect.contains(event.point) && leftPanel == .bookClosed {
@@ -356,13 +467,28 @@ final class UI: DuneNode {
             }
         }
       
-        // Menus
         if menuRect.contains(event.point) {
-            
+            let slot = Int((event.point.y - menuRect.y) / 8)
+            guard let choice = Menus.shared.choose(slot: slot) else {
+                return
+            }
+            if choice.handler == MenuHandler.closeBook && leftPanel == .bookOpen {
+                hideBook()
+            } else if choice.handler == MenuHandler.exitMenu && palacePlanVisible {
+                palacePlanVisible = false
+                Menus.shared.pop()
+            }
+            EventManager.menuChoiceEvent.notify(MenuChoiceEventData(choice: choice))
         }
     }
   
   
+    private func canOpenPalacePlan() -> Bool {
+        let room = GameState.shared.locationAndRoom
+        return room >> 8 == 0x20 && room & 0xFF != 1
+    }
+
+
     func showBook() {
         startHeadIndex = 26
         headAnimation = DuneAnimation(from: 0, to: 10, startTime: currentTime, endTime: currentTime + 0.5)
@@ -386,10 +512,15 @@ final class UI: DuneNode {
 struct UIStateEventData {
     var leftPanel: UILeftPanel?
     var rightPanel: UIRightPanel?
-    var items: [UInt16]?
+    var directions: UIDirection?
+}
+
+struct NavigationEventData {
+    var direction: Int
 }
 
 
 extension EventManager {
     static let uiStateChangedEvent = DuneEvent<UIStateEventData>()
+    static let navigationEvent = DuneEvent<NavigationEventData>()
 }

@@ -23,12 +23,9 @@ final class Arrakeen: DuneNode {
     private var contextBuffer = PixelBuffer(width: 320, height: 152)
 
     private var arrakeenScenery: Scenery?
-    private var currentRoom: ArrakeenRoom = .throne
+    private var roomIndex: Int = ArrakeenRoom.throne.rawValue
     private var markers: Dictionary<Int, RoomCharacter> = [:]
   
-    private var transitionIn: TransitionEffect = .none
-    private var transitionOut: TransitionEffect = .none
-
     init() {
         super.init("Arrakeen")
     }
@@ -44,15 +41,19 @@ final class Arrakeen: DuneNode {
     override func onDisable() {
         arrakeenScenery = nil
         markers = [:]
-        currentRoom = .throne
+        roomIndex = ArrakeenRoom.throne.rawValue
         currentTime = 0.0
         contextBuffer.tag = 0x0000
     }
   
   
     override func onParamsChange() {
-        if let room = params["room"] {
-          self.currentRoom = room as! ArrakeenRoom
+        if let room = params["room"] as? Int {
+          roomIndex = room
+          contextBuffer.tag = 0
+        } else if let room = params["room"] as? ArrakeenRoom {
+          roomIndex = room.rawValue
+          contextBuffer.tag = 0
         }
         
         if let markers = params["markers"] {
@@ -90,7 +91,7 @@ final class Arrakeen: DuneNode {
       
       
       if contextBuffer.tag != 0x0001 {
-        arrakeenScenery.drawRoom(currentRoom.rawValue, buffer: contextBuffer)
+        arrakeenScenery.drawRoom(roomIndex, buffer: contextBuffer)
         contextBuffer.tag = 0x0001
       }
       

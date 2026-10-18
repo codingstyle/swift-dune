@@ -22,7 +22,6 @@ final class Stars: DuneNode {
     private var globe: Globe?
 
     private var mode: StarsMode = .stars
-    private var transitionIn: TransitionEffect = .none
 
     init() {
         super.init("Stars")
@@ -48,6 +47,7 @@ final class Stars: DuneNode {
         currentTime = 0.0
         mode = .stars
         transitionIn = .none
+        transitionOut = .none
         
         contextBuffer.clearBuffer()
         contextBuffer.tag = 0x0

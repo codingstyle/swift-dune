@@ -53,8 +53,6 @@ final class Book: DuneNode {
       BookChapter(.fremen, false, [ 423, 431, 432 ])
     ]
 
-    private let menuItemsBook: [BookTopic] = [.allTopics, .politics, .paulOnDune, .spice, .fremen]
-
     private let pageFlipDuration = 1.0
     private var animationStartTime = 0.0
     private var flipping = false
@@ -76,11 +74,7 @@ final class Book: DuneNode {
         phrases = Sentence(.phrase2)
         credits = Credits()
 
-        EventManager.uiStateChangedEvent.notify(UIStateEventData(
-          items: menuItemsBook.map({ topic in
-            topic.rawValue
-          })
-        ))
+        Menus.shared.show(.book)
       
         EventManager.bookStateChangedEvent.addListener(self) { event in
             if event.action == .turnPageLeft && self.pageIndex > 0 {
@@ -96,7 +90,8 @@ final class Book: DuneNode {
     
     override func onDisable() {
         EventManager.bookStateChangedEvent.removeListener(self)
-      
+        engine.audioPlayer.stop()
+
         credits = nil
         bookSprite = nil
         flipSound = nil

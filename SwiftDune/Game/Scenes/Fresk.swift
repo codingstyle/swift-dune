@@ -29,9 +29,6 @@ final class Fresk: DuneNode {
         }
     }
     
-    private let menuItemsGlobe: [UInt16] = [170, 164, 166, 167, 168]
-    private let menuItemsStats: [UInt16] = [170, 165, 166, 167, 168]
-
     private var panelAnimation: DuneAnimation<Int16>?
     
     init() {
@@ -42,6 +39,7 @@ final class Fresk: DuneNode {
     override func onEnable() {
         freskSprite = Sprite("FRESK.HSQ")
         globe = Globe()
+        Menus.shared.show(.globe)
     }
     
     
@@ -62,8 +60,7 @@ final class Fresk: DuneNode {
 
         EventManager.uiStateChangedEvent.notify(UIStateEventData(
             leftPanel: .globe,
-            rightPanel: .rect,
-            items: menuItemsGlobe
+            rightPanel: .rect
         ))
     }
     

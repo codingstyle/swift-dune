@@ -35,8 +35,8 @@ final class Sentence {
     
     
     func sentenceCount() -> UInt16 {
-        let firstSentence = resource.stream!.readUInt16LE();
         resource.stream!.seek(0)
+        let firstSentence = resource.stream!.readUInt16LE();
         return (firstSentence / 2)
     }
     

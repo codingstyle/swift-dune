@@ -10,7 +10,7 @@ import Foundation
 enum PalaceRoom: Int {
     case porch = 0
     case diningRoom = 1
-    case bedroom = 2
+    case bedroom = 2 // DOS palace room 9: Paul's room, the one with the mirror
     case bedroomEmpty = 3
     case armory = 4
     case command = 5
@@ -32,15 +32,24 @@ final class Palace: DuneNode {
     private var sky: Sky?
     private var characterSprite: Sprite?
     
-    private var currentRoom: PalaceRoom = .stairs
+    private var roomIndex: Int = PalaceRoom.porch.rawValue
+    private var currentRoom: PalaceRoom {
+        PalaceRoom(rawValue: roomIndex) ?? .porch
+    }
     private var markers: Dictionary<Int, RoomCharacter> = [:]
     private var character: DuneCharacter = .none
     private var zoomRect: DuneRect?
     private var dayMode: DuneLightMode = .day
     
-    private var transitionIn: TransitionEffect = .none
-    private var transitionOut: TransitionEffect = .none
     private var playMusic = true
+    private var showingMirror = false
+    private var mirrorSprite: Sprite?
+    private var paulSprite: Sprite?
+    private var chaniSprite: Sprite?
+
+    var isShowingMirror: Bool {
+        showingMirror
+    }
 
     init() {
         super.init("Palace")
@@ -51,7 +60,6 @@ final class Palace: DuneNode {
         palaceScenery = Scenery("PALACE.SAL")
         sky = Sky()
         
-        engine.palette.clear()
         palaceScenery?.characters = markers
     }
     
@@ -62,18 +70,26 @@ final class Palace: DuneNode {
         characterSprite = nil
         
         markers = [:]
-        currentRoom = .stairs
+        roomIndex = PalaceRoom.porch.rawValue
         currentTime = 0.0
         contextBuffer.tag = 0x0000
         zoomRect = nil
         dayMode = .day
         playMusic = true
+        showingMirror = false
+        mirrorSprite = nil
+        paulSprite = nil
+        chaniSprite = nil
     }
     
     
     override func onParamsChange() {
-        if let room = params["room"] {
-            self.currentRoom = room as! PalaceRoom
+        if let room = params["room"] as? Int {
+            roomIndex = room
+            contextBuffer.tag = 0
+        } else if let room = params["room"] as? PalaceRoom {
+            roomIndex = room.rawValue
+            contextBuffer.tag = 0
         }
         
         if let markers = params["markers"] {
@@ -107,6 +123,19 @@ final class Palace: DuneNode {
         if let playMusicParam = params["playMusic"] {
             self.playMusic = playMusicParam as! Bool
         }
+
+        let mirror = params["mirror"] as? Bool ?? false
+        if mirror != showingMirror {
+            showingMirror = mirror
+            contextBuffer.tag = 0
+            if showingMirror {
+                Menus.shared.show(.palaceMirrorRoom)
+            } else {
+                mirrorSprite = nil
+                paulSprite = nil
+                chaniSprite = nil
+            }
+        }
     }
     
     
@@ -135,6 +164,12 @@ final class Palace: DuneNode {
         intermediateFrameBuffer.clearBuffer()
         buffer.clearBuffer()
 
+        if showingMirror {
+            renderMirror(intermediateFrameBuffer)
+            intermediateFrameBuffer.render(to: buffer, effect: .none)
+            return
+        }
+
         // TODO: improve this according to day time
         if currentRoom == .stairs && dayMode == .sunrise {
             let sunriseProgress = Math.clampf((currentTime - 2.0) / 3.0, 0.0, 1.0)
@@ -155,19 +190,19 @@ final class Palace: DuneNode {
         if currentRoom == .porch || currentRoom == .balcony {
             if contextBuffer.tag != 0x0001 {
                 sky.render(contextBuffer, width: 320, at: 0, type: .narrow)
-                palaceScenery.drawRoom(currentRoom.rawValue, buffer: contextBuffer)
+                palaceScenery.drawRoom(roomIndex, buffer: contextBuffer)
                 contextBuffer.tag = 0x0001
             }
 
             contextBuffer.render(to: intermediateFrameBuffer, effect: fx)
         } else if currentRoom == .stairs {
             sky.render(intermediateFrameBuffer, width: 200, at: 0, type: .large)
-            palaceScenery.drawRoom(currentRoom.rawValue, buffer: intermediateFrameBuffer)
+            palaceScenery.drawRoom(roomIndex, buffer: intermediateFrameBuffer)
 
             // Fade on palace
             if dayMode == .sunrise {
                 if currentTime > 1.0 {
-                    palaceScenery.setPalette(currentRoom.rawValue)
+                    palaceScenery.setPalette(roomIndex)
                     engine.palette.stash()
                 }
 
@@ -180,7 +215,7 @@ final class Palace: DuneNode {
             }
         } else {
             if contextBuffer.tag != 0x0001 {
-                palaceScenery.drawRoom(currentRoom.rawValue, buffer: contextBuffer)
+                palaceScenery.drawRoom(roomIndex, buffer: contextBuffer)
                 contextBuffer.tag = 0x0001
             }
 
@@ -201,5 +236,38 @@ final class Palace: DuneNode {
         }
 
         intermediateFrameBuffer.render(to: buffer, effect: fxTransition)
+    }
+
+
+    private func renderMirror(_ buffer: PixelBuffer) {
+        if mirrorSprite == nil {
+            mirrorSprite = Sprite("MIRROR.HSQ")
+            paulSprite = Sprite("PAUL.HSQ")
+            paulSprite?.replaceAnimationsImageIndex(1, 9)
+            if GameState.shared.personsTravellingWith & 0x80 != 0 {
+                chaniSprite = Sprite("CHAN.HSQ")
+            }
+        }
+
+        mirrorSprite?.setPalette()
+        paulSprite?.setPalette()
+        chaniSprite?.setPalette()
+
+        if contextBuffer.tag != 0x0002 {
+            contextBuffer.clearBuffer()
+            mirrorSprite?.drawFrame(0, x: 0, y: 0, buffer: contextBuffer)
+            mirrorSprite?.drawFrame(1, x: 0, y: 0, buffer: contextBuffer)
+            contextBuffer.tag = 0x0002
+        }
+
+        contextBuffer.render(to: buffer)
+
+        let withChani = chaniSprite != nil
+        if withChani {
+            chaniSprite?.drawAnimation(2, buffer: buffer, time: currentTime, offset: DunePoint(0, 15))
+        }
+        let paulOffset = withChani ? DuneCharacter.paulInMirror.offset : .zero
+        paulSprite?.drawAnimation(0, buffer: buffer, time: currentTime, offset: paulOffset)
+        mirrorSprite?.drawFrame(2, x: 0, y: 0, buffer: buffer)
     }
 }

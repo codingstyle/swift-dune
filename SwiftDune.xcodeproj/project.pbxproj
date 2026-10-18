@@ -144,6 +144,8 @@
 		068300842A9D080800414896 /* Sound.swift in Sources */ = {isa = PBXBuildFile; fileRef = 068300832A9D080800414896 /* Sound.swift */; };
 		06892D522C19750F00B08B22 /* Mouse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06892D512C19750F00B08B22 /* Mouse.swift */; };
 		06892D542C1EE62700B08B22 /* DesertWalk.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06892D532C1EE62700B08B22 /* DesertWalk.swift */; };
+		06B1A0042C7A100100000002 /* DesertLandscape.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06B1A0042C7A100100000001 /* DesertLandscape.swift */; };
+		06B1A0042C7A100100000003 /* DesertLandscape.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06B1A0042C7A100100000001 /* DesertLandscape.swift */; };
 		06892D572C3031F400B08B22 /* Renderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06892D562C3031F400B08B22 /* Renderer.swift */; };
 		06892D592C31CAE700B08B22 /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 06892D582C31CAE700B08B22 /* Shaders.metal */; };
 		068965B82B5F046A005A19D7 /* UI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 068965B72B5F046A005A19D7 /* UI.swift */; };
@@ -171,6 +173,8 @@
 		069B5B28307C06A700AA8FE1 /* DuneInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 067CE994307BAD4C00186AC3 /* DuneInput.swift */; };
 		069B5B29307C31A500AA8FE1 /* DuneFiles in Resources */ = {isa = PBXBuildFile; fileRef = 0699D2732A93C6D7006287E0 /* DuneFiles */; };
 		069B5B2A307C34E400AA8FE1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0699D2682A93C685006287E0 /* Assets.xcassets */; };
+		069B5B2D307E0A5A00AA8FE1 /* Touch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 069B5B2B307E0A5700AA8FE1 /* Touch.swift */; };
+		069B5B2E307E0A5A00AA8FE1 /* Touch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 069B5B2B307E0A5700AA8FE1 /* Touch.swift */; };
 		069B74792D1822660071E68C /* Event.swift in Sources */ = {isa = PBXBuildFile; fileRef = 069B74782D1822660071E68C /* Event.swift */; };
 		069B747A2D1822660071E68C /* Event.swift in Sources */ = {isa = PBXBuildFile; fileRef = 069B74782D1822660071E68C /* Event.swift */; };
 		06A023442A9FC5BA0091D581 /* Video.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06A023422A9FC5BA0091D581 /* Video.swift */; };
@@ -181,6 +185,14 @@
 		06AB96D72BEE013300482823 /* Animation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06AB96D62BEE013300482823 /* Animation.swift */; };
 		06AB96DA2BEE160B00482823 /* Keyboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06AB96D92BEE160B00482823 /* Keyboard.swift */; };
 		06AB96DC2BEFC4FD00482823 /* Flight.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06AB96DB2BEFC4FD00482823 /* Flight.swift */; };
+		06B1A0012C7A100100000002 /* Map.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06B1A0012C7A100100000001 /* Map.swift */; };
+		06B1A0012C7A100100000003 /* Map.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06B1A0012C7A100100000001 /* Map.swift */; };
+		06B1A0022C7A100100000002 /* SceneNavigation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06B1A0022C7A100100000001 /* SceneNavigation.swift */; };
+		06B1A0022C7A100100000003 /* SceneNavigation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06B1A0022C7A100100000001 /* SceneNavigation.swift */; };
+		06B1A0032C7A100100000002 /* Locations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06B1A0032C7A100100000001 /* Locations.swift */; };
+		06B1A0032C7A100100000003 /* Locations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06B1A0032C7A100100000001 /* Locations.swift */; };
+		06B1A0052C7A100100000002 /* Menus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06B1A0052C7A100100000001 /* Menus.swift */; };
+		06B1A0052C7A100100000003 /* Menus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06B1A0052C7A100100000001 /* Menus.swift */; };
 		06B812CB2BB0CF3D0048C8AC /* Prologue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06B812CA2BB0CF3D0048C8AC /* Prologue.swift */; };
 		06B812CD2BB559B90048C8AC /* PrologueSubtitle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06B812CC2BB559B90048C8AC /* PrologueSubtitle.swift */; };
 		06C0C5022F8A10A100B47D13 /* Cursor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06C0C5012F8A10A100B47D13 /* Cursor.swift */; };
@@ -203,8 +215,6 @@
 		06CA2BAC2C7B350F00B47D13 /* DuneEditorApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06CA2B8D2C7B30B800B47D13 /* DuneEditorApp.swift */; };
 		06CA2BAD2C7B350F00B47D13 /* Renderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06892D562C3031F400B08B22 /* Renderer.swift */; };
 		06CA2BAE2C7B350F00B47D13 /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 06892D582C31CAE700B08B22 /* Shaders.metal */; };
-		06CA2BAF2C7B350F00B47D13 /* Keyboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06AB96D92BEE160B00482823 /* Keyboard.swift */; };
-		06CA2BB02C7B350F00B47D13 /* Mouse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06892D512C19750F00B08B22 /* Mouse.swift */; };
 		06CA2BB12C7B350F00B47D13 /* AudioPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06A023432A9FC5BA0091D581 /* AudioPlayer.swift */; };
 		06CA2BB22C7B350F00B47D13 /* PixelBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06C16D862B1C8F0100CBEAA2 /* PixelBuffer.swift */; };
 		06CA2BB32C7B350F00B47D13 /* Effects.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06C16D882B1CB01700CBEAA2 /* Effects.swift */; };
@@ -297,6 +307,7 @@
 		068300832A9D080800414896 /* Sound.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sound.swift; sourceTree = "<group>"; };
 		06892D512C19750F00B08B22 /* Mouse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Mouse.swift; sourceTree = "<group>"; };
 		06892D532C1EE62700B08B22 /* DesertWalk.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesertWalk.swift; sourceTree = "<group>"; };
+		06B1A0042C7A100100000001 /* DesertLandscape.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesertLandscape.swift; sourceTree = "<group>"; };
 		06892D562C3031F400B08B22 /* Renderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Renderer.swift; sourceTree = "<group>"; };
 		06892D582C31CAE700B08B22 /* Shaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
 		068965B72B5F046A005A19D7 /* UI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UI.swift; sourceTree = "<group>"; };
@@ -318,6 +329,7 @@
 		0699D27D2A93D245006287E0 /* DuneEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuneEngine.swift; sourceTree = "<group>"; };
 		069B5B20307BC32B00AA8FE1 /* App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App.swift; sourceTree = "<group>"; };
 		069B5B25307BC4ED00AA8FE1 /* NSColor+Palette.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSColor+Palette.swift"; sourceTree = "<group>"; };
+		069B5B2B307E0A5700AA8FE1 /* Touch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Touch.swift; sourceTree = "<group>"; };
 		069B74782D1822660071E68C /* Event.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Event.swift; sourceTree = "<group>"; };
 		06A023422A9FC5BA0091D581 /* Video.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Video.swift; sourceTree = "<group>"; };
 		06A023432A9FC5BA0091D581 /* AudioPlayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AudioPlayer.swift; sourceTree = "<group>"; };
@@ -333,6 +345,10 @@
 		06AB96D62BEE013300482823 /* Animation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Animation.swift; sourceTree = "<group>"; };
 		06AB96D92BEE160B00482823 /* Keyboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Keyboard.swift; sourceTree = "<group>"; };
 		06AB96DB2BEFC4FD00482823 /* Flight.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Flight.swift; sourceTree = "<group>"; };
+		06B1A0012C7A100100000001 /* Map.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Map.swift; sourceTree = "<group>"; };
+		06B1A0022C7A100100000001 /* SceneNavigation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneNavigation.swift; sourceTree = "<group>"; };
+		06B1A0032C7A100100000001 /* Locations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Locations.swift; sourceTree = "<group>"; };
+		06B1A0052C7A100100000001 /* Menus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Menus.swift; sourceTree = "<group>"; };
 		06B812CA2BB0CF3D0048C8AC /* Prologue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Prologue.swift; sourceTree = "<group>"; };
 		06B812CC2BB559B90048C8AC /* PrologueSubtitle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrologueSubtitle.swift; sourceTree = "<group>"; };
 		06C0C5012F8A10A100B47D13 /* Cursor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cursor.swift; sourceTree = "<group>"; };
@@ -418,6 +434,7 @@
 				0638C2562AD29B2F006B00CF /* Credits.swift */,
 				06D16B672C5D557300C85A78 /* Death.swift */,
 				06892D532C1EE62700B08B22 /* DesertWalk.swift */,
+				06B1A0042C7A100100000001 /* DesertLandscape.swift */,
 				06A494032B2634AC00D60425 /* DuneTitle.swift */,
 				0607FA7F3067C05400B35E6E /* Ending.swift */,
 				06AB96DB2BEFC4FD00482823 /* Flight.swift */,
@@ -427,6 +444,7 @@
 				061725EA2B77AA8400254635 /* Kiss.swift */,
 				0638C2522AD1FD2E006B00CF /* Logo.swift */,
 				066D9D3A2B4A9EC40003ADD3 /* LogoSwap.swift */,
+				06B1A0012C7A100100000001 /* Map.swift */,
 				062779672B9AEED00046E068 /* Main.swift */,
 				061725EE2B8542A400254635 /* Ornithopter.swift */,
 				061725EC2B7968DA00254635 /* Palace.swift */,
@@ -535,6 +553,7 @@
 		067CE993307B90B200186AC3 /* Input */ = {
 			isa = PBXGroup;
 			children = (
+				069B5B2B307E0A5700AA8FE1 /* Touch.swift */,
 				06AB96D92BEE160B00482823 /* Keyboard.swift */,
 				06892D512C19750F00B08B22 /* Mouse.swift */,
 			);
@@ -663,6 +682,9 @@
 				06939C3830570C2800565DC3 /* Smuggler.swift */,
 				06939C533059200200565DC3 /* DialogueEvents.swift */,
 				06AB6B9F3056FCEE001A72DF /* GameState.swift */,
+				06B1A0052C7A100100000001 /* Menus.swift */,
+				06B1A0032C7A100100000001 /* Locations.swift */,
+				06B1A0022C7A100100000001 /* SceneNavigation.swift */,
 			);
 			path = Logic;
 			sourceTree = "<group>";
@@ -841,6 +863,7 @@
 				067CE9D8307BB16F00186AC3 /* GameTypes.swift in Sources */,
 				067CE9CD307BB11A00186AC3 /* DuneAudioPlayer.swift in Sources */,
 				067CE9AD307BB00400186AC3 /* DuneIOSApp.swift in Sources */,
+				069B5B2E307E0A5A00AA8FE1 /* Touch.swift in Sources */,
 				067CE9B8307BB10B00186AC3 /* Globe.swift in Sources */,
 				067CE9B9307BB10B00186AC3 /* Scenery.swift in Sources */,
 				067CE9BA307BB10B00186AC3 /* Sound.swift in Sources */,
@@ -879,6 +902,10 @@
 				067CE9E4307BB17600186AC3 /* Game.swift in Sources */,
 				067CE9E5307BB17600186AC3 /* Intro.swift in Sources */,
 				067CE9E6307BB17600186AC3 /* Palace.swift in Sources */,
+				06B1A0012C7A100100000002 /* Map.swift in Sources */,
+				06B1A0022C7A100100000002 /* SceneNavigation.swift in Sources */,
+				06B1A0032C7A100100000002 /* Locations.swift in Sources */,
+				06B1A0052C7A100100000002 /* Menus.swift in Sources */,
 				067CE9E7307BB17600186AC3 /* Main.swift in Sources */,
 				067CE9E8307BB17600186AC3 /* Arrakeen.swift in Sources */,
 				067CE9E9307BB17600186AC3 /* Kiss.swift in Sources */,
@@ -894,6 +921,7 @@
 				067CE9F3307BB17600186AC3 /* Credits.swift in Sources */,
 				069B5B28307C06A700AA8FE1 /* DuneInput.swift in Sources */,
 				067CE9F4307BB17600186AC3 /* DesertWalk.swift in Sources */,
+				06B1A0042C7A100100000002 /* DesertLandscape.swift in Sources */,
 				067CE9F5307BB17600186AC3 /* Death.swift in Sources */,
 				067CE9F6307BB17600186AC3 /* PaulAndChani.swift in Sources */,
 				067CE9C9307BB11200186AC3 /* Effects.swift in Sources */,
@@ -936,6 +964,11 @@
 				068300842A9D080800414896 /* Sound.swift in Sources */,
 				067791222C728CE0008CB4A7 /* StatsView.swift in Sources */,
 				061725ED2B7968DA00254635 /* Palace.swift in Sources */,
+				06B1A0012C7A100100000003 /* Map.swift in Sources */,
+				06B1A0022C7A100100000003 /* SceneNavigation.swift in Sources */,
+				06B1A0032C7A100100000003 /* Locations.swift in Sources */,
+				06B1A0052C7A100100000003 /* Menus.swift in Sources */,
+				06B1A0042C7A100100000003 /* DesertLandscape.swift in Sources */,
 				06939C3B30570CEA00565DC3 /* RoomPerson.swift in Sources */,
 				06939C3F3057157F00565DC3 /* Condition.swift in Sources */,
 				06939C513059200100565DC3 /* Dialogue.swift in Sources */,
@@ -986,6 +1019,7 @@
 				0601F8772CD20E0500581B49 /* Character.swift in Sources */,
 				065F0CA42F33C4B90032796E /* OPL3Tables.swift in Sources */,
 				065F0CA52F33C4B90032796E /* OPL3Channel.swift in Sources */,
+				069B5B2D307E0A5A00AA8FE1 /* Touch.swift in Sources */,
 				065F0CA62F33C4B90032796E /* OPL3Lfo.swift in Sources */,
 				065F0CA72F33C4B90032796E /* OPL3Fm.swift in Sources */,
 				069B5B26307BC4EF00AA8FE1 /* NSColor+Palette.swift in Sources */,
@@ -1044,8 +1078,6 @@
 				06CA2BAE2C7B350F00B47D13 /* Shaders.metal in Sources */,
 				06939C423059176500565DC3 /* ConditionDetailsView.swift in Sources */,
 				069B5B27307BC50200AA8FE1 /* NSColor+Palette.swift in Sources */,
-				06CA2BAF2C7B350F00B47D13 /* Keyboard.swift in Sources */,
-				06CA2BB02C7B350F00B47D13 /* Mouse.swift in Sources */,
 				06CA2BB12C7B350F00B47D13 /* AudioPlayer.swift in Sources */,
 				06CA2BB22C7B350F00B47D13 /* PixelBuffer.swift in Sources */,
 				06CA2BB32C7B350F00B47D13 /* Effects.swift in Sources */,

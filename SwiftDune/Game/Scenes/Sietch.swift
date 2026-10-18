@@ -32,7 +32,10 @@ final class Sietch: DuneNode {
     private var characterSprite: Sprite?
     private var waterDropSound: Sound?
     
-    private var currentRoom: SietchRoom = .room8
+    private var roomIndex: Int = SietchRoom.entrance.rawValue
+    private var currentRoom: SietchRoom {
+        SietchRoom(rawValue: roomIndex) ?? .entrance
+    }
     private var markers: Dictionary<Int, RoomCharacter> = [:]
     private var character: DuneCharacter = .none
     
@@ -77,7 +80,7 @@ final class Sietch: DuneNode {
         characterSprite = nil
         waterDropSound = nil
         markers = [:]
-        currentRoom = .entrance
+        roomIndex = SietchRoom.entrance.rawValue
         currentTime = 0.0
         character = .none
         waterRadiusAnimation = nil
@@ -89,8 +92,12 @@ final class Sietch: DuneNode {
     
     
     override func onParamsChange() {
-        if let room = params["room"] {
-            self.currentRoom = room as! SietchRoom
+        if let room = params["room"] as? Int {
+            roomIndex = room
+            contextBuffer.tag = 0
+        } else if let room = params["room"] as? SietchRoom {
+            roomIndex = room.rawValue
+            contextBuffer.tag = 0
         }
         
         if let markers = params["markers"] {
@@ -149,7 +156,7 @@ final class Sietch: DuneNode {
             contextBuffer.render(to: intermediateFrameBuffer, effect: .none)
         }
         
-        sietchScenery.drawRoom(currentRoom.rawValue, buffer: intermediateFrameBuffer)
+        sietchScenery.drawRoom(roomIndex, buffer: intermediateFrameBuffer)
         
         
         // Water drop animation

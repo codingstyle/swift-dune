@@ -36,6 +36,11 @@ final class GameViewController: UIViewController {
         ])
 
         engine.input.mouseEnabled = false
+
+        let touch = Touch()
+        engine.input.registerInputMethod(touch)
+        touch.track(metalView)
+
         engine.rootNode.attachNode(Main())
         engine.rootNode.setNodeActive("Main", true)
     }

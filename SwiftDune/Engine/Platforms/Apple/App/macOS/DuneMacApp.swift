@@ -6,6 +6,7 @@
 //
 
 import Cocoa
+import SwiftUI
 
 class GameViewController: NSViewController {
   let engine = DuneEngine.shared
@@ -79,12 +80,18 @@ class GameViewController: NSViewController {
 
 
 
-class AppDelegate: NSObject, NSApplicationDelegate {
+class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     var window: NSWindow!
     var gameViewController: GameViewController!
     var windowSize = NSSize(width: 640, height: 400)
+
+    private var statsPanel: NSPanel?
+    private var statsMenuItem: NSMenuItem?
+    private var didPlaceStatsPanel = false
   
     func applicationDidFinishLaunching(_ notification: Notification) {
+        installMainMenu()
+
         // Set up the main window
         window = NSWindow(
           contentRect: NSRect(origin: .zero, size: windowSize),
@@ -117,6 +124,105 @@ class AppDelegate: NSObject, NSApplicationDelegate {
   
     func applicationSupportsSecureRestorableState(_ app: NSApplication) -> Bool {
         return false
+    }
+
+
+    private func installMainMenu() {
+        let mainMenu = NSMenu()
+
+        let appMenuItem = NSMenuItem()
+        let appMenu = NSMenu(title: "Dune")
+        appMenuItem.submenu = appMenu
+
+        let statsItem = NSMenuItem(
+            title: "Stats",
+            action: #selector(toggleStatsPanel(_:)),
+            keyEquivalent: ""
+        )
+        statsItem.target = self
+        appMenu.addItem(statsItem)
+        statsMenuItem = statsItem
+
+        appMenu.addItem(.separator())
+
+        appMenu.addItem(NSMenuItem(
+            title: "Quit Dune",
+            action: #selector(NSApplication.terminate(_:)),
+            keyEquivalent: "q"
+        ))
+
+        mainMenu.addItem(appMenuItem)
+        NSApp.mainMenu = mainMenu
+    }
+
+
+    @objc private func toggleStatsPanel(_ sender: NSMenuItem) {
+        let panel = statsPanel ?? makeStatsPanel()
+        statsPanel = panel
+
+        if panel.isVisible {
+            panel.orderOut(nil)
+            panel.contentViewController = nil
+            sender.state = .off
+            return
+        }
+
+        panel.contentViewController = NSHostingController(rootView: StatsView())
+        placeStatsPanelIfNeeded(panel)
+        panel.orderFront(nil)
+        sender.state = .on
+    }
+
+
+    private func makeStatsPanel() -> NSPanel {
+        let panel = NSPanel(
+            contentRect: NSRect(x: 0, y: 0, width: 290, height: 460),
+            styleMask: [.titled, .closable, .utilityWindow],
+            backing: .buffered,
+            defer: false
+        )
+        panel.title = "Stats"
+        panel.isFloatingPanel = true
+        panel.hidesOnDeactivate = false
+        panel.isReleasedWhenClosed = false
+        panel.delegate = self
+        return panel
+    }
+
+
+    private func placeStatsPanelIfNeeded(_ panel: NSPanel) {
+        guard !didPlaceStatsPanel else {
+            return
+        }
+
+        didPlaceStatsPanel = true
+
+        guard let gameFrame = window?.frame else {
+            panel.center()
+            return
+        }
+
+        var origin = NSPoint(x: gameFrame.maxX + 12, y: gameFrame.maxY - panel.frame.height)
+
+        if let screen = window.screen ?? NSScreen.main {
+            let visible = screen.visibleFrame
+            if origin.x + panel.frame.width > visible.maxX {
+                origin.x = max(visible.minX, gameFrame.minX - panel.frame.width - 12)
+            }
+            origin.y = min(max(origin.y, visible.minY), visible.maxY - panel.frame.height)
+        }
+
+        panel.setFrameOrigin(origin)
+    }
+
+
+    func windowWillClose(_ notification: Notification) {
+        guard let closed = notification.object as? NSWindow, closed === statsPanel else {
+            return
+        }
+
+        statsPanel?.contentViewController = nil
+        statsMenuItem?.state = .off
     }
 }
 

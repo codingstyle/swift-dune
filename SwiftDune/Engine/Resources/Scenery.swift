@@ -261,6 +261,7 @@ final class Scenery {
     
     
     func drawRoom(_ index: Int, buffer: PixelBuffer) {
+        guard rooms.indices.contains(index) else { return }
         let room = rooms[index]
         
         var i = 0

@@ -18,10 +18,6 @@ final class Kiss: DuneNode {
     private var dunesSprite: Sprite?
     private var sky: Sky?
 
-    private var transitionIn: TransitionEffect = .none
-    private var transitionOut: TransitionEffect = .none
-    
-    
     init() {
         super.init("Kiss")
     }

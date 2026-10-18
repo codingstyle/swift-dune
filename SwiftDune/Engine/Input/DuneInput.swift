@@ -35,6 +35,10 @@ enum DuneSpecialKey: UInt16, CaseIterable {
   case keyReturn = 36
   case keyDelete = 51
   case keyEscape = 53
+  case keyLeft = 123
+  case keyRight = 124
+  case keyDown = 125
+  case keyUp = 126
   case none = 0
 }
 
@@ -76,7 +80,7 @@ final class Input {
         while i < inputMethods.count {
             inputMethods[i].update(self)
           
-            if inputMethods[i].inputMethodType == .mouse {
+            if inputMethods[i].inputMethodType == .mouse || inputMethods[i].inputMethodType == .touch {
                 self.coordinates.x = inputMethods[i].coordinates.x
                 self.coordinates.y = inputMethods[i].coordinates.y
             }

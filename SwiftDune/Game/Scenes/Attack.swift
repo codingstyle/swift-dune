@@ -39,9 +39,6 @@ final class Attack: DuneNode {
     private var attackSprite: Sprite?
     private var attackSound: Sound?
     
-    private var transitionIn: TransitionEffect = .none
-    private var transitionOut: TransitionEffect = .none
-    
     private var rngSeed: UInt32 = 0x01d2
     private var maskedRngSeed: UInt32 = 0x0273
     private var randomBits: UInt16 = 0x7302

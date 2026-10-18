@@ -81,6 +81,7 @@ final class AudioPlayer {
     private func initAudioEngine() {
         // Start the audio engine
       do {
+          var sampleRate = Self.oplSampleRate
 #if os(iOS)
           let session = AVAudioSession.sharedInstance()
           try session.setCategory(.playback, mode: .default, options: [])
@@ -89,9 +90,9 @@ final class AudioPlayer {
           try session.setActive(true)
           // Match the hardware clock. A 49716 → 48000 converter in the graph slips every few seconds.
           let hardwareRate = audioEngine.outputNode.outputFormat(forBus: 0).sampleRate
-          Self.oplSampleRate = hardwareRate > 0 ? hardwareRate : 48_000
+          sampleRate = hardwareRate > 0 ? hardwareRate : 48_000
 #endif
-          oplAudioFormat = AVAudioFormat(standardFormatWithSampleRate: Self.oplSampleRate, channels: 2)!
+          oplAudioFormat = AVAudioFormat(standardFormatWithSampleRate: sampleRate, channels: 2)!
         
           // Attach mixer
           let outputAudioFormat = audioEngine.mainMixerNode.outputFormat(forBus: 0)
@@ -151,7 +152,7 @@ final class AudioPlayer {
     private var oplBufferPool: [AVAudioPCMBuffer] = []
     
     /// OPL3 output rate. 49716 Hz on macOS; the active hardware rate on iOS.
-    static var oplSampleRate: Double = 49716.0
+    static let oplSampleRate: Double = 49716.0
     
     /// Number of OPL3 samples per HERAD tick - set by Music before calling startOPL3()
     var oplSamplesPerTick: Double = 0
