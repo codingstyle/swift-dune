@@ -50,6 +50,7 @@ enum MenuHandler {
   static let closeBook: UInt16 = 0xb18b
   static let exitGlobe: UInt16 = 0xbc81
   static let exitMaps: UInt16 = 0x186b
+  static let seeDuneMap: UInt16 = 0x0000
   static let lookAtMirror: UInt16 = 0x0ea6
   static let lookAwayFromTheMirror: UInt16 = 0x0eb9
 }
@@ -84,7 +85,8 @@ enum CommandId {
   static let stayHere: UInt16 = 0x87
   static let giveOrdersToTroop: UInt16 = 0x88
   static let stopTalking: UInt16 = 0x89
-  static let lookAtMirror: UInt16 = 0x99
+  static let seeDuneMap: UInt16 = 0x8d
+  static let lookAtMirror: UInt16 = 0x8e
   static let lookAwayFromTheMirror: UInt16 = 0x92
   static let others: UInt16 = 0x93
   static let done: UInt16 = 0x94

@@ -8,182 +8,140 @@
 import Foundation
 
 final class Game: DuneNode {
+    private var sceneNode: DuneNode?
     private var uiNode: UI?
     private var cursor: Cursor?
-    private var shownKind: DunePlaceKind?
-    private var mapVisible = false
-  
+
     init() {
         super.init("Game")
     }
 
-  
+
     override func onEnable() {
-      EventManager.uiStateChangedEvent.addListener(self) { [weak self] state in
-        guard let self = self else { return }
-        self.onUIEvent(state)
-      }
-      
-      
-      EventManager.bookStateChangedEvent.addListener(self) { [weak self] state in
-        guard let self = self else { return }
-        self.onBookEvent(state)
-      }
-      
-      GameState.shared.prepareWorld()
+        EventManager.uiStateChangedEvent.addListener(self) { [weak self] state in
+            guard let self = self else { return }
+            self.onUIEvent(state)
+        }
 
-      attachNode(Palace())
-      attachNode(Sietch())
-      attachNode(Arrakeen())
-      attachNode(DesertWalk())
-      attachNode(Map())
-      attachNode(Fresk())
-      attachNode(Book())
+        EventManager.bookStateChangedEvent.addListener(self) { [weak self] state in
+            guard let self = self else { return }
+            self.onBookEvent(state)
+        }
 
-      EventManager.navigationEvent.addListener(self) { [weak self] event in
-        self?.move(event.direction)
-      }
+        EventManager.navigationEvent.addListener(self) { [weak self] event in
+            self?.move(event.direction)
+        }
 
-      EventManager.menuChoiceEvent.addListener(self) { [weak self] event in
-        self?.onMenuChoice(event.choice)
-      }
-      
-      showLocation()
+        EventManager.menuChoiceEvent.addListener(self) { [weak self] event in
+            self?.onMenuChoice(event.choice)
+        }
 
-      uiNode = UI()
-      uiNode?.onEnable()
-      uiNode?.isActive = true
-      
-      if engine.input.mouseEnabled {
-          cursor = Cursor()
-      }
+        GameState.shared.prepareWorld()
+
+        uiNode = UI()
+        uiNode?.isActive = true
+
+        if engine.input.mouseEnabled {
+            cursor = Cursor()
+        }
+
+        showLocation()
     }
-  
-  
+
+
     override func onDisable() {
+        sceneNode?.isActive = false
+        sceneNode = nil
         uiNode?.onDisable()
         EventManager.uiStateChangedEvent.removeListener(self)
+        EventManager.bookStateChangedEvent.removeListener(self)
         EventManager.navigationEvent.removeListener(self)
         EventManager.menuChoiceEvent.removeListener(self)
     }
-  
-  
+
+
     func onUIEvent(_ e: UIStateEventData) {
         if e.leftPanel == .bookOpen {
             showBook()
         }
     }
-  
-  
+
+
     func onBookEvent(_ e: BookStateEventData) {
         if e.action == .close {
             showLocation()
         }
     }
-  
-  
+
+
     override func update(_ elapsedTime: TimeInterval) {
-        super.update(elapsedTime)
+        sceneNode?.update(elapsedTime)
         uiNode?.update(elapsedTime)
     }
-  
-  
+
+
     override func render(_ buffer: PixelBuffer) {
-        super.render(buffer)
-      
+        sceneNode?.render(buffer)
         uiNode?.render(buffer)
         cursor?.render(buffer)
     }
-  
-  
+
+
     override func onClick(_ event: DuneClickEvent) {
-        super.onClick(event)
-      
+        sceneNode?.onClick(event)
         uiNode?.onClick(event)
-      
-        if viewingMirror && event.point.y < 152 {
-            lookAwayFromMirror()
-        }
     }
 
     override func onKey(_ event: DuneKeyEvent) {
-        super.onKey(event)
-      
+        sceneNode?.onKey(event)
+
         if event.char.lowercased() == "m" {
             toggleMap()
             return
         }
-      
-        let direction: Int?
-        
-        switch event.specialKey {
-          case .keyUp: direction = 1
-          case .keyRight: direction = 2
-          case .keyDown: direction = 3
-          case .keyLeft: direction = 4
-          default: direction = nil
-        }
-      
-        if let direction {
+
+        if let direction = event.specialKey.direction() {
             move(direction)
         }
     }
 
 
     func move(_ direction: Int) {
-        if viewingMirror || findNode("Book")?.isActive == true || findNode("Fresk")?.isActive == true {
+        if sceneNode?.handleNavigation(direction) == true {
             return
         }
-      
-        if mapVisible {
-            (findNode("Map") as? Map)?.pan(direction)
-            return
-        }
-      
+
         GameState.shared.move(direction)
         showLocation()
     }
 
 
     func showLocation() {
-        mapVisible = false
-        setNodeActive("Fresk", false)
-        setNodeActive("Book", false)
-        setNodeActive("Map", false)
         uiNode?.closePalacePlan()
 
         let view = GameState.shared.locationView()
-        if view.kind != shownKind {
-            setNodeActive("Palace", false)
-            setNodeActive("Sietch", false)
-            setNodeActive("Arrakeen", false)
-            setNodeActive("DesertWalk", false)
-            shownKind = view.kind
-        }
-
         switch view.kind {
         case .palace:
-            var roomParams: [String: Any] = ["room": view.salRoom]
+            var roomParams: [String: Any] = [
+                "room": view.salRoom,
+                "commands": true
+            ]
             roomParams["markers"] = view.salRoom == PalaceRoom.porch.rawValue
                 ? [8: RoomCharacter.leto]
                 : Dictionary<Int, RoomCharacter>()
-            showScene("Palace", roomParams)
+            showScene("Palace", roomParams) { Palace() }
         case .sietch:
-            showScene("Sietch", ["room": view.salRoom])
+            showScene("Sietch", ["room": view.salRoom]) { Sietch() }
         case .fort, .harkonnenPalace:
-            showScene("Arrakeen", ["room": view.salRoom])
+            showScene("Arrakeen", ["room": view.salRoom]) { Arrakeen() }
         case .village, .desert:
-            showScene("DesertWalk", ["place": view.kind])
+            showScene("DesertWalk", ["place": view.kind]) { DesertWalk() }
         }
 
-        if view.kind == .palace && view.salRoom == PalaceRoom.bedroom.rawValue {
-            Menus.shared.setRecords(.command, [
-                MenuRecord(textId: CommandId.lookAtMirror, handler: MenuHandler.lookAtMirror)
-            ])
-        } else {
+        if sceneNode?.name != "Palace" {
             Menus.shared.setRecords(.command, [])
+            Menus.shared.show(.command)
         }
-        Menus.shared.show(.command)
         EventManager.uiStateChangedEvent.notify(UIStateEventData(
             rightPanel: .roomDirections,
             directions: view.directions
@@ -191,71 +149,47 @@ final class Game: DuneNode {
     }
 
 
-    private var viewingMirror: Bool {
-        (findNode("Palace") as? Palace)?.isShowingMirror == true
-    }
-
-
-    private func lookAtMirror() {
-        let view = GameState.shared.locationView()
-        guard view.kind == .palace, view.salRoom == PalaceRoom.bedroom.rawValue else {
+    private func showScene(_ name: String, _ params: [String: Any], make: () -> DuneNode) {
+        if sceneNode?.name == name {
+            sceneNode?.params = params
             return
         }
-        uiNode?.closePalacePlan()
-        showScene("Palace", [
-            "room": PalaceRoom.bedroom.rawValue,
-            "markers": Dictionary<Int, RoomCharacter>(),
-            "mirror": true
-        ])
-        EventManager.uiStateChangedEvent.notify(UIStateEventData(rightPanel: .rect, directions: []))
-    }
 
-
-    private func lookAwayFromMirror() {
-        guard viewingMirror else { return }
-        showLocation()
-    }
-
-
-    private func showScene(_ name: String, _ params: [String: Any]) {
-        setNodeParams(name, params)
-        if findNode(name)?.isActive != true {
-            setNodeActive(name, true)
-        }
+        sceneNode?.isActive = false
+        let node = make()
+        node.params = params
+        node.isActive = true
+        sceneNode = node
     }
 
 
     func toggleMap() {
-        mapVisible.toggle()
-        if mapVisible {
-            setNodeActive("Palace", false)
-            setNodeActive("Sietch", false)
-            setNodeActive("Arrakeen", false)
-            setNodeActive("DesertWalk", false)
-            setNodeActive("Fresk", false)
-            setNodeActive("Book", false)
-            shownKind = nil
-            setNodeActive("Map", true)
-            Menus.shared.show(.mapTroops)
-            EventManager.uiStateChangedEvent.notify(UIStateEventData(rightPanel: .mapDirections))
+        if sceneNode?.name == "Map" {
+            showLocation()
             return
         }
-        showLocation()
+
+        showScene("Map", [:]) { Map() }
+        Menus.shared.show(.mapTroops)
+        EventManager.uiStateChangedEvent.notify(UIStateEventData(rightPanel: .mapDirections))
     }
-  
-  
+
+
     func onMenuChoice(_ choice: MenuChoice) {
         switch choice.handler {
-        case MenuHandler.exitMaps:
-            if mapVisible {
+        case MenuHandler.seeDuneMap:
+            if sceneNode?.name != "Map" {
                 toggleMap()
             }
+            break
+        case MenuHandler.exitMaps:
+            if sceneNode?.name == "Map" {
+                toggleMap()
+            }
+            break
         case MenuHandler.exitGlobe:
             showLocation()
-        case MenuHandler.lookAtMirror:
-            lookAtMirror()
-        case MenuHandler.lookAwayFromTheMirror:
-            lookAwayFromMirror()
+            break
         default:
             break
         }
@@ -266,17 +200,13 @@ final class Game: DuneNode {
         showLocation()
     }
 
-    
+
     func showFresk() {
-        setNodeActive("Book", false)
-        setNodeActive("Palace", false)
-        setNodeActive("Fresk", true)
+        showScene("Fresk", [:]) { Fresk() }
     }
-    
-    
+
+
     func showBook() {
-      setNodeActive("Fresk", false)
-      setNodeActive("Palace", false)
-      setNodeActive("Book", true)
+        showScene("Book", [:]) { Book() }
     }
 }

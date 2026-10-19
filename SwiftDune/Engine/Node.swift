@@ -173,6 +173,12 @@ class DuneNode: @MainActor Comparable {
             node.onClick(event)
         }
     }
+
+
+    /// Return true when this scene handles the direction itself.
+    func handleNavigation(_ direction: Int) -> Bool {
+        false
+    }
   
   
     func onInput(_ event: DuneInputEvent) {

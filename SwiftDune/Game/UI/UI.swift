@@ -92,7 +92,7 @@ final class UI: DuneNode {
     private var pageFlipAnimation: DuneAnimation<UInt16>?
     private var pageFlipStartIndex: UInt16 = 10
   
-    private let bookRect = DuneRect(22, 152, 120, 26)
+    private let bookRect = DuneRect(22, 152, 50, 26)
     private let bookLeftPageRect = DuneRect(13, 152, 30, 40)
     private let bookRightPageRect = DuneRect(33, 152, 120, 40)
   
@@ -416,6 +416,10 @@ final class UI: DuneNode {
         if let directions = e.directions {
             self.directions = directions
         }
+
+        if let palacePlanVisible = e.palacePlanVisible {
+            self.palacePlanVisible = palacePlanVisible
+        }
     }
   
   
@@ -513,6 +517,7 @@ struct UIStateEventData {
     var leftPanel: UILeftPanel?
     var rightPanel: UIRightPanel?
     var directions: UIDirection?
+    var palacePlanVisible: Bool?
 }
 
 struct NavigationEventData {

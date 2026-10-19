@@ -40,6 +40,20 @@ enum DuneSpecialKey: UInt16, CaseIterable {
   case keyDown = 125
   case keyUp = 126
   case none = 0
+  
+  func direction() -> Int? {
+    let direction: Int?
+    
+    switch self {
+      case .keyUp: direction = 1
+      case .keyRight: direction = 2
+      case .keyDown: direction = 3
+      case .keyLeft: direction = 4
+      default: direction = nil
+    }
+    
+    return direction
+  }
 }
 
 

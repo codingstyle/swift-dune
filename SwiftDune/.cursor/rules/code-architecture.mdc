@@ -50,8 +50,9 @@ SwiftDune/
 
 ### 2. Game
 
-- Game is reinterpreted using a modern node graph pattern, similarly to Unity
+- Game is reinterpreted using a modern node graph pattern, where elements for rendering are structured in a node tree
 - All game screens and UI elements inherit from `DuneNode` and use a final class
+- Use `EventManager` to broadcast events across the game, and add node as subscribers on the receiving end
 - Use `update()` to update the variable state and `render()` to draw into the pixel buffer
 - Use `PixelBuffer` context property in case you need to draw different stages of the buffer
 

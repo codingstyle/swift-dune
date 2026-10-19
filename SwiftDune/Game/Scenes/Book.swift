@@ -64,6 +64,11 @@ final class Book: DuneNode {
     init() {
         super.init("Book")
     }
+
+
+    override func handleNavigation(_ direction: Int) -> Bool {
+        true
+    }
     
     
     override func onEnable() {

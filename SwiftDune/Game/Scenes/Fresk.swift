@@ -34,6 +34,11 @@ final class Fresk: DuneNode {
     init() {
         super.init("Fresk")
     }
+
+
+    override func handleNavigation(_ direction: Int) -> Bool {
+        true
+    }
     
     
     override func onEnable() {

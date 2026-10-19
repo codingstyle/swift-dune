@@ -23,6 +23,11 @@ final class Map: DuneNode {
     latitude = min(75, max(-75, position.lat))
   }
 
+  override func handleNavigation(_ direction: Int) -> Bool {
+    pan(direction)
+    return true
+  }
+
   func pan(_ direction: Int) {
     switch direction {
     case 1:

@@ -42,14 +42,12 @@ final class Palace: DuneNode {
     private var dayMode: DuneLightMode = .day
     
     private var playMusic = true
+    private var managesCommands = false
     private var showingMirror = false
+    private var roomCharacters: [DuneRoomPerson] = []
     private var mirrorSprite: Sprite?
     private var paulSprite: Sprite?
     private var chaniSprite: Sprite?
-
-    var isShowingMirror: Bool {
-        showingMirror
-    }
 
     init() {
         super.init("Palace")
@@ -61,6 +59,11 @@ final class Palace: DuneNode {
         sky = Sky()
         
         palaceScenery?.characters = markers
+
+        guard managesCommands else { return }
+        EventManager.menuChoiceEvent.addListener(self) { [weak self] event in
+            self?.onMenuChoice(event.choice)
+        }
     }
     
     
@@ -76,10 +79,16 @@ final class Palace: DuneNode {
         zoomRect = nil
         dayMode = .day
         playMusic = true
+        if managesCommands {
+            GameState.shared.personsInRoom = 0
+        }
+        managesCommands = false
         showingMirror = false
+        roomCharacters = []
         mirrorSprite = nil
         paulSprite = nil
         chaniSprite = nil
+        EventManager.menuChoiceEvent.removeListener(self)
     }
     
     
@@ -124,18 +133,13 @@ final class Palace: DuneNode {
             self.playMusic = playMusicParam as! Bool
         }
 
-        let mirror = params["mirror"] as? Bool ?? false
-        if mirror != showingMirror {
-            showingMirror = mirror
-            contextBuffer.tag = 0
-            if showingMirror {
-                Menus.shared.show(.palaceMirrorRoom)
-            } else {
-                mirrorSprite = nil
-                paulSprite = nil
-                chaniSprite = nil
-            }
+        if let commands = params["commands"] as? Bool {
+            managesCommands = commands
         }
+
+        guard managesCommands else { return }
+        dismissMirror()
+        updateRoomCommands()
     }
     
     
@@ -236,6 +240,144 @@ final class Palace: DuneNode {
         }
 
         intermediateFrameBuffer.render(to: buffer, effect: fxTransition)
+    }
+
+
+    override func onClick(_ event: DuneClickEvent) {
+        guard showingMirror, event.point.y < 152 else { return }
+        lookAwayFromMirror()
+    }
+
+
+    override func handleNavigation(_ direction: Int) -> Bool {
+        showingMirror
+    }
+
+
+    private func onMenuChoice(_ choice: MenuChoice) {
+        switch choice.handler {
+        case MenuHandler.lookAtMirror:
+            lookAtMirror()
+        case MenuHandler.lookAwayFromTheMirror:
+            lookAwayFromMirror()
+        case MenuHandler.exitMenu:
+            if choice.scenario == .npcActions {
+                Menus.shared.show(.command)
+            }
+        default:
+            guard choice.scenario == .command,
+                  let person = roomCharacters.first(where: { $0.handler == choice.handler }) else {
+                return
+            }
+            showCharacterMenu(person)
+        }
+    }
+
+
+    private func lookAtMirror() {
+        guard managesCommands, currentRoom == .bedroom, !showingMirror else { return }
+        showingMirror = true
+        contextBuffer.tag = 0
+        Menus.shared.show(.palaceMirrorRoom)
+        EventManager.uiStateChangedEvent.notify(UIStateEventData(
+            rightPanel: .rect,
+            directions: [],
+            palacePlanVisible: false
+        ))
+    }
+
+
+    private func lookAwayFromMirror() {
+        guard showingMirror else { return }
+        dismissMirror()
+        updateRoomCommands()
+        let view = GameState.shared.locationView()
+        EventManager.uiStateChangedEvent.notify(UIStateEventData(
+            rightPanel: .roomDirections,
+            directions: view.directions
+        ))
+    }
+
+
+    private func dismissMirror() {
+        guard showingMirror else { return }
+        showingMirror = false
+        mirrorSprite = nil
+        paulSprite = nil
+        chaniSprite = nil
+        contextBuffer.tag = 0
+    }
+
+
+    private func updateRoomCommands() {
+        let present = charactersInRoom()
+        roomCharacters = present
+        var inRoom: UInt16 = 0
+        var records: [MenuRecord] = []
+
+        records.append(MenuRecord(textId: CommandId.seeDuneMap, handler: MenuHandler.seeDuneMap))
+
+        if currentRoom == .bedroom {
+            records.append(MenuRecord(textId: CommandId.lookAtMirror, handler: MenuHandler.lookAtMirror))
+        } else {
+            // List persons in room and add them in menu
+            for person in present {
+                inRoom |= UInt16(1) << person.personIndex
+    
+                records.append(MenuRecord(
+                  textId: 0x6D + UInt16(person.personIndex),
+                  handler: person.handler
+                ))
+            }
+          
+            GameState.shared.personsInRoom = inRoom
+        }
+        
+
+        Menus.shared.setRecords(.command, records)
+        Menus.shared.show(.command)
+    }
+
+
+    /// Residents match this room. Companions follow Paul and are listed after them.
+    private func charactersInRoom() -> [DuneRoomPerson] {
+        let state = GameState.shared
+        var present: [DuneRoomPerson] = []
+        for person in state.roomPersons where !person.flags.contains(.npcCompanion) && isStationedHere(person, state) {
+            present.append(person)
+        }
+        for person in state.roomPersons where person.flags.contains(.npcCompanion) {
+            present.append(person)
+        }
+        return present
+    }
+
+
+    private func isStationedHere(_ person: DuneRoomPerson, _ state: GameState) -> Bool {
+        if person.personIndex == 4 && state.gamePhase >= 0x15 && state.gamePhase < 0x20 {
+            return false
+        }
+        return person.locationAndRoom == state.locationAndRoom
+            && person.locationAppearance == state.locationAppearance
+    }
+
+
+    private func showCharacterMenu(_ person: DuneRoomPerson) {
+        GameState.shared.personTalkingTo = UInt16(1) << person.personIndex
+        GameState.shared.currentSpeakerId = person.personIndex
+
+        let comeGreyed = person.flags.contains(.npcNoComeWithMe)
+            || (person.personIndex == 0x0C && person.flags.contains(.npcStoryBit))
+        let travel = person.flags.contains(.npcCompanion)
+            ? MenuRecord(textId: CommandId.stayHere, handler: 0x95e2)
+            : MenuRecord(textId: CommandId.comeWithMe, handler: 0x95e2, greyed: comeGreyed)
+
+        Menus.shared.setRecords(.npcActions, [
+            MenuRecord(textId: CommandId.talkToMe, handler: 0x9472),
+            travel,
+            MenuRecord(textId: CommandId.stopTalking, handler: MenuHandler.exitMenu)
+        ])
+        Menus.shared.show(.npcActions)
     }
 
 
