@@ -22,8 +22,14 @@ enum DuneInputMethodType {
 protocol DuneInputMethod {
   var inputMethodType: DuneInputMethodType { get }
   var coordinates: DunePoint { get }
+  var cursorVisible: Bool { get }
 
   @MainActor func update(_ input: Input)
+}
+
+
+extension DuneInputMethod {
+  var cursorVisible: Bool { false }
 }
 
 
@@ -76,6 +82,7 @@ final class Input {
     private var inputMethods: [DuneInputMethod] = []
   
     var mouseEnabled = true
+    var cursorVisible = false
     var coordinates = DunePoint.zero
   
     func registerInputMethod(_ method: DuneInputMethod) {
@@ -97,6 +104,7 @@ final class Input {
             if inputMethods[i].inputMethodType == .mouse || inputMethods[i].inputMethodType == .touch {
                 self.coordinates.x = inputMethods[i].coordinates.x
                 self.coordinates.y = inputMethods[i].coordinates.y
+                self.cursorVisible = inputMethods[i].cursorVisible
             }
           
             i += 1

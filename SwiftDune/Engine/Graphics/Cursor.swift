@@ -35,6 +35,10 @@ final class Cursor {
     var shape: CursorShape = .arrow
   
     func render(_ buffer: PixelBuffer) {
+        guard engine.input.cursorVisible else {
+            return
+        }
+
         let mouseCoords = engine.input.coordinates
       
         let image = CursorImage.image(for: shape)
