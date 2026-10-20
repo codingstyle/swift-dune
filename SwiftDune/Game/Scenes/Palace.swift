@@ -57,8 +57,8 @@ final class Palace: DuneNode {
     override func onEnable() {
         palaceScenery = Scenery("PALACE.SAL")
         sky = Sky()
-        
-        palaceScenery?.characters = markers
+
+        syncStandingCharacters()
 
         guard managesCommands else { return }
         EventManager.menuChoiceEvent.addListener(self) { [weak self] event in
@@ -173,6 +173,8 @@ final class Palace: DuneNode {
             intermediateFrameBuffer.render(to: buffer, effect: .none)
             return
         }
+
+        syncStandingCharacters()
 
         // TODO: improve this according to day time
         if currentRoom == .stairs && dayMode == .sunrise {
@@ -336,6 +338,79 @@ final class Palace: DuneNode {
 
         Menus.shared.setRecords(.command, records)
         Menus.shared.show(.command)
+    }
+
+
+    /// Scripted scenes pass an explicit cast. In play, each person stationed in
+    /// this room stands on a SAL slot, unless they are travelling with Paul.
+    private func syncStandingCharacters() {
+        guard let palaceScenery else { return }
+        let standing = standingCharacters(in: palaceScenery)
+        guard palaceScenery.characters != standing else { return }
+        palaceScenery.characters = standing
+        contextBuffer.tag = 0
+    }
+
+
+    private func standingCharacters(in scenery: Scenery) -> [Int: RoomCharacter] {
+        guard managesCommands else { return markers }
+
+        let count = markerCount(in: scenery)
+        guard count > 0 else { return [:] }
+
+        let state = GameState.shared
+        var present: UInt16 = 0
+        for person in state.roomPersons where isStationedHere(person, state) {
+            present |= UInt16(1) << person.personIndex
+        }
+        // persons_in_room XOR persons_travelling_with. Masking with the people
+        // actually here drops a travelling bit that belongs to another room.
+        let bits = present & ~state.personsTravellingWith
+
+        var slots = [Int](repeating: -1, count: count)
+        let base = Int(state.personMarkerBase & 0x0F)
+        var id = 0
+        var remaining = bits
+        while remaining != 0 {
+            if remaining & 1 != 0 {
+                assignStandingSlot(&slots, id, base)
+            }
+            remaining >>= 1
+            id += 1
+        }
+
+        var placed: [Int: RoomCharacter] = [:]
+        for (slot, personId) in slots.enumerated() where personId >= 0 {
+            if let character = RoomCharacter(rawValue: UInt16(personId) * 2) {
+                placed[slot] = character
+            }
+        }
+        return placed
+    }
+
+
+    private func markerCount(in scenery: Scenery) -> Int {
+        guard scenery.rooms.indices.contains(roomIndex) else { return 0 }
+        return scenery.rooms[roomIndex].commands.reduce(into: 0) { count, command in
+            if command is RoomMarker {
+                count += 1
+            }
+        }
+    }
+
+
+    /// Preferred slot is (person + base) mod the room's marker count. A taken slot spills to the first free one.
+    private func assignStandingSlot(_ slots: inout [Int], _ personId: Int, _ base: Int) {
+        let count = slots.count
+        guard count > 0 else { return }
+        let preferred = (personId + base) % count
+        if slots[preferred] == -1 {
+            slots[preferred] = personId
+            return
+        }
+        if let free = slots.firstIndex(of: -1) {
+            slots[free] = personId
+        }
     }
 
 

@@ -122,14 +122,10 @@ final class Game: DuneNode {
         let view = GameState.shared.locationView()
         switch view.kind {
         case .palace:
-            var roomParams: [String: Any] = [
+            showScene("Palace", [
                 "room": view.salRoom,
                 "commands": true
-            ]
-            roomParams["markers"] = view.salRoom == PalaceRoom.porch.rawValue
-                ? [0: RoomCharacter.leto]
-                : Dictionary<Int, RoomCharacter>()
-            showScene("Palace", roomParams) { Palace() }
+            ]) { Palace() }
         case .sietch:
             showScene("Sietch", ["room": view.salRoom]) { Sietch() }
         case .fort, .harkonnenPalace:
