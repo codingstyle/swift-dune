@@ -442,30 +442,41 @@ final class Sprite: @MainActor Equatable {
             return
         }
         
+        let frameIndex = Int(index)
+        guard frames.indices.contains(frameIndex) else { return }
+
         let bufferWidth = buffer.width
         let bufferHeight = buffer.height
         
-        let frameInfo = frames[Int(index)]
+        let frameInfo = frames[frameIndex]
         var frameWidth = Int(frameInfo.width)
         var frameHeight = Int(frameInfo.height)
         var roomPaletteOffset: Int = 0
-        let scaledFrameWidth = frameWidth
+        let sourceWidth = frameWidth
+        let sourceHeight = frameHeight
         
         // Effects
         var flipX = false
         var flipY = false
         var scaleRatio = 1.0
+        var fixedStep = 0
       
         var effectIndex = 0
         
         while effectIndex < effects.count {
             switch effects[effectIndex] {
-            case .transform(let offset, let flipHorizontal, let flipVertical, let scaleFactor):
+            case .transform(let offset, let flipHorizontal, let flipVertical, let scaleFactor, let scaleStep):
                 flipX = flipHorizontal
                 flipY = flipVertical
                 roomPaletteOffset = offset != 0 ? Int(offset) - Int(frameInfo.paletteOffset) : 0
-                
-                if scaleFactor != 1.0 {
+
+                if scaleStep != 0 {
+                    // DOS room blit: destination size is (src << 8) / step, and source
+                    // samples advance by `step` in 8.8 fixed point.
+                    fixedStep = Int(scaleStep)
+                    frameWidth = (sourceWidth << 8) / fixedStep
+                    frameHeight = (sourceHeight << 8) / fixedStep
+                } else if scaleFactor != 1.0 {
                     scaleRatio = scaleFactor
                     frameWidth = Int(Double(frameWidth) * scaleRatio)
                     frameHeight = Int(Double(frameHeight) * scaleRatio)
@@ -501,12 +512,21 @@ final class Sprite: @MainActor Equatable {
         while j < maxY2 {
             var i = minX1
             let yDelta = j - y1
-            let yRatio = Int(CGFloat(yDelta) / scaleRatio)
-            let yScaled = yRatio * scaledFrameWidth
+            let srcY = fixedStep != 0 ? (yDelta * fixedStep) >> 8 : Int(CGFloat(yDelta) / scaleRatio)
+            if srcY < 0 || srcY >= sourceHeight {
+                j += 1
+                continue
+            }
+            let yScaled = srcY * sourceWidth
 
             while i < maxX2 {
                 let xDelta = i - x1
-                let srcIndex = yScaled + Int(CGFloat(xDelta) / scaleRatio)
+                let srcX = fixedStep != 0 ? (xDelta * fixedStep) >> 8 : Int(CGFloat(xDelta) / scaleRatio)
+                if srcX < 0 || srcX >= sourceWidth {
+                    i += 1
+                    continue
+                }
+                let srcIndex = yScaled + srcX
                 var paletteIndex = frameInfo.paletteIndices[srcIndex]
 
                 if paletteIndex <= frameInfo.paletteOffset || paletteIndex == 0 {
@@ -514,11 +534,15 @@ final class Sprite: @MainActor Equatable {
                     continue
                 }
                 
-                paletteIndex = UInt8(Int(paletteIndex) + roomPaletteOffset)
+                paletteIndex = UInt8(truncatingIfNeeded: Int(paletteIndex) + roomPaletteOffset)
 
                 let x = flipX ? x2 - xDelta - 1 : i
                 let y = flipY ? y2 - yDelta - 1 : j
-                
+                if x < 0 || x >= bufferWidth || y < 0 || y >= bufferHeight {
+                    i += 1
+                    continue
+                }
+
                 let destIndex = y * bufferWidth + x
                 
                 if paletteIndex == 0x00 {

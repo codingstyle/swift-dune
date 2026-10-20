@@ -127,7 +127,7 @@ final class Game: DuneNode {
                 "commands": true
             ]
             roomParams["markers"] = view.salRoom == PalaceRoom.porch.rawValue
-                ? [8: RoomCharacter.leto]
+                ? [0: RoomCharacter.leto]
                 : Dictionary<Int, RoomCharacter>()
             showScene("Palace", roomParams) { Palace() }
         case .sietch:

@@ -69,7 +69,6 @@ final class AudioPlayer {
 #endif
   
     init() {
-        oplQueue.setSpecific(key: oplQueueKey, value: 1)
         initAudioEngine()
     }
     
@@ -81,6 +80,8 @@ final class AudioPlayer {
     private func initAudioEngine() {
         // Start the audio engine
       do {
+          oplQueue.setSpecific(key: oplQueueKey, value: 1)
+
           var sampleRate = Self.oplSampleRate
 #if os(iOS)
           let session = AVAudioSession.sharedInstance()
@@ -184,7 +185,8 @@ final class AudioPlayer {
     /// while the first buffer is synthesized.
     func startOPL3() {
         oplQueue.async { [weak self] in
-            self?.startOPL3OnQueue()
+            guard let self = self else { return }
+            self.startOPL3OnQueue()
         }
     }
 

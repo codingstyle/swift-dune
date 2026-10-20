@@ -156,26 +156,32 @@ struct Primitives {
     }
     
     
-    static func drawGradientLineWithNoise(_ pixelBuffer: PixelBuffer, _ x: UInt16, _ y: UInt16, _ w: UInt16, _ bp: inout UInt16, _ si: UInt16, _ di: Int16, _ color: UInt16) {
-        var offset = 320 * Int(y) + Int(x)
-        var w = w
-        var color = Int(color)
-        
-        repeat {
+    static func drawGradientLineWithNoise(_ pixelBuffer: PixelBuffer, _ x: UInt16, _ y: UInt16, _ w: UInt16, _ bp: inout UInt16, _ si: UInt16, _ di: Int16, _ color: UInt16, reverse: Bool = false) {
+        let row = Int(y)
+        guard w > 0 else { return }
+
+        var color = color
+        let span = Int(w)
+        let origin = Int(x)
+        var i = 0
+
+        while i < span {
             let lsb = (bp & 1) != 0
             bp >>= 1
-            
+
             if lsb {
                 bp ^= si
             }
 
-            let v = (bp & 3) + ((UInt16(color) >> 8) & 0xFF) - 1
-            color += Int(di)
+            let shade = Int(bp & 3) + Int(color >> 8) - 1
+            let pixelX = reverse ? origin + span - 1 - i : origin + i
+            if row >= 0 && row < pixelBuffer.height && pixelX >= 0 && pixelX < pixelBuffer.width {
+                pixelBuffer.rawPointer[row * pixelBuffer.width + pixelX] = UInt8(truncatingIfNeeded: shade)
+            }
 
-            pixelBuffer.rawPointer[offset] = UInt8(truncatingIfNeeded: (v & 0xFF))
-            offset += 1
-            w -= 1
-        } while w > 0
+            color = color &+ UInt16(bitPattern: di)
+            i += 1
+        }
     }
     
     
@@ -183,39 +189,43 @@ struct Primitives {
         let command = (UInt16(polygon.drawCommand) << 8) | (UInt16(polygon.command) & 0xFF)
 
         var bp: UInt16 = (command & 0x3E00) != 0 ? 1 : 0
-        let ds22df: UInt16 = (command & 0x3E00) | 0x2
+        let noiseMask: UInt16 = (command & 0x3E00) | 0x2
         var color = (command & 0xFF) << 8
+        guard polygon.finalY >= polygon.startY else { return }
+        let rows = polygon.finalY - polygon.startY
+        var y: UInt16 = 0
 
-        //if (command & 0x0100) == 0 {
-            var y: UInt16 = 0
-            
-            while y < polygon.finalY - polygon.startY {
-                var x0 = polygon.polygonSideUp[Int(y)]
-                var x1 = polygon.polygonSideDown[Int(y)]
-                
-                if x1 < x0 {
-                    swap(&x0, &x1)
-                }
-                
-                let w = x1 - x0 + 1
-                
-                drawGradientLineWithNoise(
-                    buffer,
-                    x0,
-                    y + polygon.startY,
-                    w,
-                    &bp,
-                    ds22df,
-                    polygon.hGradient,
-                    color
-                )
-
-                y += 1
-                color = UInt16(bitPattern: Int16(truncatingIfNeeded: Int(color) + Int(polygon.vGradient)))
+        while y < rows {
+            let row = Int(y)
+            guard polygon.polygonSideUp.indices.contains(row),
+                  polygon.polygonSideDown.indices.contains(row) else {
+                break
             }
-        /*} else {
-            print("Invalid polygon to draw")
-        }*/
+
+            var x0 = polygon.polygonSideUp[row]
+            var x1 = polygon.polygonSideDown[row]
+
+            if x1 < x0 {
+                swap(&x0, &x1)
+            }
+
+            let span = x1 &- x0 &+ 1
+
+            drawGradientLineWithNoise(
+                buffer,
+                x0,
+                y &+ polygon.startY,
+                span,
+                &bp,
+                noiseMask,
+                polygon.hGradient,
+                color,
+                reverse: polygon.reverseGradient
+            )
+
+            y &+= 1
+            color = color &+ UInt16(bitPattern: polygon.vGradient)
+        }
     }
   
   

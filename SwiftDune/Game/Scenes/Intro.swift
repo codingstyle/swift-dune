@@ -124,8 +124,8 @@ final class Intro: DuneNode {
         ))
         queue.enqueue(IntroStep(
           background: DuneNodeParams("Sietch", [ "room": SietchRoom.room8, "markers": [
-              6: RoomCharacter.harah,
-              9: RoomCharacter.stilgar
+              3: RoomCharacter.harah,
+              0: RoomCharacter.stilgar
           ] ] ),
           duration: 4.0,
           transitionIn: .fadeIn(duration: 2.0)
@@ -136,8 +136,8 @@ final class Intro: DuneNode {
         ))
         queue.enqueue(IntroStep(
           background: DuneNodeParams("Sietch", [ "room": SietchRoom.room8, "markers": [
-            6: RoomCharacter.harah,
-            9: RoomCharacter.stilgar
+            3: RoomCharacter.harah,
+            0: RoomCharacter.stilgar
           ]]),
           duration: 4.0
         ))
@@ -159,10 +159,10 @@ final class Intro: DuneNode {
         queue.enqueue(IntroStep(
           background: DuneNodeParams("Palace", [ "room": PalaceRoom.balcony, "markers": [
             4: RoomCharacter.gurney,
-            5: RoomCharacter.duncan,
-            6: RoomCharacter.thufir,
-            7: RoomCharacter.jessica,
-            8: RoomCharacter.leto
+            3: RoomCharacter.duncan,
+            2: RoomCharacter.thufir,
+            1: RoomCharacter.jessica,
+            0: RoomCharacter.leto
           ]]),
           duration: 2.0
         ))

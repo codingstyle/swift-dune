@@ -25,7 +25,7 @@ enum RoomCharacter: UInt16 {
     case fremen = 28  // + 33 for face change
     case fremen2 = 30 // + 33 for face change
     case fremen3 = 32 // and 33
-    case gurneyHorizontal = 34 // wtf?
+    case gurneyWounded = 34
 }
 
 enum SceneryType: String {
@@ -57,11 +57,13 @@ struct RoomPolygon: RoomCommandProtocol {
     var finalY: UInt16
     var polygonSideUp: [UInt16]
     var polygonSideDown: [UInt16]
+    /// Bit 8 of the polygon command. The span is still filled left to right, but the gradient and noise land on the mirrored x.
+    var reverseGradient: Bool
 }
 
 
 struct RoomSprite: RoomCommandProtocol {
-    var spriteID: UInt8
+    var spriteID: UInt16
     var pt: DunePoint
     var paletteOffset: UInt8
     var flipX: Bool
@@ -71,6 +73,7 @@ struct RoomSprite: RoomCommandProtocol {
 
 
 struct RoomMarker: RoomCommandProtocol {
+    /// DOS standing slot. The room lists markers front to back in the file, and the engine consumes that list from the end, so slot 0 is the last marker in the file.
     var index: Int
     var pt: DunePoint
     var paletteOffset: UInt8
@@ -156,63 +159,64 @@ final class Scenery {
     
     
     func parseRooms() {
-        let firstOffset = resource.stream!.readUInt16LE(peek: true)
-        let roomCount = firstOffset / 2
-        var i = 0
+        // The file starts with one little-endian offset per room. The first
+        // offset is also the byte length of that table.
+        let firstOffset = resource.stream!.readUInt16LE()
+        let roomCount = Int(firstOffset / 2)
+        guard roomCount > 0 else { return }
 
-        resource.stream!.seek(UInt32(firstOffset))
+        var offsets = [firstOffset]
+        if roomCount > 1 {
+            for _ in 1..<roomCount {
+                offsets.append(resource.stream!.readUInt16LE())
+            }
+        }
 
-        while i < roomCount {
-            var room = Room(offset: resource.stream!.offset)
-            let _ = resource.stream!.readByte() // Room marker count
+        for offset in offsets {
+            resource.stream!.seek(UInt32(offset))
+
+            var room = Room(offset: UInt32(offset))
+            let markerCount = Int(resource.stream!.readByte())
             var markerIndex = 0
-            
-            /*engine.logger.log(.debug, "--------------------------------------------------------------------------------------")
-            engine.logger.log(.debug, "")
-            engine.logger.log(.debug, "ROOM #\(i): markers=\(markerCount), offset=\(room.offset)")*/
-            
-            // Processes room blocks
-            while !resource.stream!.isEOF() && resource.stream!.readUInt16LE(peek: true) != 0xFFFF {
-                let command = resource.stream!.readByte()
-                
-                if command == 0x00 {
-                    // Invalid command
-                    // engine.logger.log(.error, " - Invalid command")
-                } else if command <= 0x3F {
-                    // Command = 0x01 => Marker
-                    // Command <= 0x3F => Sprite blit
-                    
-                    let modificator = resource.stream!.readByte()
+
+            // Processes room blocks. 0xFFFF ends the room and must be consumed.
+            while !resource.stream!.isEOF() {
+                let cmd = resource.stream!.readUInt16LE()
+                if cmd == 0xFFFF {
+                    break
+                }
+
+                if cmd & 0x8000 == 0 {
+                    // Low 9 bits == 1 is a standing-person marker. Anything else is a sprite blit.
                     var x = Int16(resource.stream!.readByte())
                     let y = Int16(resource.stream!.readByte())
                     let paletteOffset = resource.stream!.readByte()
-                    let addByte = (modificator & 0x02 != 0)
-                    
-                    if addByte {
+
+                    if cmd & 0x0200 != 0 {
                         x += 256
                     }
-                    
-                    let flipY = (modificator & 0x20 != 0)
-                    let flipX = (modificator & 0x40 != 0)
-                    let scaleFactor = Int((modificator & 0x1C) >> 2)
-                    
-                    if command == 0x01 {
+
+                    let flipY = cmd & 0x2000 != 0
+                    let flipX = cmd & 0x4000 != 0
+                    let scaleFactor = Int((cmd >> 10) & 7)
+                    let partId = Int(cmd & 0x1FF)
+
+                    if partId == 1 {
+                        let slot = markerIndex < markerCount ? markerCount - 1 - markerIndex : -1
                         let roomMarker = RoomMarker(
-                            index: markerIndex,
+                            index: slot,
                             pt: DunePoint(x, y),
                             paletteOffset: paletteOffset,
                             flipX: flipX,
                             flipY: flipY,
                             scale: transformScale[scaleFactor]
                         )
-                        
+
                         room.commands.append(roomMarker)
                         markerIndex += 1
-
-                        //engine.logger.log(.debug, " - Marker: x=\(x), y=\(y), flipX=\(flipX), flipY=\(flipY), scaleFlag=\(scaleFactor), modificator=\(String.fromByte(modificator))")
-                    } else {
+                    } else if partId > 1 {
                         let roomSprite = RoomSprite(
-                            spriteID: command - 1,
+                            spriteID: UInt16(partId - 1),
                             pt: DunePoint(x, y),
                             paletteOffset: paletteOffset,
                             flipX: flipX,
@@ -220,24 +224,20 @@ final class Scenery {
                             scale: transformScale[scaleFactor]
                         )
                         room.commands.append(roomSprite)
-                        
-                        //engine.logger.log(.debug, " - Sprite: id=\(command), x=\(x), y=\(y), flipX=\(flipX), flipY=\(flipY), scaleFlag=\(scaleFactor), paletteOffset=\(paletteOffset), modificator=\(String.fromByte(modificator))")
                     }
                 } else {
-                    let paletteIndex = command & 0x7F
-                    let drawCommand = resource.stream!.readByte()
+                    let paletteIndex = UInt8(cmd & 0xFF)
+                    let drawCommand = UInt8(cmd >> 8)
 
-                    if (drawCommand >> 6) == 2 {
-                        parsePolygon(&room, command, drawCommand, paletteIndex)
-                    } else if (drawCommand >> 6) == 3 {
-                        // Line
-                        let x1 = Int16(resource.stream!.readUInt16LE())
-                        let y1 = Int16(resource.stream!.readUInt16LE())
-                        let x2 = Int16(resource.stream!.readUInt16LE())
-                        let y2 = Int16(resource.stream!.readUInt16LE())
+                    if drawCommand >> 6 == 2 {
+                        parsePolygon(&room, paletteIndex, drawCommand, paletteIndex)
+                    } else if drawCommand >> 6 == 3 {
+                        // Bit cast, matching the DOS word used as a signed coordinate.
+                        let x1 = Int16(bitPattern: resource.stream!.readUInt16LE())
+                        let y1 = Int16(bitPattern: resource.stream!.readUInt16LE())
+                        let x2 = Int16(bitPattern: resource.stream!.readUInt16LE())
+                        let y2 = Int16(bitPattern: resource.stream!.readUInt16LE())
 
-                        //engine.logger.log(.debug, " - Line: x1=\(x1), y1=\(y1), x2=\(x2), y2=\(y2)")
-                        
                         let line = RoomLine(pt1: DunePoint(x1, y1), pt2: DunePoint(x2, y2), paletteOffset: paletteIndex)
                         room.commands.append(line)
                     }
@@ -245,8 +245,6 @@ final class Scenery {
             }
             
             rooms.append(room)
-          
-            i += 1
         }
     }
     
@@ -294,33 +292,31 @@ final class Scenery {
         guard let character = characters[marker.index] else {
             return
         }
-        
-        let frameInfo = characterSprite.frame(at: Int(character.rawValue))
-        let scale = CGFloat((frameInfo.width << 8) / marker.scale) / CGFloat(frameInfo.width)
-        
-        var fx: SpriteEffect {
-            return .transform(offset: marker.paletteOffset, flipX: marker.flipX, flipY: marker.flipY, scale: scale)
-        }
-     
+
+        let fx = SpriteEffect.transform(
+            offset: marker.paletteOffset,
+            flipX: marker.flipX,
+            flipY: marker.flipY,
+            scaleStep: marker.scale
+        )
+
         characterSprite.setPalette()
-        characterSprite.drawFrame(character.rawValue, x: Int16(marker.pt.x), y: Int16(marker.pt.y), buffer: buffer, effect: fx)
-      
-        if character == .feyd {
-          characterSprite.drawFrame(character.rawValue + 1, x: Int16(marker.pt.x), y: Int16(marker.pt.y), buffer: buffer, effect: fx)
-        }
+        let base = character.rawValue
+        characterSprite.drawFrame(base, x: Int16(marker.pt.x), y: Int16(marker.pt.y), buffer: buffer, effect: fx)
+        characterSprite.drawFrame(base + 1, x: Int16(marker.pt.x), y: Int16(marker.pt.y), buffer: buffer, effect: fx)
     }
     
     
     private func drawRoomSprite(_ roomSprite: RoomSprite, _ sprite: Sprite, _ roomIndex: Int, _ buffer: PixelBuffer) {
-        let frameInfo = sprite.frame(at: Int(roomSprite.spriteID))
-        let scale = CGFloat((frameInfo.width << 8) / roomSprite.scale) / CGFloat(frameInfo.width)
+        let fx = SpriteEffect.transform(
+            offset: roomSprite.paletteOffset,
+            flipX: roomSprite.flipX,
+            flipY: roomSprite.flipY,
+            scaleStep: roomSprite.scale
+        )
 
-        var fx: SpriteEffect {
-            return .transform(offset: roomSprite.paletteOffset, flipX: roomSprite.flipX, flipY: roomSprite.flipY, scale: scale)
-        }
-        
         sprite.setPalette()
-        sprite.drawFrame(UInt16(roomSprite.spriteID), x: Int16(roomSprite.pt.x), y: Int16(roomSprite.pt.y), buffer: buffer, effect: fx)
+        sprite.drawFrame(roomSprite.spriteID, x: Int16(roomSprite.pt.x), y: Int16(roomSprite.pt.y), buffer: buffer, effect: fx)
     }
     
     
@@ -341,7 +337,7 @@ final class Scenery {
     
     
     private func drawLine(_ roomLine: RoomLine, _ buffer: PixelBuffer) {
-        Primitives.drawLine(roomLine.pt1, roomLine.pt2, Int(roomLine.paletteOffset), buffer)
+        Primitives.drawLine(roomLine.pt1, roomLine.pt2, Int(roomLine.paletteOffset), buffer, isOffset: false)
     }
 }
 
@@ -405,7 +401,8 @@ extension Scenery {
             startY: startY,
             finalY: finalY,
             polygonSideUp: polygonSideUp,
-            polygonSideDown: polygonSideDown
+            polygonSideDown: polygonSideDown,
+            reverseGradient: drawCommand & 0x01 != 0
         )
         
         room.commands.append(polygon)
@@ -469,10 +466,10 @@ extension Scenery {
             deltaX = -deltaX
         }
         
-        let bp6 = Int16(signY)
-        let bp4 = Int16(signX)
-        var bp2 = Int16(signY)
-        var bp0 = Int16(signX)
+        let bp6 = signY
+        let bp4 = signX
+        var bp2 = signY
+        var bp0 = signX
         
         var minorDelta = deltaY
         var majorDelta = deltaX
@@ -488,18 +485,20 @@ extension Scenery {
             bp0 = 0
         }
         
-        var ax = Int16(truncatingIfNeeded: majorDelta / 2)
-        var cx = Int16(truncatingIfNeeded: majorDelta)
-        var x0 = x0
+        // Full-width error term. A checked Int16 add traps once the longer
+        // axis passes 16384, which is inside the 16-bit coordinate range.
+        var ax = majorDelta / 2
+        var cx = majorDelta
+        var x = Int(x0)
 
         repeat {
-            ax += Int16(truncatingIfNeeded: minorDelta)
+            ax += minorDelta
             
-            var dx: Int16
-            var bx: Int16
+            let dx: Int
+            let bx: Int
             
             if ax >= majorDelta {
-                ax -= Int16(truncatingIfNeeded: majorDelta)
+                ax -= majorDelta
                 dx = bp4
                 bx = bp6
             } else {
@@ -507,14 +506,11 @@ extension Scenery {
                 bx = bp2
             }
             
-            dx += Int16(x0)
-            
             if bx == 1 {
-                polygonSide.append(x0)
+                polygonSide.append(UInt16(truncatingIfNeeded: x))
             }
             
-            x0 = UInt16(bitPattern: dx)
-            
+            x += dx
             cx -= 1
         } while cx > 0
     }

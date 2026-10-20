@@ -160,7 +160,8 @@ enum SpriteEffect {
     case zoomReveal(start: Double, sequence: ZoomSequence, focal: DunePoint, current: Double)
     case pageFlip(start: Double, duration: Double, current: Double)
     case pageFlipBack(start: Double, duration: Double, current: Double)
-    case transform(offset: UInt8 = 0, flipX: Bool = false, flipY: Bool = false, scale: Double = 1.0)
+    /// `scaleStep` is the DOS 8.8 room-sprite step (0x100, 0x120, …). Zero keeps the floating-point `scale`, used by non-room callers.
+    case transform(offset: UInt8 = 0, flipX: Bool = false, flipY: Bool = false, scale: Double = 1.0, scaleStep: UInt16 = 0)
 }
 
 
