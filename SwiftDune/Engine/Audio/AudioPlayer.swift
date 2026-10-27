@@ -29,8 +29,12 @@ class AudioPlayer {
     /// OPL3 FM Synthesizer (NukedOPL3 implementation)
     let opl3fm = OPL3Fm(bufferSize: 4096)
   
-    /// OPL3 output rate. 49716 Hz on macOS; the active hardware rate on iOS.
-    static let oplSampleRate: Double = 49716.0
+    /// Native OPL3 rate. The chip resamples from this rate to `oplSampleRate`.
+    static let nativeOPLSampleRate: Double = 49716.0
+
+    /// Sample rate of the frames written for playback.
+    /// macOS keeps the native OPL3 rate. iOS sets the hardware rate so the graph does not resample.
+    var oplSampleRate: Double = AudioPlayer.nativeOPLSampleRate
     
     /// Number of OPL3 samples per HERAD tick - set by Music before calling startOPL3()
     var oplSamplesPerTick: Double = 0
@@ -56,7 +60,7 @@ class AudioPlayer {
     func startOPL3() {
         // OPL3Fm handles tone generator initialization in reset()
         // Use direct writes (not buffered) for initial setup
-        opl3fm.reset(UInt32(Self.oplSampleRate.rounded()))
+        opl3fm.reset(UInt32(oplSampleRate.rounded()))
         opl3fm.writeRegister(0x105, 1) // Enable OPL3
         opl3fm.writeRegister(0x104, 0) // Disable 4OP Mode
     }

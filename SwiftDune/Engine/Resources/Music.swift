@@ -47,7 +47,7 @@ final class Music: AudioPlayerItem {
     self.isPlaying = true
 
     // Configure AudioPlayer with tick rate for synchronized event processing
-    player.oplSamplesPerTick = AudioPlayer.oplSampleRate / herad.ticksPerSecond
+    player.oplSamplesPerTick = player.oplSampleRate / herad.ticksPerSecond
     
     // Set up the tick callback - invoked once per HERAD tick at the correct sample boundary
     player.oplTickCallback = { [weak self] in

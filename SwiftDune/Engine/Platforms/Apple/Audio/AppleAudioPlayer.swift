@@ -62,7 +62,7 @@ final class AppleAudioPlayer: AudioPlayer {
       do {
           oplQueue.setSpecific(key: oplQueueKey, value: 1)
 
-          var sampleRate = Self.oplSampleRate
+          var sampleRate = Self.nativeOPLSampleRate
 #if os(iOS)
           let session = AVAudioSession.sharedInstance()
           try session.setCategory(.playback, mode: .default, options: [])
@@ -70,9 +70,18 @@ final class AppleAudioPlayer: AudioPlayer {
           try session.setPreferredIOBufferDuration(0.02) // 20 ms
           try session.setActive(true)
           // Match the hardware clock. A 49716 → 48000 converter in the graph slips every few seconds.
-          let hardwareRate = audioEngine.outputNode.outputFormat(forBus: 0).sampleRate
-          sampleRate = hardwareRate > 0 ? hardwareRate : 48_000
+          // The chip and the HERAD tick clock must use this same rate: buffers tagged at the
+          // hardware rate but filled at 49716 Hz play flat and slow.
+          let outputRate = audioEngine.outputNode.outputFormat(forBus: 0).sampleRate
+          if outputRate > 0 {
+              sampleRate = outputRate
+          } else if session.sampleRate > 0 {
+              sampleRate = session.sampleRate
+          } else {
+              sampleRate = 48_000
+          }
 #endif
+          oplSampleRate = sampleRate
           oplAudioFormat = AVAudioFormat(standardFormatWithSampleRate: sampleRate, channels: 2)!
         
           // Attach mixer
