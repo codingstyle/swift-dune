@@ -29,6 +29,14 @@ let adpcmIndexTable: [Int] = [
     -1, -1, -1, -1, 2, 4, 6, 8
 ]
 
+
+struct PCMBuffer {
+    var codec: VOCAudioCodec
+    var samplingRate: CGFloat
+    var sample: [Float32]
+}
+
+
 enum VOCDataBlock {
     case terminate
     case soundData(codec: VOCAudioCodec, samplingRate: UInt16, bytes: [UInt8])
@@ -65,17 +73,11 @@ final class Sound: AudioPlayerItem {
   
   
   func play(loop _: Bool = false) {
-    let node = player.node(for: .sound)
-    
-    if node.isPlaying {
-      node.stop()
-    }
-
     print("Playing sound: \(resource.fileName)")
     
     var i = 0
     
-    var pendingBuffers: [AVAudioPCMBuffer] = []
+    var pendingBuffers: [PCMBuffer] = []
     var isRepeating = false
     var repeatCount = 1
     
@@ -91,8 +93,7 @@ final class Sound: AudioPlayerItem {
           break
         case .soundData(_, _, _):
           let buffer = makePCMBuffer(from: dataBlock)!
-          let resampledBuffer = player.resampledBuffer(buffer)
-          pendingBuffers.append(resampledBuffer!)
+          pendingBuffers.append(buffer)
           isRepeating = false
           break
         case .repetition(let count):
@@ -109,8 +110,7 @@ final class Sound: AudioPlayerItem {
       }
       
       if !pendingBuffers.isEmpty {
-        node.scheduleBuffersLoop(pendingBuffers, numberOfLoops: repeatCount)
-        node.play()
+        player.queueSoundBuffers(pendingBuffers, numberOfLoops: repeatCount)
       }
           
       i += 1
@@ -125,20 +125,14 @@ final class Sound: AudioPlayerItem {
   
   
   func stop() {
-    let node = player.node(for: .sound)
-    
-    if node.isPlaying {
-      node.stop()
-    }
-    
-    isPlaying = false
+      isPlaying = false
   }
     
   
   /**
    Converts VOC data to an AVAudioPCMBuffer
    */
-  private func makePCMBuffer(from dataBlock: VOCDataBlock) -> AVAudioPCMBuffer? {
+  private func makePCMBuffer(from dataBlock: VOCDataBlock) -> PCMBuffer? {
     var bytes: [UInt8] = []
     var codec: VOCAudioCodec
     var samplingRate: CGFloat = 0.0
@@ -168,15 +162,7 @@ final class Sound: AudioPlayerItem {
         Logger.shared.log(.error, "Unsupported codec: \(codec)")
     }
     
-    let format = AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: samplingRate, channels: 1, interleaved: false)!
-    
-    let frameCapacity = AVAudioFrameCount(UInt32(sample.count))
-    guard let audioBuffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: frameCapacity) else { return nil }
-    
-    memcpy(audioBuffer.mutableAudioBufferList.pointee.mBuffers.mData, sample, sample.count * MemoryLayout<Float32>.size)
-    audioBuffer.frameLength = frameCapacity
-    
-    return audioBuffer
+    return PCMBuffer(codec: codec, samplingRate: samplingRate, sample: sample)
   }
   
   

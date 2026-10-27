@@ -7,10 +7,6 @@
 
 import Foundation
 
-// Based on original Rust code by Thomas Fach-Pedersen
-// @see https://github.com/madmoose/dune-rust/blob/main/globe_renderer/src/globe_renderer.rs
-
-
 let GLOBE_MAP_PALETTE: [UInt8] = [
     0x00, 0x00, 0x00, 0x00, 0x00, 0xaa, 0x00, 0xaa, 0x00, 0x00, 0xaa, 0xaa,
     0xaa, 0x00, 0x00, 0xff, 0xd2, 0x51, 0xaa, 0x55, 0x00, 0xaa, 0xaa, 0xaa,
@@ -125,6 +121,7 @@ final class Globe {
     private var tilt: Int16 = 0
     private var rotation: UInt16 = 0
     private var initialRotation: UInt16 = 0
+    var showsAreaControl = false
 
     init() {
         let tablatResource = Resource("TABLAT.BIN", uncompressed: true)
@@ -221,6 +218,20 @@ final class Globe {
     private func mapColor(_ offset: Int16) -> UInt8 {
         let mapIndex = 0x62FC + Int(offset)
         let mapValue = self.map[mapIndex]
+
+        if showsAreaControl {
+            let flags = mapValue & 0x30
+            var color = mapValue & 0x0f
+            color |= 0x10
+            if flags >= 0x10 {
+                color += 0x10
+                if flags == 0x30 {
+                    color += 0x10
+                }
+            }
+            return color
+        }
+
         let flags = (mapValue >> 4) & 3
         var color = mapValue & 0x0f
 
@@ -332,36 +343,46 @@ final class Globe {
     }
     
     
-    func move(_ move: GlobeMove) {
+    func move(_ move: GlobeMove, tiltStep: Int16 = 1, rotationStep: UInt16 = 100) {
         switch move {
         case .left:
-            if self.rotation > UInt16.min {
-                self.rotation -= 100
-            } else {
-                self.rotation = 65500
-            }
-            break
+            self.rotation &-= rotationStep
         case .right:
-            if self.rotation < 65500 {
-                self.rotation += 100
-            } else {
-                self.rotation = 0
-            }
-            break
+            self.rotation &+= rotationStep
         case .up:
-            self.tilt -= 1
-            break
+            self.tilt &-= tiltStep
         case .down:
-            self.tilt += 1
-            break
+            self.tilt &+= tiltStep
         }
 
         setOrientation(tilt: self.tilt, rotation: self.rotation)
     }
+
+
+    /// One held-arrow step toward a map longitude and latitude. Rotation moves
+    /// at most 0x20 of a 398-phase turn; tilt moves at most 24 rows.
+    func stepToward(rotation targetRotation: UInt16, tilt targetTilt: Int16) {
+        var delta = Int(targetRotation) - Int(self.rotation)
+        if delta > 32767 { delta -= 65536 }
+        if delta < -32768 { delta += 65536 }
+        let rotationStep = 5271
+        if delta > rotationStep { delta = rotationStep }
+        if delta < -rotationStep { delta = -rotationStep }
+
+        var tiltDelta = Int(targetTilt) - Int(self.tilt)
+        if tiltDelta > 0x18 { tiltDelta = 0x18 }
+        if tiltDelta < -0x18 { tiltDelta = -0x18 }
+
+        let rotation = UInt16(truncatingIfNeeded: Int(self.rotation) &+ delta)
+        let tilt = Int16(clamping: Int(self.tilt) + tiltDelta)
+        setOrientation(tilt: tilt, rotation: rotation)
+    }
     
     
     func update(_ time: TimeInterval) {
-        let rotation = initialRotation + UInt16(Int(ceil(time) * 200.0) % 65000)
+        // 65000 == 325 * 200, so the offset repeats every 325s and stays in UInt16.
+        let seconds = max(0.0, ceil(time)).truncatingRemainder(dividingBy: 325.0)
+        let rotation = initialRotation &+ UInt16(seconds * 200.0)
         self.rotation = rotation
 
         self.precalculateGlobeRotationLookupTable(rotation)

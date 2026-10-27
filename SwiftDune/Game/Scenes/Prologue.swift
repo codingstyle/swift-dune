@@ -46,8 +46,7 @@ final class Prologue: DuneNode {
     
     
     override func onEnable() {
-        music = Music("WORMSUIT.HSQ", player: engine.audioPlayer)
-        engine.audioPlayer.play(music!)
+        engine.audioPlayer.playSong("WORMSUIT.HSQ")
 
         queue.enqueue(PrologueSteps(
             background: DuneNodeParams("Stars", [ "mode": StarsMode.planets ]),

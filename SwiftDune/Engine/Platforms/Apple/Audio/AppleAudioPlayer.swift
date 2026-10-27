@@ -12,28 +12,10 @@ import AVFoundation
 import AVFAudio
 #endif
 
-protocol AudioPlayerItem {
-  var type: AudioPlayerItemType { get }
-  var fileName: String { get }
-  
-  init(_ fileName: String, player: AudioPlayer)
-  func play(loop: Bool)
-  func stop()
-  func dumpInfo()
-}
 
-enum AudioPlayerItemType {
-  case music
-  case sound
-}
-
-
-final class AudioPlayer {
+final class AppleAudioPlayer: AudioPlayer {
     private let audioEngine = AVAudioEngine()
 
-    private var currentAudioItem: AudioPlayerItem?
-    private var currentMusicItem: AudioPlayerItem?
-  
     private let soundFxNode = AVAudioPlayerNode()
     private let soundFxMixerNode = AVAudioMixerNode()
     private let soundFxAudioFormat = AVAudioFormat(standardFormatWithSampleRate: 22500.0, channels: 1)!
@@ -41,9 +23,6 @@ final class AudioPlayer {
     private let musicMaxTracks = 21
     private var musicSamplerNode: [AVAudioUnitSampler] = []
     private let musicMixerNode = AVAudioMixerNode()
-
-    /// OPL3 FM Synthesizer (NukedOPL3 implementation)
-    let opl3fm = OPL3Fm(bufferSize: 4096)
 
     private let oplNode = AVAudioPlayerNode()
     private let oplMixerNode = AVAudioMixerNode()
@@ -68,7 +47,8 @@ final class AudioPlayer {
     private let oplScheduledBufferTarget = 4
 #endif
   
-    init() {
+    override init() {
+        super.init()
         initAudioEngine()
     }
     
@@ -107,9 +87,6 @@ final class AudioPlayer {
           audioEngine.connect(soundFxNode, to: soundFxMixerNode, format: soundFxAudioFormat)
           audioEngine.connect(soundFxMixerNode, to: audioEngine.mainMixerNode, format: nil)
         
-          // OPL3 init
-          initOPL3()
-        
           // OPL3 node setup
           audioEngine.attach(oplNode)
           audioEngine.attach(oplMixerNode)
@@ -137,33 +114,12 @@ final class AudioPlayer {
     }
   
     
-    private func initOPL3() {
-        // OPL3Fm handles tone generator initialization in reset()
-        // Use direct writes (not buffered) for initial setup
-        opl3fm.reset(UInt32(Self.oplSampleRate.rounded()))
-        opl3fm.writeRegister(0x105, 1) // Enable OPL3
-        opl3fm.writeRegister(0x104, 0) // Disable 4OP Mode
-    }
-  
     /// Number of samples per buffer (at 49716 Hz, 8192 samples = ~165ms)
     /// Larger buffers reduce timer overhead and allocation frequency
     private let oplBufferFrameCount = 8192
 
     /// Pre-allocated buffer pool to avoid per-timer-fire heap allocation
     private var oplBufferPool: [AVAudioPCMBuffer] = []
-    
-    /// OPL3 output rate. 49716 Hz on macOS; the active hardware rate on iOS.
-    static let oplSampleRate: Double = 49716.0
-    
-    /// Number of OPL3 samples per HERAD tick - set by Music before calling startOPL3()
-    var oplSamplesPerTick: Double = 0
-    
-    /// Callback invoked at each HERAD tick boundary during audio generation.
-    /// Should process events for the current tick. Returns false when music is finished.
-    var oplTickCallback: (() -> Bool)?
-    
-    /// Countdown of samples until the next tick boundary
-    private var oplSamplesUntilNextTick: Double = 0
     
     /// Gets a buffer from the pool or creates a new one
     private func acquireOPL3Buffer() -> AVAudioPCMBuffer {
@@ -183,7 +139,9 @@ final class AudioPlayer {
 
     /// Starts OPL3 generation on the audio queue. Returns immediately so the caller is not blocked
     /// while the first buffer is synthesized.
-    func startOPL3() {
+    override func startOPL3() {
+        super.startOPL3()
+      
         oplQueue.async { [weak self] in
             guard let self = self else { return }
             self.startOPL3OnQueue()
@@ -263,7 +221,9 @@ final class AudioPlayer {
     /// Stops the OPL3 audio generation timer.
     /// Synchronous when called off the audio queue so a following play() cannot be wiped by a late stop.
     /// Inline when already on the queue: the tick callback stops playback from inside generation.
-    func stopOPL3() {
+    override func stopOPL3() {
+        super.stopOPL3()
+      
         if DispatchQueue.getSpecific(key: oplQueueKey) != nil {
             stopOPL3OnQueue()
         } else {
@@ -360,63 +320,28 @@ final class AudioPlayer {
 #endif
         return true
     }
-  
-  
-    func node(for type: AudioPlayerItemType) -> AVAudioPlayerNode {
-      switch type {
-        case .music:
-          return oplNode
-        
-        case .sound:
-          return soundFxNode
-      }
-    }
-    
-    /// Mutes the OPL3 output
-    func muteOPL3() {
-        oplMixerNode.outputVolume = 0.0
-    }
-    
-    /// Unmutes the OPL3 output
-    func unmuteOPL3() {
-        oplMixerNode.outputVolume = 1.0
-    }
-  
-  
-    func play(_ item: AudioPlayerItem, loop: Bool = false) {
-      if item.type == .sound {
-        if let currentAudioItem = currentAudioItem {
-          currentAudioItem.stop()
-        }
-        
-        self.currentAudioItem = item
-      } else if item.type == .music {
-        if let currentMusicItem = currentMusicItem {
-          currentMusicItem.stop()
-        }
-        
-        self.currentMusicItem = item
-      }
-
-      item.play(loop: loop)
-    }
-  
-  
-    func stop() {
-      if let currentAudioItem = currentAudioItem {
-        currentAudioItem.stop()
-      }
       
-      self.currentAudioItem = nil
+  
+    override func queueSoundBuffers(_ buffers: [PCMBuffer], numberOfLoops: Int) {
+        let pendingBuffers: [AVAudioPCMBuffer] = buffers.compactMap { buffer in
+          let format = AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: buffer.samplingRate, channels: 1, interleaved: false)!
+          
+          let frameCapacity = AVAudioFrameCount(UInt32(buffer.sample.count))
+          guard let audioBuffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: frameCapacity) else { return nil }
+          
+          memcpy(audioBuffer.mutableAudioBufferList.pointee.mBuffers.mData, buffer.sample, buffer.sample.count * MemoryLayout<Float32>.size)
+          audioBuffer.frameLength = frameCapacity
+          
+          return self.resampledBuffer(audioBuffer)
+        }
 
-      if let currentMusicItem = currentMusicItem {
-        currentMusicItem.stop()
-      }
-      
-      self.currentMusicItem = nil
+        guard !pendingBuffers.isEmpty else { return }
+
+        soundFxNode.scheduleBuffersLoop(pendingBuffers, numberOfLoops: numberOfLoops)
+        soundFxNode.play()
     }
-    
-    
+  
+  
     public func resampledBuffer(_ sourceBuffer: AVAudioPCMBuffer) -> AVAudioPCMBuffer? {
         let frameCapacity = AVAudioFrameCount(CGFloat(sourceBuffer.frameCapacity) * (soundFxAudioFormat.sampleRate / sourceBuffer.format.sampleRate))
         guard let destBuffer = AVAudioPCMBuffer(pcmFormat: soundFxAudioFormat, frameCapacity: frameCapacity) else { return nil }

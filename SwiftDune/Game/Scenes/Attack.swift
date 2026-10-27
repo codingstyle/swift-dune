@@ -37,7 +37,6 @@ private struct AttackTimer<T: FixedWidthInteger> {
 final class Attack: DuneNode {
     private var contextBuffer = PixelBuffer(width: 320, height: 152)
     private var attackSprite: Sprite?
-    private var attackSound: Sound?
     
     private var rngSeed: UInt32 = 0x01d2
     private var maskedRngSeed: UInt32 = 0x0273
@@ -102,8 +101,6 @@ final class Attack: DuneNode {
         attackSprite?.setPalette()
         engine.palette.stash()
       
-        attackSound = Sound("SD3.HSQ", player: engine.audioPlayer)
-      
         particles = [AttackParticle](repeating: AttackParticle(), count: maxAttackParticles)
         skyPalette = [UInt32](repeating: 0, count: skyPaletteCount)
         skyTargetPalette = [UInt32](repeating: 0, count: skyPaletteCount)
@@ -118,11 +115,7 @@ final class Attack: DuneNode {
     
     
     override func onDisable() {
-        if let sound = attackSound {
-          sound.stop()
-        }
-        
-        attackSound = nil
+        engine.audioPlayer.stopSound()
 
         attackSprite = nil
         currentTime = 0.0
@@ -156,12 +149,10 @@ final class Attack: DuneNode {
     
     
     override func update(_ elapsedTime: TimeInterval) {
-        if let sound = attackSound {
-          if currentTime == 0.0 && !sound.isPlaying {
-            engine.audioPlayer.play(sound)
-          }
+        if currentTime == 0.0 {
+            engine.audioPlayer.playSound("SD3.HSQ")
         }
-      
+
         currentTime += elapsedTime
         tickAccumulator += elapsedTime
         

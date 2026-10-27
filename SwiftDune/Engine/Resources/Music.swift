@@ -86,12 +86,6 @@ final class Music: AudioPlayerItem {
     // note-ons still waiting in the register queue.
     player.stopOPL3()
     rewindTracks()
-
-    // Apply while the generator is stopped. Queued writes would sit until the
-    // next play and run ahead of that song's program changes.
-    player.opl3fm.writeRegisterDirect(0x08, 64)   // Enable Note-Sel
-    player.opl3fm.writeRegisterDirect(0x23, 238)  // Tremolo/Vibrato/etc
-    player.opl3fm.writeRegisterDirect(0xBD, 0)    // Disable Percussion Mode
   }
 
 

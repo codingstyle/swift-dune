@@ -112,8 +112,7 @@ final class Book: DuneNode {
     
     override func update(_ elapsedTime: TimeInterval) {
         if currentTime == 0.0 {
-            let music = Music("WATER.HSQ", player: engine.audioPlayer)
-            engine.audioPlayer.play(music, loop: true)
+            engine.audioPlayer.playSong("WATER.HSQ")
         }
       
         if pageIndex == 1 {

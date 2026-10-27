@@ -445,8 +445,7 @@ final class Ending: DuneNode {
         }
 
         if step.playWormsuit {
-            let music = Music("WORMSUIT.HSQ", player: engine.audioPlayer)
-            engine.audioPlayer.play(music)
+            engine.audioPlayer.playSong("WORMSUIT.HSQ")
         }
 
         activeNodes = nodes.sorted().filter { $0.isActive }

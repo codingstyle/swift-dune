@@ -27,6 +27,7 @@ enum UILeftPanel: Int {
     case bookClosed = 1
     case bookOpen
     case globe
+    case globeDirections
 }
 
 enum UIRightPanel: Int {
@@ -61,12 +62,16 @@ final class UI: DuneNode {
     private let compassDownRect = DuneRect(264, 180, 18, 12)
     private let compassLeftRect = DuneRect(250, 170, 16, 14)
     private let compassRightRect = DuneRect(280, 170, 16, 14)
+    private let mapUpRect = DuneRect(267, 162, 17, 9)
+    private let mapRightRect = DuneRect(285, 171, 12, 13)
+    private let mapDownRect = DuneRect(267, 184, 17, 9)
+    private let mapLeftRect = DuneRect(254, 171, 12, 13)
     private var commands: Sentence?
     private var font: GameFont?
     
     private let menuRect = DuneRect(92, 159, 136, 40)
     private var menuItemBackgroundRect = DuneRect(93, 159, 134, 7)
-    private var menuItemTextRect = DuneRect(97, 159, 120, 8)
+    private var menuItemTextRect = DuneRect(97, 159, 126, 8)
   
     private var rightCloseRect = DuneRect(255, 162, 40, 30)
   
@@ -184,8 +189,10 @@ final class UI: DuneNode {
             break
           case .globe:
             uiSprite.drawFrame(6, x: 0, y: 152, buffer: buffer)
-            
-            // Globe nav arrows
+            uiSprite.drawFrame(13, x: 22, y: 161, buffer: buffer)
+            break
+          case .globeDirections:
+            uiSprite.drawFrame(6, x: 0, y: 152, buffer: buffer)
             uiSprite.drawFrame(13, x: 22, y: 161, buffer: buffer)
             uiSprite.drawFrame(49, x: 38, y: 159, buffer: buffer)
             uiSprite.drawFrame(50, x: 54, y: 168, buffer: buffer)
@@ -217,6 +224,11 @@ final class UI: DuneNode {
         switch rightPanel {
           case .mapDirections:
             uiSprite.drawFrame(41, x: 266, y: 171, buffer: buffer)
+            uiSprite.drawFrame(37, x: 267, y: 162, buffer: buffer)
+            uiSprite.drawFrame(38, x: 285, y: 171, buffer: buffer)
+            uiSprite.drawFrame(39, x: 267, y: 184, buffer: buffer)
+            uiSprite.drawFrame(40, x: 254, y: 171, buffer: buffer)
+            uiSprite.drawFrame(53, x: 266, y: 171, buffer: buffer)
           case .roomDirections:
             uiSprite.drawFrame(33, x: 255, y: 162, buffer: buffer)
             
@@ -239,7 +251,7 @@ final class UI: DuneNode {
               uiSprite.drawFrame(30, x: 284, y: 172, buffer: buffer)
             }
           case .rect:
-            uiSprite.drawFrame(33, x: 255, y: 162, buffer: buffer)
+            uiSprite.drawFrame(41, x: 266, y: 171, buffer: buffer)
             break
         }
       
@@ -443,6 +455,25 @@ final class UI: DuneNode {
             }
         }
 
+        if rightPanel == .mapDirections {
+            let direction: Int?
+            if mapUpRect.contains(event.point) {
+                direction = 1
+            } else if mapRightRect.contains(event.point) {
+                direction = 2
+            } else if mapDownRect.contains(event.point) {
+                direction = 3
+            } else if mapLeftRect.contains(event.point) {
+                direction = 4
+            } else {
+                direction = nil
+            }
+            if let direction {
+                EventManager.navigationEvent.notify(NavigationEventData(direction: direction))
+                return
+            }
+        }
+
         if leftPanel == .bookClosed && rightPanel == .roomDirections && palacePlanButtonRect.contains(event.point) {
             if palacePlanVisible {
                 palacePlanVisible = false
@@ -525,7 +556,15 @@ struct NavigationEventData {
 }
 
 
+struct ShowMapEventData {
+}
+
+struct ShowFreskEventData {
+}
+
 extension EventManager {
     static let uiStateChangedEvent = DuneEvent<UIStateEventData>()
     static let navigationEvent = DuneEvent<NavigationEventData>()
+    static let showMapEvent = DuneEvent<ShowMapEventData>()
+    static let showFreskEvent = DuneEvent<ShowFreskEventData>()
 }

@@ -47,8 +47,7 @@ final class Presents: DuneNode {
     
     override func update(_ elapsedTime: TimeInterval) {
         if screen == .virginPresents && currentTime == 0.0 {
-            let music = Music("WORMINTR.HSQ", player: engine.audioPlayer)
-            engine.audioPlayer.play(music)
+            engine.audioPlayer.playSong("WORMINTR.HSQ", loop: false)
         }
       
         currentTime += elapsedTime

@@ -59,8 +59,8 @@
 		06799CBB2B3600B000A196A3 /* WormCall.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06799CBA2B3600AF00A196A3 /* WormCall.swift */; };
 		067CE995307BAD5000186AC3 /* DuneInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 067CE994307BAD4C00186AC3 /* DuneInput.swift */; };
 		067CE996307BAD5000186AC3 /* DuneInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 067CE994307BAD4C00186AC3 /* DuneInput.swift */; };
-		067CE998307BAD5B00186AC3 /* DuneAudioPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 067CE997307BAD5600186AC3 /* DuneAudioPlayer.swift */; };
-		067CE999307BAD5B00186AC3 /* DuneAudioPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 067CE997307BAD5600186AC3 /* DuneAudioPlayer.swift */; };
+		067CE998307BAD5B00186AC3 /* AudioPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 067CE997307BAD5600186AC3 /* AudioPlayer.swift */; };
+		067CE999307BAD5B00186AC3 /* AudioPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 067CE997307BAD5600186AC3 /* AudioPlayer.swift */; };
 		067CE9AD307BB00400186AC3 /* DuneIOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 067CE9AC307BB00100186AC3 /* DuneIOSApp.swift */; };
 		067CE9B0307BB0E700186AC3 /* DuneEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0699D27D2A93D245006287E0 /* DuneEngine.swift */; };
 		067CE9B1307BB0EE00186AC3 /* Event.swift in Sources */ = {isa = PBXBuildFile; fileRef = 069B74782D1822660071E68C /* Event.swift */; };
@@ -91,7 +91,7 @@
 		067CE9CA307BB11A00186AC3 /* OPL3Fm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 065F0C9A2F33C4B90032796E /* OPL3Fm.swift */; };
 		067CE9CB307BB11A00186AC3 /* CreativeVoice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06FC4EF52E66C6A600F68119 /* CreativeVoice.swift */; };
 		067CE9CC307BB11A00186AC3 /* HERAD.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06FC4EF22E657A0800F68119 /* HERAD.swift */; };
-		067CE9CD307BB11A00186AC3 /* DuneAudioPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 067CE997307BAD5600186AC3 /* DuneAudioPlayer.swift */; };
+		067CE9CD307BB11A00186AC3 /* AudioPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 067CE997307BAD5600186AC3 /* AudioPlayer.swift */; };
 		067CE9CE307BB12200186AC3 /* OPL3SignalSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 065F0C972F33C4B90032796E /* OPL3SignalSource.swift */; };
 		067CE9CF307BB12200186AC3 /* OPL3Chip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 065F0C932F33C4B90032796E /* OPL3Chip.swift */; };
 		067CE9D0307BB12200186AC3 /* OPL3Operator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 065F0C962F33C4B90032796E /* OPL3Operator.swift */; };
@@ -101,7 +101,7 @@
 		067CE9D4307BB12200186AC3 /* OPL3Lfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 065F0C952F33C4B90032796E /* OPL3Lfo.swift */; };
 		067CE9D5307BB12B00186AC3 /* Renderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06892D562C3031F400B08B22 /* Renderer.swift */; };
 		067CE9D6307BB12B00186AC3 /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 06892D582C31CAE700B08B22 /* Shaders.metal */; };
-		067CE9D7307BB13100186AC3 /* AudioPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06A023432A9FC5BA0091D581 /* AudioPlayer.swift */; };
+		067CE9D7307BB13100186AC3 /* AppleAudioPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06A023432A9FC5BA0091D581 /* AppleAudioPlayer.swift */; };
 		067CE9D8307BB16F00186AC3 /* GameTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06D372D42B516132006BDDF3 /* GameTypes.swift */; };
 		067CE9D9307BB17600186AC3 /* Fresk.swift in Sources */ = {isa = PBXBuildFile; fileRef = 068E195C2B68420A0071DD36 /* Fresk.swift */; };
 		067CE9DA307BB17600186AC3 /* CopyProtection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0600C9E12C834BF700E552DD /* CopyProtection.swift */; };
@@ -144,8 +144,6 @@
 		068300842A9D080800414896 /* Sound.swift in Sources */ = {isa = PBXBuildFile; fileRef = 068300832A9D080800414896 /* Sound.swift */; };
 		06892D522C19750F00B08B22 /* Mouse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06892D512C19750F00B08B22 /* Mouse.swift */; };
 		06892D542C1EE62700B08B22 /* DesertWalk.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06892D532C1EE62700B08B22 /* DesertWalk.swift */; };
-		06B1A0042C7A100100000002 /* DesertLandscape.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06B1A0042C7A100100000001 /* DesertLandscape.swift */; };
-		06B1A0042C7A100100000003 /* DesertLandscape.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06B1A0042C7A100100000001 /* DesertLandscape.swift */; };
 		06892D572C3031F400B08B22 /* Renderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06892D562C3031F400B08B22 /* Renderer.swift */; };
 		06892D592C31CAE700B08B22 /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 06892D582C31CAE700B08B22 /* Shaders.metal */; };
 		068965B82B5F046A005A19D7 /* UI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 068965B72B5F046A005A19D7 /* UI.swift */; };
@@ -178,7 +176,7 @@
 		069B74792D1822660071E68C /* Event.swift in Sources */ = {isa = PBXBuildFile; fileRef = 069B74782D1822660071E68C /* Event.swift */; };
 		069B747A2D1822660071E68C /* Event.swift in Sources */ = {isa = PBXBuildFile; fileRef = 069B74782D1822660071E68C /* Event.swift */; };
 		06A023442A9FC5BA0091D581 /* Video.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06A023422A9FC5BA0091D581 /* Video.swift */; };
-		06A023452A9FC5BA0091D581 /* AudioPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06A023432A9FC5BA0091D581 /* AudioPlayer.swift */; };
+		06A023452A9FC5BA0091D581 /* AppleAudioPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06A023432A9FC5BA0091D581 /* AppleAudioPlayer.swift */; };
 		06A494042B2634AC00D60425 /* DuneTitle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06A494032B2634AC00D60425 /* DuneTitle.swift */; };
 		06AB6BA03056FCF3001A72DF /* GameState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06AB6B9F3056FCEE001A72DF /* GameState.swift */; };
 		06AB96D52BEB7DC300482823 /* Attack.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06AB96D42BEB7DC300482823 /* Attack.swift */; };
@@ -191,6 +189,8 @@
 		06B1A0022C7A100100000003 /* SceneNavigation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06B1A0022C7A100100000001 /* SceneNavigation.swift */; };
 		06B1A0032C7A100100000002 /* Locations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06B1A0032C7A100100000001 /* Locations.swift */; };
 		06B1A0032C7A100100000003 /* Locations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06B1A0032C7A100100000001 /* Locations.swift */; };
+		06B1A0042C7A100100000002 /* DesertLandscape.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06B1A0042C7A100100000001 /* DesertLandscape.swift */; };
+		06B1A0042C7A100100000003 /* DesertLandscape.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06B1A0042C7A100100000001 /* DesertLandscape.swift */; };
 		06B1A0052C7A100100000002 /* Menus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06B1A0052C7A100100000001 /* Menus.swift */; };
 		06B1A0052C7A100100000003 /* Menus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06B1A0052C7A100100000001 /* Menus.swift */; };
 		06B812CB2BB0CF3D0048C8AC /* Prologue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06B812CA2BB0CF3D0048C8AC /* Prologue.swift */; };
@@ -215,7 +215,7 @@
 		06CA2BAC2C7B350F00B47D13 /* DuneEditorApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06CA2B8D2C7B30B800B47D13 /* DuneEditorApp.swift */; };
 		06CA2BAD2C7B350F00B47D13 /* Renderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06892D562C3031F400B08B22 /* Renderer.swift */; };
 		06CA2BAE2C7B350F00B47D13 /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 06892D582C31CAE700B08B22 /* Shaders.metal */; };
-		06CA2BB12C7B350F00B47D13 /* AudioPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06A023432A9FC5BA0091D581 /* AudioPlayer.swift */; };
+		06CA2BB12C7B350F00B47D13 /* AppleAudioPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06A023432A9FC5BA0091D581 /* AppleAudioPlayer.swift */; };
 		06CA2BB22C7B350F00B47D13 /* PixelBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06C16D862B1C8F0100CBEAA2 /* PixelBuffer.swift */; };
 		06CA2BB32C7B350F00B47D13 /* Effects.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06C16D882B1CB01700CBEAA2 /* Effects.swift */; };
 		06CA2BB42C7B350F00B47D13 /* Primitives.swift in Sources */ = {isa = PBXBuildFile; fileRef = 068E195E2B6928E90071DD36 /* Primitives.swift */; };
@@ -300,14 +300,13 @@
 		067791232C728CEF008CB4A7 /* StatsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatsViewModel.swift; sourceTree = "<group>"; };
 		06799CBA2B3600AF00A196A3 /* WormCall.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WormCall.swift; sourceTree = "<group>"; };
 		067CE994307BAD4C00186AC3 /* DuneInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuneInput.swift; sourceTree = "<group>"; };
-		067CE997307BAD5600186AC3 /* DuneAudioPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuneAudioPlayer.swift; sourceTree = "<group>"; };
+		067CE997307BAD5600186AC3 /* AudioPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioPlayer.swift; sourceTree = "<group>"; };
 		067CE9A1307BAF9D00186AC3 /* DuneIOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DuneIOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		067CE9AC307BB00100186AC3 /* DuneIOSApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuneIOSApp.swift; sourceTree = "<group>"; };
 		0682820D2B3E06C5009C9FF7 /* Sunrise.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sunrise.swift; sourceTree = "<group>"; };
 		068300832A9D080800414896 /* Sound.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sound.swift; sourceTree = "<group>"; };
 		06892D512C19750F00B08B22 /* Mouse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Mouse.swift; sourceTree = "<group>"; };
 		06892D532C1EE62700B08B22 /* DesertWalk.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesertWalk.swift; sourceTree = "<group>"; };
-		06B1A0042C7A100100000001 /* DesertLandscape.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesertLandscape.swift; sourceTree = "<group>"; };
 		06892D562C3031F400B08B22 /* Renderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Renderer.swift; sourceTree = "<group>"; };
 		06892D582C31CAE700B08B22 /* Shaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
 		068965B72B5F046A005A19D7 /* UI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UI.swift; sourceTree = "<group>"; };
@@ -332,7 +331,7 @@
 		069B5B2B307E0A5700AA8FE1 /* Touch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Touch.swift; sourceTree = "<group>"; };
 		069B74782D1822660071E68C /* Event.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Event.swift; sourceTree = "<group>"; };
 		06A023422A9FC5BA0091D581 /* Video.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Video.swift; sourceTree = "<group>"; };
-		06A023432A9FC5BA0091D581 /* AudioPlayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AudioPlayer.swift; sourceTree = "<group>"; };
+		06A023432A9FC5BA0091D581 /* AppleAudioPlayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppleAudioPlayer.swift; sourceTree = "<group>"; };
 		06A494032B2634AC00D60425 /* DuneTitle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuneTitle.swift; sourceTree = "<group>"; };
 		06A7E8812AD6FA400042D878 /* EditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorView.swift; sourceTree = "<group>"; };
 		06A7E8832AD6FBA80042D878 /* EditorViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorViewModel.swift; sourceTree = "<group>"; };
@@ -348,6 +347,7 @@
 		06B1A0012C7A100100000001 /* Map.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Map.swift; sourceTree = "<group>"; };
 		06B1A0022C7A100100000001 /* SceneNavigation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneNavigation.swift; sourceTree = "<group>"; };
 		06B1A0032C7A100100000001 /* Locations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Locations.swift; sourceTree = "<group>"; };
+		06B1A0042C7A100100000001 /* DesertLandscape.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesertLandscape.swift; sourceTree = "<group>"; };
 		06B1A0052C7A100100000001 /* Menus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Menus.swift; sourceTree = "<group>"; };
 		06B812CA2BB0CF3D0048C8AC /* Prologue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Prologue.swift; sourceTree = "<group>"; };
 		06B812CC2BB559B90048C8AC /* PrologueSubtitle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrologueSubtitle.swift; sourceTree = "<group>"; };
@@ -417,7 +417,7 @@
 				065F0C9A2F33C4B90032796E /* OPL3Fm.swift */,
 				06FC4EF52E66C6A600F68119 /* CreativeVoice.swift */,
 				06FC4EF22E657A0800F68119 /* HERAD.swift */,
-				067CE997307BAD5600186AC3 /* DuneAudioPlayer.swift */,
+				067CE997307BAD5600186AC3 /* AudioPlayer.swift */,
 			);
 			path = Audio;
 			sourceTree = "<group>";
@@ -545,7 +545,7 @@
 		067CE992307B909E00186AC3 /* Audio */ = {
 			isa = PBXGroup;
 			children = (
-				06A023432A9FC5BA0091D581 /* AudioPlayer.swift */,
+				06A023432A9FC5BA0091D581 /* AppleAudioPlayer.swift */,
 			);
 			path = Audio;
 			sourceTree = "<group>";
@@ -861,7 +861,7 @@
 				067CE9CB307BB11A00186AC3 /* CreativeVoice.swift in Sources */,
 				067CE9CC307BB11A00186AC3 /* HERAD.swift in Sources */,
 				067CE9D8307BB16F00186AC3 /* GameTypes.swift in Sources */,
-				067CE9CD307BB11A00186AC3 /* DuneAudioPlayer.swift in Sources */,
+				067CE9CD307BB11A00186AC3 /* AudioPlayer.swift in Sources */,
 				067CE9AD307BB00400186AC3 /* DuneIOSApp.swift in Sources */,
 				069B5B2E307E0A5A00AA8FE1 /* Touch.swift in Sources */,
 				067CE9B8307BB10B00186AC3 /* Globe.swift in Sources */,
@@ -937,7 +937,7 @@
 				067CE9D4307BB12200186AC3 /* OPL3Lfo.swift in Sources */,
 				067CE9B1307BB0EE00186AC3 /* Event.swift in Sources */,
 				067CE9B0307BB0E700186AC3 /* DuneEngine.swift in Sources */,
-				067CE9D7307BB13100186AC3 /* AudioPlayer.swift in Sources */,
+				067CE9D7307BB13100186AC3 /* AppleAudioPlayer.swift in Sources */,
 				067CE9B3307BB0FA00186AC3 /* Animation.swift in Sources */,
 				067CE9B4307BB0FA00186AC3 /* Queue.swift in Sources */,
 				067CE9B5307BB0FA00186AC3 /* Logger.swift in Sources */,
@@ -956,7 +956,7 @@
 				068965B82B5F046A005A19D7 /* UI.swift in Sources */,
 				06A494042B2634AC00D60425 /* DuneTitle.swift in Sources */,
 				068E195D2B68420A0071DD36 /* Fresk.swift in Sources */,
-				06A023452A9FC5BA0091D581 /* AudioPlayer.swift in Sources */,
+				06A023452A9FC5BA0091D581 /* AppleAudioPlayer.swift in Sources */,
 				068E195F2B6928E90071DD36 /* Primitives.swift in Sources */,
 				06C0C5022F8A10A100B47D13 /* Cursor.swift in Sources */,
 				062779662B9AEB940046E068 /* Sky.swift in Sources */,
@@ -1030,7 +1030,7 @@
 				065F0CAC2F33C4B90032796E /* OPL3Chip.swift in Sources */,
 				06A023442A9FC5BA0091D581 /* Video.swift in Sources */,
 				06CA2B892C7A647400B47D13 /* Book.swift in Sources */,
-				067CE999307BAD5B00186AC3 /* DuneAudioPlayer.swift in Sources */,
+				067CE999307BAD5B00186AC3 /* AudioPlayer.swift in Sources */,
 				06892D592C31CAE700B08B22 /* Shaders.metal in Sources */,
 				069B74792D1822660071E68C /* Event.swift in Sources */,
 				0607FA8430684C8D00B35E6E /* PaulAndChani.swift in Sources */,
@@ -1051,7 +1051,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				06CA2BA22C7B350F00B47D13 /* SpriteListView.swift in Sources */,
-				067CE998307BAD5B00186AC3 /* DuneAudioPlayer.swift in Sources */,
+				067CE998307BAD5B00186AC3 /* AudioPlayer.swift in Sources */,
 				06CA2BA32C7B350F00B47D13 /* SpriteDetailsView.swift in Sources */,
 				06CA2BA42C7B350F00B47D13 /* FontDetailsView.swift in Sources */,
 				06CA2BA52C7B350F00B47D13 /* TextDetailsView.swift in Sources */,
@@ -1078,7 +1078,7 @@
 				06CA2BAE2C7B350F00B47D13 /* Shaders.metal in Sources */,
 				06939C423059176500565DC3 /* ConditionDetailsView.swift in Sources */,
 				069B5B27307BC50200AA8FE1 /* NSColor+Palette.swift in Sources */,
-				06CA2BB12C7B350F00B47D13 /* AudioPlayer.swift in Sources */,
+				06CA2BB12C7B350F00B47D13 /* AppleAudioPlayer.swift in Sources */,
 				06CA2BB22C7B350F00B47D13 /* PixelBuffer.swift in Sources */,
 				06CA2BB32C7B350F00B47D13 /* Effects.swift in Sources */,
 				069B747A2D1822660071E68C /* Event.swift in Sources */,

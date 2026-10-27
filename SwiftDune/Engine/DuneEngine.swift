@@ -41,7 +41,7 @@ final class DuneEngine {
     
     private init() {
         palette = Palette()
-        audioPlayer = AudioPlayer()
+        audioPlayer = AppleAudioPlayer()
         input = Input()
         renderer = Renderer()
 

@@ -30,7 +30,6 @@ final class Sietch: DuneNode {
     private var sietchScenery: Scenery?
     private var sky: Sky?
     private var characterSprite: Sprite?
-    private var waterDropSound: Sound?
     
     private var roomIndex: Int = SietchRoom.entrance.rawValue
     private var currentRoom: SietchRoom {
@@ -58,8 +57,6 @@ final class Sietch: DuneNode {
         sietchScenery = Scenery("SIET.SAL")
         sky = Sky()
         
-        waterDropSound = Sound("SD4.HSQ", player: engine.audioPlayer)
-      
         sietchScenery?.characters = markers
         
         if currentRoom == .water {
@@ -78,7 +75,6 @@ final class Sietch: DuneNode {
         sietchScenery = nil
         sky = nil
         characterSprite = nil
-        waterDropSound = nil
         markers = [:]
         roomIndex = SietchRoom.entrance.rawValue
         currentTime = 0.0
@@ -119,8 +115,8 @@ final class Sietch: DuneNode {
     
     
     override func update(_ elapsedTime: TimeInterval) {
-        if currentRoom == .water && currentTime == 0.0 && !(waterDropSound!.isPlaying) {
-            engine.audioPlayer.play(waterDropSound!)
+        if currentRoom == .water {
+            engine.audioPlayer.playSound("SD4.HSQ")
         }
       
         currentTime += elapsedTime

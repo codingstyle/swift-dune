@@ -11,6 +11,7 @@ final class Map: DuneNode {
   private let renderer = FlatMapRenderer()
   private var longitude: UInt16 = 0
   private var latitude: Int16 = 0
+  private let globeRect = DuneRect(0, 152, 90, 48)
 
   init() {
     super.init("Map")
@@ -21,6 +22,19 @@ final class Map: DuneNode {
     let position = GameState.shared.getMapPosition()
     longitude = position.x
     latitude = min(75, max(-75, position.lat))
+    
+    Menus.shared.show(.mapTroops)
+    
+    EventManager.uiStateChangedEvent.notify(UIStateEventData(
+      leftPanel: .globe,
+      rightPanel: .mapDirections
+    ))
+  }
+
+  override func onClick(_ event: DuneClickEvent) {
+    if globeRect.contains(event.point) {
+      EventManager.showFreskEvent.notify(ShowFreskEventData())
+    }
   }
 
   override func handleNavigation(_ direction: Int) -> Bool {
@@ -31,11 +45,11 @@ final class Map: DuneNode {
   func pan(_ direction: Int) {
     switch direction {
     case 1:
-      latitude = min(75, latitude + 2)
+      latitude = max(-75, latitude - 2)
     case 2:
       longitude = longitude &+ 0x0300
     case 3:
-      latitude = max(-75, latitude - 2)
+      latitude = min(75, latitude + 2)
     case 4:
       longitude = longitude &- 0x0300
     default:

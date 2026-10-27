@@ -59,6 +59,7 @@ final class Palace: DuneNode {
         sky = Sky()
 
         syncStandingCharacters()
+        EventManager.uiStateChangedEvent.notify(UIStateEventData(leftPanel: .bookClosed))
 
         guard managesCommands else { return }
         EventManager.menuChoiceEvent.addListener(self) { [weak self] event in
@@ -145,8 +146,7 @@ final class Palace: DuneNode {
     
     override func update(_ elapsedTime: TimeInterval) {
         if playMusic && currentTime == 0.0 {
-            let music = Music("ARRAKIS.HSQ", player: engine.audioPlayer)
-            engine.audioPlayer.play(music)
+            engine.audioPlayer.playSong("ARRAKIS.HSQ")
         }
         
         currentTime += elapsedTime
@@ -195,14 +195,14 @@ final class Palace: DuneNode {
         // Apply sky gradient with blue palette
         if currentRoom == .porch || currentRoom == .balcony {
             if contextBuffer.tag != 0x0001 {
-                sky.render(contextBuffer, width: 320, at: 0, type: .narrow)
+                sky.render(contextBuffer, width: 320, at: 0, type: .narrow, interfacePalette: currentRoom == .balcony)
                 palaceScenery.drawRoom(roomIndex, buffer: contextBuffer)
                 contextBuffer.tag = 0x0001
             }
 
             contextBuffer.render(to: intermediateFrameBuffer, effect: fx)
         } else if currentRoom == .stairs {
-            sky.render(intermediateFrameBuffer, width: 200, at: 0, type: .large)
+            sky.render(intermediateFrameBuffer, width: 200, at: 0, type: .large, interfacePalette: true)
             palaceScenery.drawRoom(roomIndex, buffer: intermediateFrameBuffer)
 
             // Fade on palace
@@ -226,6 +226,13 @@ final class Palace: DuneNode {
             }
 
             contextBuffer.render(to: intermediateFrameBuffer, effect: fx)
+        }
+
+        // BALCON.HSQ has no colours of its own for the interface (240...254).
+        // Those come from the sky sub-palette, and they have to be last so the
+        // room sheet does not leave the previous room's panel behind.
+        if currentRoom == .stairs || currentRoom == .balcony {
+            sky.setPalette(interfacePalette: true)
         }
         
         if let characterSprite = characterSprite {

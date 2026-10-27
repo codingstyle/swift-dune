@@ -50,9 +50,12 @@ enum MenuHandler {
   static let closeBook: UInt16 = 0xb18b
   static let exitGlobe: UInt16 = 0xbc81
   static let exitMaps: UInt16 = 0x186b
-  static let seeDuneMap: UInt16 = 0x0000
+  // Non-zero so Menus.choose delivers the click. Original offset is not mapped yet.
+  static let seeDuneMap: UInt16 = 0x0001
   static let lookAtMirror: UInt16 = 0x0ea6
   static let lookAwayFromTheMirror: UInt16 = 0x0eb9
+  static let seeResults: UInt16 = 0xb96b
+  static let seeStandardVision: UInt16 = 0xb961
 }
 
 /// Floppy COMMAND.HSQ indexes. The PC-CD table inserts strings, so the same
@@ -96,6 +99,7 @@ enum CommandId {
   static let goTowardsThisPlace: UInt16 = 0xa0
   static let ignoreWarning: UInt16 = 0xa1
   static let seeResults: UInt16 = 0xa4
+  static let standardVision: UInt16 = 0xa5
   static let saveGame: UInt16 = 0xa6
   static let loadGame: UInt16 = 0xa7
   static let optionsAndQuit: UInt16 = 0xa8
@@ -322,7 +326,7 @@ final class Menus {
     ],
     .globe: [
       item(CommandId.exitGlobe, MenuHandler.exitGlobe),
-      item(CommandId.seeResults, 0xb96b),
+      item(CommandId.seeResults, MenuHandler.seeResults),
       item(CommandId.saveGame, 0xb28c),
       item(CommandId.loadGame, 0xb29e),
       item(CommandId.optionsAndQuit, 0x0e3e)

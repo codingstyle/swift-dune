@@ -36,6 +36,14 @@ final class Game: DuneNode {
             self?.onMenuChoice(event.choice)
         }
 
+        EventManager.showMapEvent.addListener(self) { [weak self] _ in
+            self?.toggleMap()
+        }
+
+        EventManager.showFreskEvent.addListener(self) { [weak self] _ in
+            self?.showFresk()
+        }
+
         GameState.shared.prepareWorld()
 
         uiNode = UI()
@@ -57,6 +65,8 @@ final class Game: DuneNode {
         EventManager.bookStateChangedEvent.removeListener(self)
         EventManager.navigationEvent.removeListener(self)
         EventManager.menuChoiceEvent.removeListener(self)
+        EventManager.showMapEvent.removeListener(self)
+        EventManager.showFreskEvent.removeListener(self)
     }
 
 
@@ -165,18 +175,19 @@ final class Game: DuneNode {
             return
         }
 
+        showMap()
+    }
+
+
+    func showMap() {
         showScene("Map", [:]) { Map() }
-        Menus.shared.show(.mapTroops)
-        EventManager.uiStateChangedEvent.notify(UIStateEventData(rightPanel: .mapDirections))
     }
 
 
     func onMenuChoice(_ choice: MenuChoice) {
         switch choice.handler {
         case MenuHandler.seeDuneMap:
-            if sceneNode?.name != "Map" {
-                toggleMap()
-            }
+            showMap()
             break
         case MenuHandler.exitMaps:
             if sceneNode?.name == "Map" {

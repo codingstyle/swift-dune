@@ -289,7 +289,7 @@ struct GameState {
   // location_is_Atreides_05d36 REJECTS (everything the Harkonnens still
   // exploit) + rand_iterated(sum/16), recomputed each new day
   // (seg000:1cda). Static init 390 (3900 kg at game start).
-  @DuneDataSegment(0x00a8) var harkonnenSpiceProduction: UInt16
+  @DuneDataSegment(0x00a8) var harkonnenSpiceProduction: UInt16 = 390
   
   // = seg001:00aa data_000aa — total population of the troops that are
   // neither Harkonnen nor captured/unrallied (the recompute_condit_
@@ -302,6 +302,56 @@ struct GameState {
   // (7000). Gates the Fremen WORK WITH ME charisma check (seg000:95c4).
   // recompute_condit_statistics refreshes it each new day.
   @DuneDataSegment(0x00ac) var harkonnenTroopPopulation: UInt16
+
+  /// Territory percentages from the MAP.HSQ vegetation stage (byte & 0x30).
+  /// Stage 0x30 is Harkonnen; every other planted stage is Atreides.
+  /// The polar tail of 0x187 bytes is left out of the cell total.
+  mutating func refreshControlledAreas() {
+    mapState.load()
+    let map = mapState.bytes
+    guard map.count > 0x187 else { return }
+
+    var flagged = 0
+    var atreides = 0
+    for cell in map {
+      switch cell & 0x30 {
+      case 0:
+        break
+      case 0x30:
+        flagged += 1
+      default:
+        flagged += 1
+        atreides += 1
+      }
+    }
+
+    let cells = UInt32(map.count - 0x187)
+    func percent(_ count: Int) -> UInt16 {
+      let scaled = ((UInt32(count) << 16) / cells) * 100
+      return UInt16((scaled >> 16) + ((scaled >> 15) & 1))
+    }
+    areaControlledByAtreides = percent(atreides) &+ 1
+    areaControlledByHarkonnen = percent(flagged - atreides)
+  }
+
+
+  /// Loyal and Harkonnen head counts for the fresk results gauges.
+  mutating func refreshResultsPopulations() {
+    var loyal: UInt16 = 0
+    var harkonnen: UInt16 = 0
+    for troop in troops {
+      if troop.troopId == 0 { break }
+      if troop.occupation & 0x20 != 0 { continue }
+      let population = UInt16(troop.population)
+      if troop.flags & 0x80 != 0 {
+        harkonnen = harkonnen &+ population
+      } else if troop.occupation & 0x80 == 0 {
+        loyal = loyal &+ population
+      }
+    }
+    troopPopulation = loyal
+    harkonnenTroopPopulation = harkonnen
+  }
   
   // = seg001:00ae for_condit_previous_day_spice_production_ds_ae — the
   // previous day's production total, exchanged out by the new-day hook

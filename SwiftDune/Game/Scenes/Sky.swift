@@ -24,32 +24,58 @@ final class Sky {
     }
     
     
-    func setPalette() {
+    /// `interfacePalette` is the in-game sky load: 80 colours at 128, then the
+    /// next 15 at 240. Those 15 are the interface panel. Writing the whole
+    /// 95-colour block at 128 leaves them on the balcony colours instead.
+    func setPalette(interfacePalette: Bool = false) {
         guard let skySprite = skySprite else {
             return
         }
-        
+
+        func apply(_ index: Int, _ prevIndex: Int = -1, blend: CGFloat = 1.0) {
+            if interfacePalette {
+                skySprite.setAlternatePalette(
+                    index,
+                    prevIndex,
+                    blend: blend,
+                    sourceOffset: 0,
+                    destinationStart: 128,
+                    count: 80
+                )
+                skySprite.setAlternatePalette(
+                    index,
+                    prevIndex,
+                    blend: blend,
+                    sourceOffset: 80,
+                    destinationStart: 240,
+                    count: 15
+                )
+            } else {
+                skySprite.setAlternatePalette(index, prevIndex, blend: blend)
+            }
+        }
+
         switch lightMode {
         case .sunrise:
-            skySprite.setAlternatePalette(16)
+            apply(16)
         case .day:
-            skySprite.setAlternatePalette(1)
+            apply(1)
         case .sunset:
-            skySprite.setAlternatePalette(6)
+            apply(6)
         case .night:
-            skySprite.setAlternatePalette(3)
+            apply(3)
         case .custom(let index, let prevIndex, let blend):
-            skySprite.setAlternatePalette(index, prevIndex, blend: blend)
+            apply(index, prevIndex, blend: blend)
         }
     }
     
     
-    func render(_ buffer: PixelBuffer, width: Int16 = 320, at offsetX: Int16 = 0, type: SkyType = .narrow) {
+    func render(_ buffer: PixelBuffer, width: Int16 = 320, at offsetX: Int16 = 0, type: SkyType = .narrow, interfacePalette: Bool = false) {
         guard let skySprite = skySprite else {
             return
         }
         
-        self.setPalette()
+        self.setPalette(interfacePalette: interfacePalette)
 
         var x: Int16 = offsetX
 

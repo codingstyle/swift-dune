@@ -1,0 +1,337 @@
+---
+description: List of commands decrypted from COMMAND1.HSQ with the corresponding hex code in the form "{hexCode} • {english caption}" for the floppy version of Dune
+alwaysApply: false
+---
+0x0000 • Arrakeen
+0x0001 • Carthag
+0x0002 • Tuono
+0x0003 • Habbanya
+0x0004 • Oxtyn
+0x0005 • Tsympo
+0x0006 • Bledan
+0x0007 • Ergsun
+0x0008 • Haga
+0x0009 • Cielago
+0x000A • Sihaya
+0x000B • Celimyn
+0x000C • (Atreides)
+0x000D • (Harkonnen)
+0x000E • Tabr
+0x000F • Timin
+0x0010 • Tuek
+0x0011 • Harg
+0x0012 • Clam
+0x0013 • Tsymyn
+0x0014 • Siet
+0x0015 • Pyons
+0x0016 • Pyort
+0x0017 • Spice Mining
+0x0018 • .
+0x0019 • .
+0x001A • .
+0x001B • Military Training
+0x001C • Espionage
+0x001D • .
+0x001E • .
+0x001F • Irrigation & Tree Care
+0x0020 • Wind-trap Assembly
+0x0021 • Bulb growing
+0x0022 • .
+0x0023 • Spice Mining
+0x0024 • Spice Prospection
+0x0025 • Awaiting orders
+0x0026 • Search for Equipment
+0x0027 • Military Training
+0x0028 • Espionage
+0x0029 • Attacks
+0x002A • Search for Equipment
+0x002B • Irrigation & Tree Care
+0x002C • Wind-trap Assembly
+0x002D • Bulb growing
+0x002E • Search for Equipment
+0x002F • Settled in
+0x0030 • Going to
+0x0031 • 
+<0 men  Motiv. 6%
+0x0032 • Average: J kgs/h
+Current: H kgs/h
+0x0033 • Fremen lost: F0
+Harkonnen killed: D0
+0x0034 • Repairing
+0x0035 • Inactive
+0x0036 • Captured
+0x0037 • Freed Prisoner
+0x0038 • Covered Area: F%
+0x0039 • Sietch: 
+0x003A • Palace: 
+0x003B • Village: 
+0x003C • Fort: 
+0x003D • a sietch
+0x003E • a palace
+0x003F • a village
+0x0040 • a fortress
+0x0041 • Battle:
+0x0042 • ASK FOR MORE INFORMATION
+0x0043 • MODIFY EQUIPMENT
+0x0044 • CHANGE TROOP OCCUPATION
+0x0045 • MOVE TROOP
+0x0046 • NEXT TROOP
+0x0047 • NO MORE ORDERS
+0x0048 • CUT CONTACT
+0x0049 • Show me where you want me to go...
+0x004A • Show me 3 sietchs where you want me to go next...
+0x004B • SELECT TROOP OCCUPATION
+0x004C • SELECT DESTINATION ON MAP
+0x004D • CHANGE DESTINATION
+0x004E • GO THERE FLYING AN ORNI
+0x004F • GO THERE RIDING A WORM
+0x0050 • ADD A DESTINATION
+0x0051 • GIVE NEW DESTINATIONS
+0x0052 • GO & SEARCH FOR EQUIPMENT
+0x0053 •  
+0x0054 • ESPIONAGE
+0x0055 • ATTACK
+0x0056 • ASSEMBLY WIND-TRAP
+0x0057 • CONTACT FREMEN TROOPS
+0x0058 • EXIT MAPS
+0x0059 • SEE SPICE DENSITY
+0x005A •   SPICE DENSITY  
+0x005B • no troops
+0x005C • FIND PROSPECTORS
+0x005D •   TROOP OCCUPATION  
+0x005E • none
+0x005F • Spice: 
+0x0060 • unprospected
+0x0061 • water: 
+0x0062 • No wind-trap
+0x0063 • Equipment:
+0x0064 •   Sietch:
+(unused eqp.)
+0x0065 • for a very short time
+0x0066 • for a few hours
+0x0067 • for 1 day
+0x0068 • for 12 days
+0x0069 • but our job is finished
+0x006A • SPECIALIZE IN SPICE
+0x006B • SPECIALIZE IN ARMY
+0x006C • SPECIALIZE IN ECOLOGY
+0x006D • DUKE LETO ATREIDES
+0x006E • JESSICA
+0x006F • Thufir HAWAT
+0x0070 • Duncan IDAHO
+0x0071 • Gurney HALLECK
+0x0072 • STILGAR, Fremen leader
+0x0073 • KYNES, planetary ecologist
+0x0074 • CHANI
+0x0075 • HARAH
+0x0076 • BARON VLADIMIR HARKONNEN
+0x0077 • FEYD-RAUTHA HARKONNEN
+0x0078 • EMPEROR SHADDAM IV
+0x0079 • Harkonnen Captain
+0x007A • Smuggler
+0x007B • Fremen
+0x007C • Fremen Chief
+0x007D • 2nd Fremen Chief
+0x007E • 3rd Fremen Chief
+0x007F • 4th Fremen Chief
+0x0080 • 5th Fremen Chief
+0x0081 • 6th Fremen Chief
+0x0082 • 7th Fremen Chief
+0x0083 • 8th Fremen Chief
+0x0084 • Prospector Chief
+0x0085 • " TALK TO ME "
+0x0086 • " COME WITH ME "
+0x0087 • " STAY HERE "
+0x0088 • GIVE ORDERS TO TROOP
+0x0089 • STOP TALKING
+0x008A • .
+0x008B • " WORK FOR ME "
+0x008C • " RALLY ME "
+0x008D • SEE DUNE MAP
+0x008E • LOOK AT MIRROR
+0x008F • MASSIVE ATTACK
+0x0090 • FIGHT FOR A WHOLE DAY
+0x0091 • " OVERPOWER THE PRISONER "
+0x0092 • Look away from the mirror
+0x0093 •   Others...
+0x0094 • Done
+0x0095 •  Continue...
+0x0096 •   Cancel
+0x0097 • DESERT
+0x0098 • WAIT FOR EVENING
+0x0099 • WAIT FOR MORNING
+0x009A • TAKE AN ORNITHOPTER
+0x009B • CALL A WORM
+0x009C • SKIP TO DESTINATION
+0x009D • TOWARDS NEAREST PLACE
+0x009E • RESUME FLIGHT
+0x009F • BACK TO STARTING POINT
+0x00A0 • GO TOWARDS THIS PLACE
+0x00A1 • IGNORE WARNING
+0x00A2 • ATREIDES
+0x00A3 • HARKONNEN
+0x00A4 • SEE RESULTS
+0x00A5 • STANDARD VISION
+0x00A6 • SAVE GAME
+0x00A7 • LOAD GAME
+0x00A8 • OPTIONS & QUIT GAME
+0x00A9 • SEE MAP OF THIS AREA
+0x00AA • EXIT GLOBE
+0x00AB • YES I WANT TO EXIT GAME
+0x00AC • NO I DON'T WANT TO FINISH
+0x00AD • RESTART GAME
+0x00AE • EXIT GAME
+0x00AF • Ah ah! One day, this Paul Atreides went flying over us. We shot down his ornithopter.
+He died somewhere in the desert.
+0x00B0 • Paul Atreides died as he tried to drink the Water of Life. Many now say that he was too hasty. But I miss him. He was the only man able to send these Harkonnen back.
+0x00B1 • You know what?... Paul Atreides, he simply arrived one day at one of our fortresses. Needless to say, he was immediately shot! I've seen his body rotten under the sun... Ah ah!
+0x00B2 •   ****  WARNING  ****
+
+ENTERING HARKONNEN ZONE
+0x00B3 • Winning a battle, one of my captains captured Paul Atreides.
+Ah! It was a real pleasure to leave him in plain desert without any protection.
+0x00B4 • As Paul Atreides failed to respond to my spice demands, my Sardaukhars terror troops took control on the planet.
+That was the end of the Atreides.
+0x00B5 •   2nd day on DUNE
+0x00B6 • CHARISMA = 129
+0x00B7 •   0%
+0x00B8 •   0%
+0x00B9 • CONTROLLED AREAS
+0x00BA •      0 
+0x00BB •      0 
+0x00BC • SPICE PRODUCTION
+0x00BD •      0 
+0x00BE •      0 
+0x00BF •  NUMBER OF MEN
+0x00C0 •  Insufficient STANDARD MEMORY to run DUNE
+0x00C1 • on the left
+0x00C2 • ahead
+0x00C3 • on the right
+0x00C4 • On trial
+0x00C5 • Novice
+0x00C6 • Average
+0x00C7 • Efficient
+0x00C8 • Skilled
+0x00C9 • Expert
+0x00CA • VIEW NEW MESSAGES
+0x00CB • Messages already seen
+0x00CC •  Viewed
+0x00CD • northwards
+0x00CE • north-eastwards
+0x00CF • eastwards
+0x00D0 • south-eastwards
+0x00D1 • southwards
+0x00D2 • south-westwards
+0x00D3 • westwards
+0x00D4 • north-westwards
+0x00D5 •            DUNE  MAP
+* Map to command rallied troops *
+
+  Number of rallied troops =   0
+0x00D6 • ALL TOPICS
+0x00D7 • TOPIC: POLITICS
+0x00D8 • TOPIC: PAUL ON DUNE
+0x00D9 • TOPIC: SPICE
+0x00DA • TOPIC: THE FREMEN
+0x00DB • a spice-harvester
+0x00DC • an orni
+0x00DD • some krys
+0x00DE • several laser-guns
+0x00DF • weirding modules
+0x00E0 • atomics weapons
+0x00E1 • some bulbs
+0x00E2 • ACCEPT
+0x00E3 • REFUSE
+0x00E4 • ARGUE
+0x00E5 • On which page of the manual can you see this picture ?  
+0x00E6 • And the Duke said to Paul:
+0x00E7 • Paul's mother, Jessica, explains:
+0x00E8 • Strategic master, Thufir Hawat, gave Paul this advice:
+0x00E9 • Duncan Idaho told Paul:
+0x00EA • And Gurney Halleck said to Paul:
+0x00EB • Stilgar, the Fremen leader, told Paul:
+0x00EC •  
+0x00ED • And Chani said to Paul:
+0x00EE •  
+0x00EF •  
+0x00F0 •  
+0x00F1 •  
+0x00F2 •  
+0x00F3 •  
+0x00F4 • One Fremen told Paul:
+0x00F5 • A Fremen talks:
+0x00F6 •  
+0x00F7 • Politics
+0x00F8 • Paul Atreides
+0x00F9 • Spice
+0x00FA • The Fremen
+0x00FB • Paul Atreides
+0x00FC • Muad'Dib
+0x00FD • MUSIC ON (CD-STYLE)
+0x00FE • MUSIC ON (GAME RELATIVE)
+0x00FF • SHUFFLE
+0x0100 • STANDARD ORDER
+0x0101 • MUSIC OFF
+0x0102 • Log 1: DAY  0 / 12.00 a.m.
+0x0103 • Log 2: DAY  0 / 12.00 a.m.
+0x0104 • LAST ENTERING INTO A PLACE
+0x0105 • LAST ENTERING NEW SIETCH
+0x0106 •  SAVE SUCCESSFUL
+0x0107 •  *** SAVE ERROR 
+0x0108 • GAME  PAUSED
+0x0109 •  <ESC> removes this window
+Any other key resumes game
+0x010A •  4.30 a.m. 6.00 a.m. 7.30 a.m. 9.00 a.m.10.30 a.m.12.00 p.m. 1.30 p.m. 3.00 p.m. 4.30 p.m. 6.00 p.m. 7.30 p.m. 9.00 p.m.10.30 p.m.12.00 a.m. 1.30 a.m. 3.00 a.m.
+0x010B • In these times of the future, man has explored many worlds, travelling  through space by the use of the SPICE.
+0x010C • SPICE, the most precious substance, can only be found on one planet in the whole universe.
+This planet is Arrakis, better known as DUNE.
+0x010D • It's a dry desolate planet with vast deserts. There's never a drop of  rain on Dune.
+0x010E • You are PAUL ATREIDES, son of Duke Leto Atreides.
+0x010F • The HARKONNENS, long time enemies of your family, have come on Dune  to control the Spice production, in their brutal way.
+0x0110 • But the Emperor of the Universe has just allowed you and the Atreides family  to go on Dune too.
+0x0111 • You are determined to use this opportunity to drive the  Harkonnens out of Dune, with the help of the few natives, the FREMEN.
+0x0112 • The story begins as you've just arrived on Dune, in an empty palace located  at a safe distance from the Harkonnen fortresses.
+0x0113 •  
+0x0114 •  
+0x0115 • Paul Atreides
+0x0116 • Duke Leto Atreides
+0x0117 • Jessica Atreides
+0x0118 • Gurney Halleck
+0x0119 • Duncan Idaho
+0x011A • Shaddam IV
+0x011B • Harah
+0x011C • Thufir Hawat
+0x011D • Stilgar
+0x011E • Baron Harkonnen
+0x011F • Feyd Rautha
+0x0120 • Chani
+0x0121 • Liet Kynes
+0x0122 •  
+0x0123 • Coming soon: DUNE 2
+0x0124 • .
+0x0125 • SUPER FREMEN HERE
+0x0126 • PHASE LOC KNOWN
+0x0127 • ALL SIETCHS KNOWN
+0x0128 • RALLY ALL FREMEN/SIETCH
+0x0129 •  ALL LOC PROSPECTED
+0x012A •  MUAD'DIB + 10
+0x012B •   SHOW COORDS/SMALL MAP
+0x012C •  TIME VERY FAST
+0x012D •  TIME NORMAL
+0x012E •  VEGET EVERYWHERE
+0x012F •   SHOW TRAVEL ANGLES
+0x0130 •   SHOW VARIABLE
+0x0131 •    BACK TO SCR
+0x0132 •      ALL TEXTS
+0x0133 •   SHOW TIME AND SPEED
+0x0134 •    BUF TO SCR
+0x0135 •    ALL LOC KNOWN
+0x0136 •    NO "TOO FAR..."
+0x0137 •     GOTO PHASE 80
+0x0138 •     INCPHASE
+0x0139 •     PHASE 123
+0x013A •     GO->GAME END
+0x013B •      HARKO ATTACK
+0x013C •      NOT KILLED
+0x013D •      9 PERSOS HERE
+0x013E •      ALL PERSOS
