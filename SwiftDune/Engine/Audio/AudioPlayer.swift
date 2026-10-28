@@ -81,18 +81,26 @@ class AudioPlayer {
   
   
     func playSong(_ name: String, loop: Bool = true) {
+        if currentMusicItem != nil && currentMusicItem?.fileName == name {
+            return
+        }
+      
         let item = Music(name, player: self)
         self.play(item, loop: loop)
     }
 
   
     func playSound(_ name: String, loop: Bool = false) {
+        if currentAudioItem != nil && currentAudioItem?.fileName == name {
+            return
+        }
+
         let item = Sound(name, player: self)
         self.play(item, loop: loop)
     }
 
 
-    private func play(_ item: AudioPlayerItem, loop: Bool = false) {
+    func play(_ item: AudioPlayerItem, loop: Bool = false) {
         if item.type == .sound {
             if let currentAudioItem = currentAudioItem {
               currentAudioItem.stop()

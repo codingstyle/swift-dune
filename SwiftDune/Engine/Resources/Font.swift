@@ -57,38 +57,43 @@ final class GameFont {
         // 3. For each line compute space for justification and render
 
         let charHeight: Int = style == .normal ? 9 : 7
-        var spaceWidth = 5 //Int(self.charWidths[32])
-
-        if style == .small {
-            spaceWidth = min(6, spaceWidth)
-        }
-
         let words = text.split(separator: /\s/)
-        var lineWidth = 0
-        var lineBudget = Int(rect.width) - firstLineIndent
-        var i = 0
-        
         var lines: [[SizedText]] = []
         var sizedText: [SizedText] = []
-        
-        while i < words.count {
-            let word = String(words[i])
-            let wordWidth = self.width(for: word, style: style)
-            
-            if lineWidth + (spaceWidth * (sizedText.count + 1)) + wordWidth < lineBudget {
-                sizedText.append(SizedText(text: word, size: wordWidth))
-                lineWidth += wordWidth
-            } else {
-                lines.append(sizedText)
-                
-                sizedText = [SizedText(text: word, size: wordWidth)]
-                lineWidth = wordWidth
-                lineBudget = Int(rect.width)
+
+        if style == .small {
+            var i = 0
+
+            while i < words.count {
+                let word = String(words[i])
+                sizedText.append(SizedText(text: word, size: self.width(for: word, style: style)))
+                i += 1
             }
-            
-            i += 1
+        } else {
+            let spaceWidth = 5 //Int(self.charWidths[32])
+            var lineWidth = 0
+            var lineBudget = Int(rect.width) - firstLineIndent
+            var i = 0
+
+            while i < words.count {
+                let word = String(words[i])
+                let wordWidth = self.width(for: word, style: style)
+
+                if lineWidth + (spaceWidth * (sizedText.count + 1)) + wordWidth < lineBudget {
+                    sizedText.append(SizedText(text: word, size: wordWidth))
+                    lineWidth += wordWidth
+                } else {
+                    lines.append(sizedText)
+
+                    sizedText = [SizedText(text: word, size: wordWidth)]
+                    lineWidth = wordWidth
+                    lineBudget = Int(rect.width)
+                }
+
+                i += 1
+            }
         }
-        
+
         lines.append(sizedText)
 
         let yOffset = (Int(rect.height) - (lines.count * charHeight)) / 2
@@ -186,6 +191,10 @@ final class GameFont {
     
     
     private func drawText(_ words: [SizedText], x: UInt16, y: UInt16, width: UInt16, buffer: PixelBuffer, style: FontSize = .normal, alignment: FontAlignment = .left) {
+        if words.isEmpty {
+            return
+        }
+
         var currentX = Int(x)
         let currentY = Int(y)
         let charHeight: UInt32 = style == .normal ? 9 : 7
@@ -253,20 +262,23 @@ final class GameFont {
                 
                 while charY < charHeight {
                     charLine = resource.stream!.readByte()
+                    let destY = currentY + charY
 
                     var charX = 0
-                    
-                    while charX < charWidth {
-                        let destOffset = (currentY + charY) * buffer.width + (currentX + charX)
 
-                        if charLine & 0x80 > 0 {
-                            buffer.rawPointer[destOffset] = paletteIndex
+                    while charX < charWidth {
+                        if charLine & 0x80 > 0 && destY >= 0 && destY < buffer.height {
+                            let destX = currentX + charX
+
+                            if destX >= 0 && destX < buffer.width {
+                                buffer.rawPointer[(destY * buffer.width) + destX] = paletteIndex
+                            }
                         }
 
                         charLine <<= 1
                         charX += 1
                     }
-                    
+
                     charY += 1
                 }
 

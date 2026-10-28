@@ -9,6 +9,8 @@ import Foundation
 
 final class Game: DuneNode {
     private var sceneNode: DuneNode?
+    private var dialogueNode: DialogueOverlay?
+    private var characterNode: Character?
     private var uiNode: UI?
     private var cursor: Cursor?
 
@@ -49,6 +51,8 @@ final class Game: DuneNode {
         uiNode = UI()
         uiNode?.isActive = true
 
+        dialogueNode = DialogueOverlay()
+
         if engine.input.mouseEnabled {
             cursor = Cursor()
         }
@@ -59,8 +63,19 @@ final class Game: DuneNode {
 
     override func onDisable() {
         sceneNode?.isActive = false
+        sceneNode?.onDisable()
         sceneNode = nil
+      
+        dialogueNode?.isActive = false
+        dialogueNode?.onDisable()
+        dialogueNode = nil
+      
+        characterNode?.isActive = false
+        characterNode?.onDisable()
+        characterNode = nil
+        
         uiNode?.onDisable()
+      
         EventManager.uiStateChangedEvent.removeListener(self)
         EventManager.bookStateChangedEvent.removeListener(self)
         EventManager.navigationEvent.removeListener(self)
@@ -86,12 +101,30 @@ final class Game: DuneNode {
 
     override func update(_ elapsedTime: TimeInterval) {
         sceneNode?.update(elapsedTime)
+      
+        if let dialogueNode, dialogueNode.isActive {
+            dialogueNode.update(elapsedTime)
+        }
+      
+        if let characterNode, characterNode.isActive {
+            characterNode.update(elapsedTime)
+        }
+      
         uiNode?.update(elapsedTime)
     }
 
 
     override func render(_ buffer: PixelBuffer) {
         sceneNode?.render(buffer)
+      
+        if let dialogueNode, dialogueNode.isActive {
+            dialogueNode.render(buffer)
+        }
+      
+        if let characterNode, characterNode.isActive {
+            characterNode.render(buffer)
+        }
+      
         uiNode?.render(buffer)
         cursor?.render(buffer)
     }
@@ -148,6 +181,7 @@ final class Game: DuneNode {
             Menus.shared.setRecords(.command, [])
             Menus.shared.show(.command)
         }
+      
         EventManager.uiStateChangedEvent.notify(UIStateEventData(
             rightPanel: .roomDirections,
             directions: view.directions
@@ -215,5 +249,46 @@ final class Game: DuneNode {
 
     func showBook() {
         showScene("Book", [:]) { Book() }
+    }
+
+
+    func showDialogue(_ text: String, speaker: Int) {
+        if dialogueNode == nil {
+            dialogueNode = DialogueOverlay()
+        }
+      
+        dialogueNode?.params = ["text": text, "speaker": speaker]
+      
+        if dialogueNode?.isActive != true {
+            dialogueNode?.isActive = true
+        }
+    }
+
+
+    func hideDialogue() {
+        dialogueNode?.isActive = false
+    }
+
+
+    func showCharacter(_ character: DuneCharacter, animations: [Int] = [0]) {
+        if characterNode == nil {
+            characterNode = Character()
+        }
+      
+        if characterNode?.isActive == true {
+            characterNode?.isActive = false
+        }
+      
+        characterNode?.params = [
+            "character": character,
+            "animations": animations
+        ]
+        characterNode?.isActive = true
+    }
+
+
+    func hideCharacter() {
+        characterNode?.isActive = false
+        characterNode = nil
     }
 }

@@ -59,7 +59,9 @@ final class Map: DuneNode {
 
   override func render(_ buffer: PixelBuffer) {
     GameState.shared.prepareWorld()
+    
     guard GameState.shared.mapState.ready else { return }
+    
     renderer.draw(
       into: buffer,
       map: GameState.shared.mapState.bytes,

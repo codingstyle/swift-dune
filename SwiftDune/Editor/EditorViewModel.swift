@@ -120,7 +120,7 @@ class EditorViewModel: ObservableObject {
         } else if selection.resourceType == .sound {
             sound = Sound(selection.resourceName, player: engine.audioPlayer)
             sound!.dumpInfo()
-            engine.audioPlayer.play(sound!)
+            engine.audioPlayer.playSound(selection.resourceName)
         } else if selection.resourceType == .music {
             music = Music(selection.resourceName, player: engine.audioPlayer)
             music!.dumpInfo()

@@ -195,6 +195,8 @@
 		06B1A0052C7A100100000003 /* Menus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06B1A0052C7A100100000001 /* Menus.swift */; };
 		06B812CB2BB0CF3D0048C8AC /* Prologue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06B812CA2BB0CF3D0048C8AC /* Prologue.swift */; };
 		06B812CD2BB559B90048C8AC /* PrologueSubtitle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06B812CC2BB559B90048C8AC /* PrologueSubtitle.swift */; };
+		06E1D0A22F8A10A100B47D13 /* DialogueOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06E1D0A12F8A10A100B47D13 /* DialogueOverlay.swift */; };
+		06E1D0A32F8A10A100B47D13 /* DialogueOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06E1D0A12F8A10A100B47D13 /* DialogueOverlay.swift */; };
 		06C0C5022F8A10A100B47D13 /* Cursor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06C0C5012F8A10A100B47D13 /* Cursor.swift */; };
 		06C0C5032F8A10A100B47D13 /* Cursor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06C0C5012F8A10A100B47D13 /* Cursor.swift */; };
 		06C16D872B1C8F0100CBEAA2 /* PixelBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06C16D862B1C8F0100CBEAA2 /* PixelBuffer.swift */; };
@@ -351,6 +353,7 @@
 		06B1A0052C7A100100000001 /* Menus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Menus.swift; sourceTree = "<group>"; };
 		06B812CA2BB0CF3D0048C8AC /* Prologue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Prologue.swift; sourceTree = "<group>"; };
 		06B812CC2BB559B90048C8AC /* PrologueSubtitle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrologueSubtitle.swift; sourceTree = "<group>"; };
+		06E1D0A12F8A10A100B47D13 /* DialogueOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DialogueOverlay.swift; sourceTree = "<group>"; };
 		06C0C5012F8A10A100B47D13 /* Cursor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cursor.swift; sourceTree = "<group>"; };
 		06C16D862B1C8F0100CBEAA2 /* PixelBuffer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PixelBuffer.swift; sourceTree = "<group>"; };
 		06C16D882B1CB01700CBEAA2 /* Effects.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Effects.swift; sourceTree = "<group>"; };
@@ -721,6 +724,7 @@
 			children = (
 				068965B72B5F046A005A19D7 /* UI.swift */,
 				06B812CC2BB559B90048C8AC /* PrologueSubtitle.swift */,
+				06E1D0A12F8A10A100B47D13 /* DialogueOverlay.swift */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -899,6 +903,7 @@
 				067CE9E3307BB17600186AC3 /* Stars.swift in Sources */,
 				067CE9F7307BB17D00186AC3 /* UI.swift in Sources */,
 				067CE9F8307BB17D00186AC3 /* PrologueSubtitle.swift in Sources */,
+				06E1D0A32F8A10A100B47D13 /* DialogueOverlay.swift in Sources */,
 				067CE9E4307BB17600186AC3 /* Game.swift in Sources */,
 				067CE9E5307BB17600186AC3 /* Intro.swift in Sources */,
 				067CE9E6307BB17600186AC3 /* Palace.swift in Sources */,
@@ -986,6 +991,7 @@
 				0600C9E22C834BF700E552DD /* CopyProtection.swift in Sources */,
 				067CE996307BAD5000186AC3 /* DuneInput.swift in Sources */,
 				06B812CD2BB559B90048C8AC /* PrologueSubtitle.swift in Sources */,
+				06E1D0A22F8A10A100B47D13 /* DialogueOverlay.swift in Sources */,
 				06B812CB2BB0CF3D0048C8AC /* Prologue.swift in Sources */,
 				06D16B6A2C5FEC2300C85A78 /* SpriteAnimation.swift in Sources */,
 				06FC4EF42E657A0B00F68119 /* HERAD.swift in Sources */,
