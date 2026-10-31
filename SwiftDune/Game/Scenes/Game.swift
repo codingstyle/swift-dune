@@ -13,6 +13,7 @@ final class Game: DuneNode {
     private var characterNode: Character?
     private var uiNode: UI?
     private var cursor: Cursor?
+    private var dialoguePerson: UInt8?
 
     init() {
         super.init("Game")
@@ -100,6 +101,8 @@ final class Game: DuneNode {
 
 
     override func update(_ elapsedTime: TimeInterval) {
+        refreshRoomMove()
+        refreshTalk()
         sceneNode?.update(elapsedTime)
       
         if let dialogueNode, dialogueNode.isActive {
@@ -155,7 +158,9 @@ final class Game: DuneNode {
         }
 
         GameState.shared.move(direction)
-        showLocation()
+        if GameState.shared.pendingRoomAction != 1 {
+            showLocation()
+        }
     }
 
 
@@ -190,6 +195,8 @@ final class Game: DuneNode {
 
 
     private func showScene(_ name: String, _ params: [String: Any], make: () -> DuneNode) {
+        endTalk(restoreMenu: false)
+
         if sceneNode?.name == name {
             sceneNode?.params = params
             return
@@ -230,6 +237,17 @@ final class Game: DuneNode {
             break
         case MenuHandler.exitGlobe:
             showLocation()
+            break
+        case MenuHandler.exitMenu:
+            if choice.scenario == .npcActions {
+                endTalk()
+            }
+            break
+        case 0x9472:
+            advanceTalk()
+            break
+        case 0x95e2:
+            followOrStay()
             break
         default:
             break
@@ -290,5 +308,205 @@ final class Game: DuneNode {
     func hideCharacter() {
         characterNode?.isActive = false
         characterNode = nil
+    }
+
+
+    private func roomAcceptsTalk() -> Bool {
+        switch sceneNode?.name {
+        case "Palace", "Sietch", "Arrakeen":
+            return true
+        default:
+            return false
+        }
+    }
+
+
+    private func refreshRoomMove() {
+        guard GameState.shared.pendingRoomAction == 1 else { return }
+
+        let leaving = GameState.shared.runRoomAutoDialogue()
+        GameState.shared.pendingRoomAction = 0
+        if let leaving {
+            presentAutoLine(leaving)
+        }
+        guard GameState.shared.dialogueInterruptGate == 0xFF else { return }
+
+        GameState.shared.commitPendingRoomMove()
+        showLocation()
+        guard roomAcceptsTalk() else { return }
+        if let entered = GameState.shared.runRoomAutoDialogue() {
+            presentAutoLine(entered)
+        }
+    }
+
+
+    private func presentAutoLine(_ line: RoomAutoLine) {
+        GameState.shared.beginAutoTalk(with: line.person)
+        dialoguePerson = line.person.personIndex
+        zoom(on: line.person)
+        Menus.shared.setRecords(.npcActions, GameState.shared.speechMenuRecords(for: line.person))
+        Menus.shared.show(.npcActions)
+
+        if let portrait = portrait(for: line.person.personIndex) {
+            showCharacter(portrait)
+        } else {
+            hideCharacter()
+        }
+
+        if line.text.isEmpty {
+            hideDialogue()
+        } else {
+            showDialogue(line.text, speaker: Int(line.person.personIndex))
+        }
+    }
+
+
+    private func refreshTalk() {
+        guard roomAcceptsTalk() else {
+            if dialoguePerson != nil {
+                endTalk(restoreMenu: false)
+            }
+            return
+        }
+
+        guard let person = GameState.shared.selectedRoomPerson() else {
+            if dialoguePerson != nil {
+                endTalk()
+            }
+            return
+        }
+
+        if dialoguePerson != person.personIndex {
+            beginTalk(person)
+        }
+    }
+
+
+    private func beginTalk(_ person: DuneRoomPerson) {
+        GameState.shared.beginTalk(with: person)
+        guard let text = GameState.shared.nextDialogueLine() else {
+            GameState.shared.finishTalk()
+            return
+        }
+
+        dialoguePerson = person.personIndex
+        zoom(on: person)
+        Menus.shared.setRecords(.npcActions, GameState.shared.speechMenuRecords(for: person))
+        Menus.shared.show(.npcActions)
+
+        if let portrait = portrait(for: person.personIndex) {
+            showCharacter(portrait)
+        } else {
+            hideCharacter()
+        }
+
+        if text.isEmpty {
+            hideDialogue()
+        } else {
+            showDialogue(text, speaker: Int(person.personIndex))
+        }
+    }
+
+
+    private func advanceTalk() {
+        guard dialoguePerson != nil else { return }
+        guard let text = GameState.shared.nextDialogueLine() else {
+            endTalk()
+            return
+        }
+        if text.isEmpty {
+            hideDialogue()
+        } else if let dialoguePerson {
+            showDialogue(text, speaker: Int(dialoguePerson))
+        }
+    }
+
+
+    private func followOrStay() {
+        guard let dialoguePerson else { return }
+        guard let person = GameState.shared.toggleCompanion(personIndex: dialoguePerson) else { return }
+        Menus.shared.setRecords(.npcActions, GameState.shared.speechMenuRecords(for: person))
+        Menus.shared.show(.npcActions)
+    }
+
+
+    private func endTalk(restoreMenu: Bool = true) {
+        guard dialoguePerson != nil || GameState.shared.personTalkingTo != 0 else { return }
+        dialoguePerson = nil
+        GameState.shared.finishTalk()
+        hideDialogue()
+        hideCharacter()
+
+        guard restoreMenu else { return }
+        let hadZoom = sceneNode?.params["zoom"] != nil
+        clearZoom()
+        if !hadZoom || sceneNode?.name != "Palace" {
+            if Menus.shared.scenario == .npcActions {
+                Menus.shared.show(.command)
+            }
+        }
+    }
+
+
+    private func zoom(on person: DuneRoomPerson) {
+        guard sceneNode?.name == "Palace" else { return }
+        let focal = Effects.talkingHeadFocalPoint(Int(person.personIndex))
+        guard focal.x != 0 || focal.y != 0 else {
+            clearZoom()
+            return
+        }
+
+        let origin = Effects.zoomOrigin(focal: focal, scale: 6)
+        let x = min(Int(origin.x), 0xF0)
+        let y = min(Int(origin.y), 0x71)
+        var next = sceneNode?.params ?? [:]
+        next["zoom"] = DuneRect(Int16(x), Int16(y), 80, 38)
+        sceneNode?.params = next
+    }
+
+
+    private func clearZoom() {
+        guard sceneNode?.name == "Palace", sceneNode?.params["zoom"] != nil else { return }
+        var next = sceneNode?.params ?? [:]
+        next.removeValue(forKey: "zoom")
+        sceneNode?.params = next
+    }
+
+
+    private func portrait(for personIndex: UInt8) -> DuneCharacter? {
+        switch DialogueSpeaker(rawValue: personIndex) {
+        case .leto:
+            return .leto
+        case .jessica:
+            return .jessica
+        case .thufir:
+            return .thufir
+        case .duncan:
+            return .duncan
+        case .gurney:
+            return .gurney
+        case .stilgar:
+            return .stilgar
+        case .kynes:
+            return .liet
+        case .chani:
+            return .chani
+        case .harah:
+            return .harah
+        case .baron:
+            return .baron
+        case .feyd:
+            return .feyd
+        case .emperor:
+            return .emperor
+        case .smugglers:
+            return .smuggler
+        case .fremen1:
+            return .fremen1
+        case .fremen2:
+            return .fremen2
+        case .harkonnenCaptain, .narrator, .none:
+            return nil
+        }
     }
 }

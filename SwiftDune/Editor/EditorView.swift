@@ -107,6 +107,8 @@ struct EditorView: View {
                 GlobeDetailsView(viewModel: viewModel)
             } else if selection?.resourceType == .music {
                 MusicDetailsView(viewModel: viewModel)
+            } else if selection?.resourceName == "DIALOGUE.HSQ" {
+                DialogueDetailsView(viewModel: viewModel)
             } else if selection?.resourceType == .gameLogic {
                 ConditionDetailsView(viewModel: viewModel)
             } else {

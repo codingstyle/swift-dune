@@ -230,4 +230,94 @@ final class Condition {
     
     return .immediate16(stream.readUInt16LE())
   }
+  
+  
+  /// Condition 0 is inert. A non-zero result holds. Comparisons yield 0xFFFF or 0;
+  /// `<` and `>` are unsigned, `<=` and `>=` are signed, and add/sub wrap.
+  func holds(_ index: UInt16, read: (Bool, UInt8) -> UInt16) -> Bool {
+    return evaluate(index, read: read) != 0
+  }
+  
+  
+  private func evaluate(_ index: UInt16, read: (Bool, UInt8) -> UInt16) -> UInt16 {
+    if index == 0 || Int(index) > expressions.count {
+      return 0
+    }
+    
+    let tokens = expressions[Int(index) - 1].tokens
+    if tokens.isEmpty {
+      return 0
+    }
+    
+    var cursor = 0
+    var stack: [(UInt16, UInt8)] = []
+    
+    func nextOperand() -> UInt16 {
+      guard cursor < tokens.count else { return 0 }
+      guard case .operand(let operand) = tokens[cursor] else { return 0 }
+      cursor += 1
+      switch operand {
+      case .variable(let isWord, let dsOffset):
+        return read(isWord, dsOffset)
+      case .immediate8(let value):
+        return UInt16(value)
+      case .immediate16(let value):
+        return value
+      }
+    }
+    
+    var value = nextOperand()
+    
+    while cursor < tokens.count {
+      guard case .operation(let operation) = tokens[cursor] else { break }
+      cursor += 1
+      if operation.isLoose {
+        stack.append((value, operation.rawValue))
+        value = nextOperand()
+      } else {
+        value = Condition.apply(operation.rawValue, value, nextOperand())
+      }
+    }
+    
+    if let first = stack.first {
+      var accumulated = first.0
+      var i = 0
+      while i < stack.count {
+        let rhs = (i + 1 < stack.count) ? stack[i + 1].0 : value
+        accumulated = Condition.apply(stack[i].1, accumulated, rhs)
+        i += 1
+      }
+      value = accumulated
+    }
+    
+    return value
+  }
+  
+  
+  private static func apply(_ opcode: UInt8, _ left: UInt16, _ right: UInt16) -> UInt16 {
+    switch opcode & 0x1F {
+    case 0x00:
+      return left == right ? 0xFFFF : 0
+    case 0x02:
+      return left < right ? 0xFFFF : 0
+    case 0x04:
+      return left > right ? 0xFFFF : 0
+    case 0x06:
+      return left != right ? 0xFFFF : 0
+    case 0x08:
+      return Int16(bitPattern: left) <= Int16(bitPattern: right) ? 0xFFFF : 0
+    case 0x0A:
+      return Int16(bitPattern: left) >= Int16(bitPattern: right) ? 0xFFFF : 0
+    case 0x0C:
+      return left &+ right
+    case 0x0E:
+      return left &- right
+    case 0x10:
+      return left & right
+    case 0x12:
+      return left | right
+    default:
+      return 0
+    }
+  }
 }

@@ -114,9 +114,7 @@ final class Palace: DuneNode {
             self.character = character as! DuneCharacter
         }
         
-        if let zoom = params["zoom"] {
-            self.zoomRect = zoom as? DuneRect
-        }
+        zoomRect = params["zoom"] as? DuneRect
 
         if let dayMode = params["dayMode"] {
             self.dayMode = dayMode as! DuneLightMode
@@ -447,19 +445,6 @@ final class Palace: DuneNode {
     private func showCharacterMenu(_ person: DuneRoomPerson) {
         GameState.shared.personTalkingTo = UInt16(1) << person.personIndex
         GameState.shared.currentSpeakerId = person.personIndex
-
-        let comeGreyed = person.flags.contains(.npcNoComeWithMe)
-            || (person.personIndex == 0x0C && person.flags.contains(.npcStoryBit))
-        let travel = person.flags.contains(.npcCompanion)
-            ? MenuRecord(textId: CommandId.stayHere, handler: 0x95e2)
-            : MenuRecord(textId: CommandId.comeWithMe, handler: 0x95e2, greyed: comeGreyed)
-
-        Menus.shared.setRecords(.npcActions, [
-            MenuRecord(textId: CommandId.talkToMe, handler: 0x9472),
-            travel,
-            MenuRecord(textId: CommandId.stopTalking, handler: MenuHandler.exitMenu)
-        ])
-        Menus.shared.show(.npcActions)
     }
 
 

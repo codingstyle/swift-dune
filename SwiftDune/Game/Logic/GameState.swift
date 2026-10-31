@@ -652,6 +652,17 @@ struct GameState {
   var showLocationOnMapRequested: Bool = false
   var pendingCutscene: DialogueCutscene?
   var dialoguePlayedLog: [UInt16] = []
+  var dialogueScript: Dialogue?
+  var dialogueConditions: Condition?
+  var phraseBank1: Sentence?
+  var phraseBank2: Sentence?
+  var commandLines: Sentence?
+  var talkTopic: UInt16 = 0
+  var talkResume: UInt32 = 0
+  var talkPages: [String] = []
+  var talkExhausted: Bool = false
+  var pendingTalkSentence: DialogueSentence?
+  var pendingMoveRoom: UInt16 = 0
   
   
   mutating func update(_ offset: UInt16, _ value: UInt16, isWord: Bool = false) {
@@ -688,7 +699,7 @@ struct GameState {
     return false
   }
   
-  private static let uint8Fields: [WritableKeyPath<GameState, DuneDataSegment<UInt8>>] = [
+  private nonisolated(unsafe) static let uint8Fields: [WritableKeyPath<GameState, DuneDataSegment<UInt8>>] = [
     \._data_0008, \._data_0009, \._paulFlags, \._currentRoom,
     \._pendingDestinationRoom, \._previousRoom, \._conditionSpeakerFlags,
     \._lineSpokenThisConversation, \._relateToArguing_001a, \._data_001b,
@@ -710,7 +721,7 @@ struct GameState {
     \._daysSinceLastGamePhaseChange, \._argueMenuWithSmuggler
   ]
   
-  private static let uint16Fields: [WritableKeyPath<GameState, DuneDataSegment<UInt16>>] = [
+  private nonisolated(unsafe) static let uint16Fields: [WritableKeyPath<GameState, DuneDataSegment<UInt16>>] = [
     \._randomBits, \._gameTime, \._locationAndRoom, \._locationAppearance,
     \._personsMet, \._personsInRoom, \._personsTravellingWith, \._personTalkingTo,
     \._conditionSpeakerTravelTimestamp, \._currentSmugglerBillAmount, \._spiceInStock,
@@ -723,24 +734,607 @@ struct GameState {
     \._shipmentReportSceneMask, \._nightAttackBackgroundSprite
   ]
   
-  private static let int8Fields: [WritableKeyPath<GameState, DuneDataSegment<Int8>>] = [
+  private nonisolated(unsafe) static let int8Fields: [WritableKeyPath<GameState, DuneDataSegment<Int8>>] = [
     \._data_00ea
   ]
   
-  private static let int16Fields: [WritableKeyPath<GameState, DuneDataSegment<Int16>>] = [
+  private nonisolated(unsafe) static let int16Fields: [WritableKeyPath<GameState, DuneDataSegment<Int16>>] = [
     \._globeParam4
   ]
   
-  private static let uint8ArrayFields: [WritableKeyPath<GameState, DuneDataSegment<[UInt8]>>] = [
+  private nonisolated(unsafe) static let uint8ArrayFields: [WritableKeyPath<GameState, DuneDataSegment<[UInt8]>>] = [
     \._wormEventLikelihoodByRegion
   ]
   
-  private static let uint16ArrayFields: [WritableKeyPath<GameState, DuneDataSegment<[UInt16]>>] = [
+  private nonisolated(unsafe) static let uint16ArrayFields: [WritableKeyPath<GameState, DuneDataSegment<[UInt16]>>] = [
     \._spiceShipmentArgumentAmounts
   ]
   
-  private static let nearestFields: [WritableKeyPath<GameState, DuneDataSegment<DuneNearestLocation>>] = [
+  private nonisolated(unsafe) static let nearestFields: [WritableKeyPath<GameState, DuneDataSegment<DuneNearestLocation>>] = [
     \._nearestLocation, \._nearestVillage, \._nearestSietch,
     \._nearestAtreidesArea, \._nearestHarkonnenArea
   ]
+}
+
+
+struct RoomAutoLine {
+  let person: DuneRoomPerson
+  let text: String
+}
+
+
+extension GameState {
+  /// The person the player selected, when that person is still in the room.
+  func selectedRoomPerson() -> DuneRoomPerson? {
+    if personTalkingTo == 0 {
+      return nil
+    }
+    
+    var present: [DuneRoomPerson] = []
+    for person in roomPersons where !person.flags.contains(.npcCompanion) && isStationedHere(person) {
+      present.append(person)
+    }
+    for person in roomPersons where person.flags.contains(.npcCompanion) {
+      present.append(person)
+    }
+    
+    return present.first { person in
+      personTalkingTo & (UInt16(1) << person.personIndex) != 0
+    }
+  }
+  
+  
+  func speechMenuRecords(for person: DuneRoomPerson) -> [MenuRecord] {
+    let comeGreyed = person.flags.contains(.npcNoComeWithMe)
+      || (person.personIndex == 0x0C && person.flags.contains(.npcStoryBit))
+    let travel = person.flags.contains(.npcCompanion)
+      ? MenuRecord(textId: CommandId.stayHere, handler: 0x95e2)
+      : MenuRecord(textId: CommandId.comeWithMe, handler: 0x95e2, greyed: comeGreyed)
+    
+    return [
+      MenuRecord(textId: CommandId.talkToMe, handler: 0x9472),
+      travel,
+      MenuRecord(textId: CommandId.stopTalking, handler: MenuHandler.exitMenu)
+    ]
+  }
+  
+  
+  /// Speaker install after an auto line has already been chosen and its event fired.
+  mutating func beginAutoTalk(with person: DuneRoomPerson) {
+    let bit = UInt16(1) << person.personIndex
+    personsMet |= bit
+    personTalkingTo = bit
+    currentSpeakerId = person.personIndex
+    lineSpokenThisConversation = 0
+    talkTopic = UInt16(person.personIndex) << 3
+    talkResume = 0
+    talkPages = []
+    talkExhausted = false
+    pendingTalkSentence = nil
+    loadDialogueFiles()
+  }
+  
+  
+  mutating func beginTalk(with person: DuneRoomPerson) {
+    let bit = UInt16(1) << person.personIndex
+    personsMet |= bit
+    personTalkingTo = bit
+    currentSpeakerId = person.personIndex
+    lineSpokenThisConversation = 0
+    talkTopic = UInt16(person.personIndex) << 3
+    talkResume = 0
+    talkPages = []
+    talkExhausted = false
+    pendingTalkSentence = nil
+    loadDialogueFiles()
+  }
+  
+  
+  mutating func finishTalk() {
+    if let index = roomPersons.firstIndex(where: { personTalkingTo & (UInt16(1) << $0.personIndex) != 0 }) {
+      roomPersons[index].flags.insert(.npcTalkedTo)
+      roomPersons[index].flags.remove(.npcLeftBehind)
+    }
+    personTalkingTo = 0
+    currentSpeakerId = 0
+    lineSpokenThisConversation = 0
+    talkTopic = 0
+    talkResume = 0
+    talkPages = []
+    talkExhausted = false
+    pendingTalkSentence = nil
+  }
+  
+  
+  mutating func toggleCompanion(personIndex: UInt8) -> DuneRoomPerson? {
+    guard let index = roomPersons.firstIndex(where: { $0.personIndex == personIndex }) else {
+      return nil
+    }
+    
+    let bit = UInt16(1) << personIndex
+    if roomPersons[index].flags.contains(.npcCompanion) {
+      roomPersons[index].flags.remove(.npcCompanion)
+      personsTravellingWith &= ~bit
+      roomPersons[index].timeDismissed = gameTime
+    } else if !roomPersons[index].flags.contains(.npcNoComeWithMe) {
+      roomPersons[index].flags.insert(.npcCompanion)
+      personsTravellingWith |= bit
+      roomPersons[index].timeJoined = gameTime
+    }
+    
+    return roomPersons[index]
+  }
+  
+  
+  /// First topic-4 line whose condition holds for someone standing in this room.
+  /// `pendingRoomAction` is still the value the conditions read; the caller clears it.
+  mutating func runRoomAutoDialogue() -> RoomAutoLine? {
+    loadDialogueFiles()
+    guard let dialogueScript, let dialogueConditions else {
+      return nil
+    }
+    
+    for person in roomOccupants() {
+      let slot = Dialogue.slot(person: UInt16(person.personIndex), topic: DialogueTopic.auto.rawValue)
+      guard let record = dialogueScript.record(at: slot) else {
+        continue
+      }
+      
+      seedSpeakerFields(person.personIndex)
+      
+      var match: DialogueSentence?
+      for sentence in record.sentences {
+        if sentence.shouldSkip(mask: DialogueTopic.autoMask) {
+          continue
+        }
+        if !dialogueConditions.holds(sentence.conditionId, read: { isWord, offset in
+          self.segmentValue(at: UInt16(offset), isWord: isWord)
+        }) {
+          continue
+        }
+        match = sentence
+        break
+      }
+      
+      guard var sentence = match else {
+        continue
+      }
+      
+      currentSpeakerId = person.personIndex
+      let pages = dialoguePages(for: sentence, record: record)
+      _ = fireDialogueLineEvent(&sentence)
+      dialogueScript.markSpoken(fileOffset: sentence.fileOffset)
+      paulFoundUnconscious = 0
+      return RoomAutoLine(person: person, text: pages.first ?? "")
+    }
+    
+    return nil
+  }
+  
+  
+  /// The next talk page, or nil when this speaker has nothing left to say.
+  mutating func nextDialogueLine() -> String? {
+    if !talkPages.isEmpty {
+      let page = talkPages.removeFirst()
+      if talkPages.isEmpty {
+        commitTalkSentence()
+      }
+      return page
+    }
+    
+    if talkExhausted {
+      return nil
+    }
+    
+    loadDialogueFiles()
+    guard let dialogueScript, let dialogueConditions else {
+      return nil
+    }
+    
+    var topic = talkTopic
+    var resume = talkResume
+    
+    while true {
+      guard let record = dialogueScript.record(at: topic) else {
+        topic = topic &+ 1
+        resume = 0
+        talkTopic = topic
+        talkResume = 0
+        if topic & 3 == 0 {
+          return nil
+        }
+        continue
+      }
+      
+      seedSpeakerFields(UInt8(truncatingIfNeeded: topic >> 3))
+      
+      var match: DialogueSentence?
+      for sentence in record.sentences {
+        if resume != 0 && sentence.fileOffset < resume {
+          continue
+        }
+        if sentence.shouldSkip(mask: DialogueTopic.talkMask) {
+          continue
+        }
+        if !dialogueConditions.holds(sentence.conditionId, read: { isWord, offset in
+          self.segmentValue(at: UInt16(offset), isWord: isWord)
+        }) {
+          continue
+        }
+        match = sentence
+        break
+      }
+      
+      if let sentence = match {
+        talkTopic = topic
+        talkResume = sentence.fileOffset
+        let pages = dialoguePages(for: sentence, record: record)
+        pendingTalkSentence = sentence
+        talkPages = pages
+        if talkPages.isEmpty {
+          commitTalkSentence()
+          return ""
+        }
+        let page = talkPages.removeFirst()
+        if talkPages.isEmpty {
+          commitTalkSentence()
+        }
+        return page
+      }
+      
+      topic = topic &+ 1
+      resume = 0
+      talkTopic = topic
+      talkResume = 0
+      if topic & 3 == 0 {
+        return nil
+      }
+    }
+  }
+  
+  
+  func segmentValue(at offset: UInt16, isWord: Bool) -> UInt16 {
+    if isWord, let word = segmentWord(offset) {
+      return word
+    }
+    if isWord {
+      guard segmentByte(offset) != nil || segmentByte(offset &+ 1) != nil else {
+        return 0
+      }
+      let low = segmentByte(offset) ?? 0
+      let high = segmentByte(offset &+ 1) ?? 0
+      return UInt16(low) | (UInt16(high) << 8)
+    }
+    return UInt16(segmentByte(offset) ?? 0)
+  }
+  
+  
+  /// The property marked `@DuneDataSegment` at `offset`, or an empty string when none is.
+  func segmentVariableName(_ offset: UInt16) -> String {
+    return Self.segmentVariableNames[offset] ?? ""
+  }
+  
+  
+  private static let segmentVariableNames: [UInt16: String] = {
+    var names: [UInt16: String] = [:]
+    for child in Mirror(reflecting: GameState()).children {
+      guard let label = child.label,
+            String(describing: type(of: child.value)).hasPrefix("DuneDataSegment<") else {
+        continue
+      }
+      let wrapper = Mirror(reflecting: child.value)
+      guard let offset = wrapper.children.first(where: { $0.label == "offset" })?.value as? UInt16 else {
+        continue
+      }
+      let name = label.hasPrefix("_") ? String(label.dropFirst()) : label
+      names[offset] = name
+    }
+    return names
+  }()
+  
+  
+  private func roomOccupants() -> [DuneRoomPerson] {
+    var present: [DuneRoomPerson] = []
+    for person in roomPersons where isStationedHere(person) {
+      present.append(person)
+    }
+    return present
+  }
+  
+  
+  private func isStationedHere(_ person: DuneRoomPerson) -> Bool {
+    if person.personIndex == 4 && gamePhase >= 0x15 && gamePhase < 0x20 {
+      return false
+    }
+    return person.locationAndRoom == locationAndRoom
+      && person.locationAppearance == locationAppearance
+  }
+  
+  
+  private mutating func loadDialogueFiles() {
+    if dialogueScript == nil {
+      dialogueScript = Dialogue()
+    }
+    if dialogueConditions == nil {
+      dialogueConditions = Condition()
+    }
+    if phraseBank1 == nil {
+      phraseBank1 = Sentence(.phrase1)
+    }
+    if phraseBank2 == nil {
+      phraseBank2 = Sentence(.phrase2)
+    }
+    if commandLines == nil {
+      commandLines = Sentence(.command)
+    }
+  }
+  
+  
+  private mutating func seedSpeakerFields(_ personIndex: UInt8) {
+    guard let entry = roomPersons.first(where: { $0.personIndex == personIndex }) else {
+      return
+    }
+    conditionSpeakerFlags = entry.flags.rawValue
+    let stamp = entry.flags.contains(.npcCompanion) ? entry.timeJoined : entry.timeDismissed
+    conditionSpeakerTravelTimestamp = gameTime &- stamp
+  }
+  
+  
+  private mutating func commitTalkSentence() {
+    guard var sentence = pendingTalkSentence else { return }
+    pendingTalkSentence = nil
+    let resume = fireDialogueLineEvent(&sentence)
+    dialogueScript?.markSpoken(fileOffset: sentence.fileOffset)
+    talkExhausted = resume == 0xFFFF
+    if !talkExhausted {
+      talkResume = sentence.fileOffset &+ 4
+    }
+  }
+  
+  
+  private func dialoguePages(for sentence: DialogueSentence, record: DialogueRecord) -> [String] {
+    let phraseNumber = sentence.phraseId & 0x03FF
+    if phraseNumber == 0 {
+      return []
+    }
+    let split = dialogueScript?.phraseBankSplit ?? 0xFFFF
+    let bank = record.tableOffset < split ? phraseBank1 : phraseBank2
+    let bytes = bank?.expandedBytes(at: phraseNumber &- 1) ?? []
+    return interpolatePages(bytes, record: record)
+  }
+  
+  
+  private func includedBytes(_ id: UInt16, record: DialogueRecord) -> [UInt8] {
+    if id == 0 {
+      return []
+    }
+    let index = id &- 1
+    if index & 0x800 != 0 {
+      let split = dialogueScript?.phraseBankSplit ?? 0xFFFF
+      let bank = record.tableOffset < split ? phraseBank1 : phraseBank2
+      return bank?.expandedBytes(at: index & 0x7FF) ?? []
+    }
+    guard let commandLines, index < commandLines.sentenceCount() else {
+      return []
+    }
+    return commandLines.sentence(at: index).unicodeScalars.map { UInt8(truncatingIfNeeded: $0.value) }
+  }
+  
+  
+  private func interpolatePages(_ bytes: [UInt8], record: DialogueRecord) -> [String] {
+    var pages: [String] = []
+    var page: [UInt8] = []
+    var frames: [(bytes: [UInt8], index: Int)] = [(bytes, 0)]
+    
+    while let frame = frames.last {
+      if frame.index >= frame.bytes.count {
+        frames.removeLast()
+        continue
+      }
+      
+      let source = frame.bytes
+      var index = frame.index
+      let byte = source[index]
+      index += 1
+      frames[frames.count - 1].index = index
+      
+      if byte < 0x80 {
+        if !(page.isEmpty && byte == 0x20) {
+          page.append(byte)
+        }
+        continue
+      }
+      
+      if byte <= 0x8F {
+        let id: UInt16
+        if byte == 0x80 {
+          let high = index < source.count ? source[index] : 0
+          let low = index + 1 < source.count ? source[index + 1] : 0
+          index += 2
+          frames[frames.count - 1].index = index
+          id = (UInt16(high) << 8) | UInt16(low)
+        } else {
+          let slot = Int(byte & 0x0F)
+          id = slot < stringSubstIds.count ? stringSubstIds[slot] : 0
+        }
+        if frames.count < 12 && id != 0 {
+          frames.append((includedBytes(id, record: record), 0))
+        }
+        continue
+      }
+      
+      if byte <= 0x9F {
+        let address = index < source.count ? source[index] : 0
+        index += 1
+        frames[frames.count - 1].index = index
+        page.append(contentsOf: decimalDigits(segmentValue(at: UInt16(address), isWord: byte == 0x92)))
+        continue
+      }
+      
+      if byte <= 0xEF {
+        let operands = byte == 0xD0 ? 2 : (byte == 0xD1 ? 4 : 1)
+        frames[frames.count - 1].index = min(index + operands, source.count)
+        continue
+      }
+      
+      if frames.count > 1 {
+        frames.removeLast()
+        continue
+      }
+      
+      if !page.isEmpty {
+        pages.append(String(bytes: page, encoding: .isoLatin1) ?? "")
+        page.removeAll(keepingCapacity: true)
+      }
+      if byte == 0xFF {
+        break
+      }
+      
+      let rest = Array(source[index...])
+      frames = rest.isEmpty ? [] : [(rest, 0)]
+    }
+    
+    if !page.isEmpty {
+      pages.append(String(bytes: page, encoding: .isoLatin1) ?? "")
+    }
+    return pages
+  }
+  
+  
+  private func decimalDigits(_ value: UInt16) -> [UInt8] {
+    var digits: [UInt8] = []
+    var started = false
+    for divisor in [10000, 1000, 100, 10, 1] as [UInt16] {
+      let digit = (value / divisor) % 10
+      if digit != 0 || started || divisor == 1 {
+        started = true
+        digits.append(UInt8(digit) + 0x30)
+      }
+    }
+    return digits
+  }
+  
+  
+  private func segmentWord(_ offset: UInt16) -> UInt16? {
+    for keyPath in Self.uint16Fields {
+      let field = self[keyPath: keyPath]
+      if field.offset == offset {
+        return field.wrappedValue
+      }
+    }
+    for keyPath in Self.int16Fields {
+      let field = self[keyPath: keyPath]
+      if field.offset == offset {
+        return UInt16(bitPattern: field.wrappedValue)
+      }
+    }
+    for keyPath in Self.uint16ArrayFields {
+      let field = self[keyPath: keyPath]
+      if offset < field.offset {
+        continue
+      }
+      let relative = Int(offset &- field.offset)
+      if relative % 2 != 0 {
+        continue
+      }
+      let index = relative / 2
+      if field.wrappedValue.indices.contains(index) {
+        return field.wrappedValue[index]
+      }
+    }
+    for keyPath in Self.nearestFields {
+      let field = self[keyPath: keyPath]
+      if offset < field.offset {
+        continue
+      }
+      let relative = offset &- field.offset
+      if relative == 0 {
+        return field.wrappedValue.distance
+      }
+      if relative == 2 {
+        return field.wrappedValue.locationPtr
+      }
+    }
+    return nil
+  }
+  
+  
+  private func segmentByte(_ offset: UInt16) -> UInt8? {
+    for keyPath in Self.uint8Fields {
+      let field = self[keyPath: keyPath]
+      if field.offset == offset {
+        return field.wrappedValue
+      }
+    }
+    for keyPath in Self.int8Fields {
+      let field = self[keyPath: keyPath]
+      if field.offset == offset {
+        return UInt8(bitPattern: field.wrappedValue)
+      }
+    }
+    for keyPath in Self.uint16Fields {
+      let field = self[keyPath: keyPath]
+      if field.offset == offset {
+        return UInt8(truncatingIfNeeded: field.wrappedValue)
+      }
+      if field.offset &+ 1 == offset {
+        return UInt8(truncatingIfNeeded: field.wrappedValue >> 8)
+      }
+    }
+    for keyPath in Self.int16Fields {
+      let field = self[keyPath: keyPath]
+      let bits = UInt16(bitPattern: field.wrappedValue)
+      if field.offset == offset {
+        return UInt8(truncatingIfNeeded: bits)
+      }
+      if field.offset &+ 1 == offset {
+        return UInt8(truncatingIfNeeded: bits >> 8)
+      }
+    }
+    for keyPath in Self.uint8ArrayFields {
+      let field = self[keyPath: keyPath]
+      if offset < field.offset {
+        continue
+      }
+      let index = Int(offset &- field.offset)
+      if field.wrappedValue.indices.contains(index) {
+        return field.wrappedValue[index]
+      }
+    }
+    for keyPath in Self.uint16ArrayFields {
+      let field = self[keyPath: keyPath]
+      if offset < field.offset {
+        continue
+      }
+      let relative = Int(offset &- field.offset)
+      let index = relative / 2
+      if field.wrappedValue.indices.contains(index) {
+        let word = field.wrappedValue[index]
+        return relative % 2 == 0
+          ? UInt8(truncatingIfNeeded: word)
+          : UInt8(truncatingIfNeeded: word >> 8)
+      }
+    }
+    for keyPath in Self.nearestFields {
+      let field = self[keyPath: keyPath]
+      if offset < field.offset {
+        continue
+      }
+      switch offset &- field.offset {
+      case 0:
+        return UInt8(truncatingIfNeeded: field.wrappedValue.distance)
+      case 1:
+        return UInt8(truncatingIfNeeded: field.wrappedValue.distance >> 8)
+      case 2:
+        return UInt8(truncatingIfNeeded: field.wrappedValue.locationPtr)
+      case 3:
+        return UInt8(truncatingIfNeeded: field.wrappedValue.locationPtr >> 8)
+      case 4:
+        return field.wrappedValue.orientation.rawValue
+      default:
+        break
+      }
+    }
+    return nil
+  }
 }

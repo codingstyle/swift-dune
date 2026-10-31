@@ -92,6 +92,8 @@ final class Dialogue {
   private var resource: Resource
   private(set) var records: [DialogueRecord] = []
   private(set) var vocBases: [UInt16] = []
+  /// File offset of slot 0x30. Phrase lines before it are stored in PHRASE1.
+  private(set) var phraseBankSplit: UInt16 = 0xFFFF
   
   init() {
     self.resource = Resource("DIALOGUE.HSQ")
@@ -124,15 +126,19 @@ final class Dialogue {
   
   func markSpoken(fileOffset: UInt32) {
     var i = 0
+    
     while i < records.count {
       var j = 0
+    
       while j < records[i].sentences.count {
         if records[i].sentences[j].fileOffset == fileOffset {
           records[i].sentences[j].markSpoken()
           return
         }
+      
         j += 1
       }
+      
       i += 1
     }
   }
@@ -153,10 +159,16 @@ final class Dialogue {
     offsets.reserveCapacity(count)
     
     stream.seek(0)
+    
     var i = 0
+    
     while i < count {
       offsets.append(stream.readUInt16LE())
       i += 1
+    }
+    
+    if offsets.count > 0x30 {
+      phraseBankSplit = offsets[0x30]
     }
     
     records.removeAll(keepingCapacity: false)
@@ -165,6 +177,7 @@ final class Dialogue {
     i = 0
     while i < count {
       let start = offsets[i]
+      
       if start == 0xFFFF {
         records.append(DialogueRecord(sentences: [], tableOffset: start))
         i += 1
@@ -173,11 +186,13 @@ final class Dialogue {
       
       var end = stream.size
       var j = i + 1
+      
       while j < count {
         if offsets[j] != 0xFFFF {
           end = UInt32(offsets[j])
           break
         }
+        
         j += 1
       }
       

@@ -187,6 +187,7 @@ class EditorViewModel: ObservableObject {
             condition = Condition()
           } else if selection.resourceName == "DIALOGUE.HSQ" {
             dialogue = Dialogue()
+            condition = Condition()
           }
         }
     }

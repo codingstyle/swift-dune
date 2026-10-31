@@ -150,7 +150,7 @@ struct MenuChoice {
 }
 
 final class Menus {
-  static let shared = Menus()
+  @MainActor static let shared = Menus()
 
   private(set) var scenario: MenuScenario = .command
   private var stack: [MenuScenario] = []

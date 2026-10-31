@@ -186,8 +186,15 @@ extension GameState {
     let newRoom = (locationAndRoom & 0xFF00) | UInt16(exit)
     markVisitedIfNeeded()
     pendingDestinationRoom = UInt8(truncatingIfNeeded: newRoom)
+    pendingMoveRoom = newRoom
+    pendingRoomAction = 1
+    dialogueInterruptGate = 0xFF
+  }
+
+  mutating func commitPendingRoomMove() {
+    let room = pendingMoveRoom
     pendingRoomAction = 5
-    commitMove(newRoom, locationAppearance)
+    commitMove(room, locationAppearance)
   }
 
   private func currentAppearance() -> UInt8 {

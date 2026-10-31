@@ -81,6 +81,58 @@ final class Sentence {
       
         return str
     }
+    
+    
+    /// Phrase text with dictionary tokens (0xE0...0xFD) expanded. 0xFE stays in
+    /// the result so the caller can split a multi-part line.
+    func expandedBytes(at index: UInt16) -> [UInt8] {
+        let count = sentenceCount()
+        if count == 0 || index >= count {
+            return []
+        }
+        
+        let raw = sentenceBytes(at: index)
+        let dictionary = sentenceBytes(at: count &- 1)
+        var expanded: [UInt8] = []
+        var cursor = 0
+        
+        while cursor < raw.count {
+            let byte = raw[cursor]
+            cursor += 1
+            
+            if byte == 0xFF {
+                break
+            }
+            
+            if byte == 0xFE || byte < 0xE0 {
+                expanded.append(byte)
+                continue
+            }
+            
+            if cursor + 1 >= raw.count {
+                break
+            }
+            
+            let word = UInt16(raw[cursor]) | (UInt16(raw[cursor + 1]) << 8)
+            cursor += 2
+            let length = Int((UInt8(truncatingIfNeeded: word >> 8) >> 2) & 0x30) | Int(byte & 0x0F)
+            let start = Int(word & 0x3FFF)
+            if start >= 0 && start + length <= dictionary.count {
+                expanded.append(contentsOf: dictionary[start..<(start + length)])
+            }
+            
+            if cursor >= raw.count || raw[cursor] != 0xFF {
+                expanded.append(0x20)
+            }
+        }
+        
+        return expanded
+    }
+    
+    
+    private func sentenceBytes(at index: UInt16) -> [UInt8] {
+        sentence(at: index).unicodeScalars.map { UInt8(truncatingIfNeeded: $0.value) }
+    }
 
 
     /// Write `value` over the sentence's digit field. A French ordinal day
