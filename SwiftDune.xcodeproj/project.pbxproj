@@ -155,6 +155,7 @@
 		06939C3F3057157F00565DC3 /* Condition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06939C3E3057157900565DC3 /* Condition.swift */; };
 		06939C403057157F00565DC3 /* Condition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06939C3E3057157900565DC3 /* Condition.swift */; };
 		06939C423059176500565DC3 /* ConditionDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06939C413059175C00565DC3 /* ConditionDetailsView.swift */; };
+		06E1D0C22F8A10A100B47D13 /* DialogueDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06E1D0C12F8A10A100B47D13 /* DialogueDetailsView.swift */; };
 		06939C513059200100565DC3 /* Dialogue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06939C503059200100565DC3 /* Dialogue.swift */; };
 		06939C523059200100565DC3 /* Dialogue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06939C503059200100565DC3 /* Dialogue.swift */; };
 		06939C543059200200565DC3 /* DialogueEvents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06939C533059200200565DC3 /* DialogueEvents.swift */; };
@@ -196,6 +197,14 @@
 		06B812CB2BB0CF3D0048C8AC /* Prologue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06B812CA2BB0CF3D0048C8AC /* Prologue.swift */; };
 		06B812CD2BB559B90048C8AC /* PrologueSubtitle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06B812CC2BB559B90048C8AC /* PrologueSubtitle.swift */; };
 		06E1D0A22F8A10A100B47D13 /* DialogueOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06E1D0A12F8A10A100B47D13 /* DialogueOverlay.swift */; };
+		06E1D0B12F8A10A100B47D13 /* GameState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06AB6B9F3056FCEE001A72DF /* GameState.swift */; };
+		06E1D0B22F8A10A100B47D13 /* GameTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06D372D42B516132006BDDF3 /* GameTypes.swift */; };
+		06E1D0B32F8A10A100B47D13 /* Locations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06B1A0032C7A100100000001 /* Locations.swift */; };
+		06E1D0B42F8A10A100B47D13 /* Troop.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06939C3C30570DD700565DC3 /* Troop.swift */; };
+		06E1D0B52F8A10A100B47D13 /* Smuggler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06939C3830570C2800565DC3 /* Smuggler.swift */; };
+		06E1D0B62F8A10A100B47D13 /* RoomPerson.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06939C3A30570CE700565DC3 /* RoomPerson.swift */; };
+		06E1D0B72F8A10A100B47D13 /* DialogueEvents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06939C533059200200565DC3 /* DialogueEvents.swift */; };
+		06E1D0B82F8A10A100B47D13 /* Menus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06B1A0052C7A100100000001 /* Menus.swift */; };
 		06E1D0A32F8A10A100B47D13 /* DialogueOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06E1D0A12F8A10A100B47D13 /* DialogueOverlay.swift */; };
 		06C0C5022F8A10A100B47D13 /* Cursor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06C0C5012F8A10A100B47D13 /* Cursor.swift */; };
 		06C0C5032F8A10A100B47D13 /* Cursor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06C0C5012F8A10A100B47D13 /* Cursor.swift */; };
@@ -319,6 +328,7 @@
 		06939C3C30570DD700565DC3 /* Troop.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Troop.swift; sourceTree = "<group>"; };
 		06939C3E3057157900565DC3 /* Condition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Condition.swift; sourceTree = "<group>"; };
 		06939C413059175C00565DC3 /* ConditionDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConditionDetailsView.swift; sourceTree = "<group>"; };
+		06E1D0C12F8A10A100B47D13 /* DialogueDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DialogueDetailsView.swift; sourceTree = "<group>"; };
 		06939C503059200100565DC3 /* Dialogue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Dialogue.swift; sourceTree = "<group>"; };
 		06939C533059200200565DC3 /* DialogueEvents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DialogueEvents.swift; sourceTree = "<group>"; };
 		0699D2612A93C682006287E0 /* DuneMac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DuneMac.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -704,6 +714,7 @@
 			isa = PBXGroup;
 			children = (
 				06939C413059175C00565DC3 /* ConditionDetailsView.swift */,
+				06E1D0C12F8A10A100B47D13 /* DialogueDetailsView.swift */,
 				061C19582F8FCCA400C531EE /* MusicListView.swift */,
 				065F0CAD2F3656E80032796E /* MusicDetailsView.swift */,
 				06A7E8862AD700910042D878 /* SpriteListView.swift */,
@@ -1083,6 +1094,15 @@
 				06CA2BAD2C7B350F00B47D13 /* Renderer.swift in Sources */,
 				06CA2BAE2C7B350F00B47D13 /* Shaders.metal in Sources */,
 				06939C423059176500565DC3 /* ConditionDetailsView.swift in Sources */,
+				06E1D0C22F8A10A100B47D13 /* DialogueDetailsView.swift in Sources */,
+				06E1D0B12F8A10A100B47D13 /* GameState.swift in Sources */,
+				06E1D0B22F8A10A100B47D13 /* GameTypes.swift in Sources */,
+				06E1D0B32F8A10A100B47D13 /* Locations.swift in Sources */,
+				06E1D0B42F8A10A100B47D13 /* Troop.swift in Sources */,
+				06E1D0B52F8A10A100B47D13 /* Smuggler.swift in Sources */,
+				06E1D0B62F8A10A100B47D13 /* RoomPerson.swift in Sources */,
+				06E1D0B72F8A10A100B47D13 /* DialogueEvents.swift in Sources */,
+				06E1D0B82F8A10A100B47D13 /* Menus.swift in Sources */,
 				069B5B27307BC50200AA8FE1 /* NSColor+Palette.swift in Sources */,
 				06CA2BB12C7B350F00B47D13 /* AppleAudioPlayer.swift in Sources */,
 				06CA2BB22C7B350F00B47D13 /* PixelBuffer.swift in Sources */,
